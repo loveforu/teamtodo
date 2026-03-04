@@ -111,6 +111,22 @@
       return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
     }
 
+    function normalizeTask(t) {
+      return {
+        id: String(t && t.id != null ? t.id : ''),
+        title: String((t && t.title) || ''),
+        checked: !!(t && t.isCompleted),
+        points: parseInt((t && t.points) || 0, 10) || 0,
+        startDate: String((t && t.startDate) || ''),
+        endDate: String((t && t.endDate) || ''),
+        startTime: String((t && t.startTime) || ''),
+        endTime: String((t && t.endTime) || ''),
+        memo: String((t && t.memo) || ''),
+        parentTodoId: String((t && t.parentTodoId) || ''),
+        daysOfWeek: Array.isArray(t && t.daysOfWeek) ? t.daysOfWeek : []
+      };
+    }
+
     function getTasksForDate(year, month, day) {
       const key = `${year}-${month}-${day}`;
       if (!tasksStore[key]) tasksStore[key] = [];
@@ -146,7 +162,7 @@
           tasksStore[key] = local
             .filter((t) => String(t.profileId || '') === String(resolvedProfileId))
             .filter((t) => String(t.startDate || '') === date && !t.parentTodoId)
-            .map((t) => ({ id: t.id, title: String(t.title || ''), checked: !!t.isCompleted, points: parseInt(t.points || 0, 10) || 0 }));
+            .map(normalizeTask);
         } catch (_) { tasksStore[key] = []; }
         if (typeof done === 'function') done([]);
         return;
@@ -155,19 +171,14 @@
         const arr = Array.isArray(rows) ? rows : [];
         let list = arr
           .filter((t) => !t.parentTodoId)
-          .map((t) => ({
-            id: t.id,
-            title: String(t.title || ''),
-            checked: !!t.isCompleted,
-            points: parseInt(t.points || 0, 10) || 0
-          }));
+          .map(normalizeTask);
         if (list.length === 0) {
           try {
             const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
             list = local
               .filter((t) => String(t.profileId || '') === String(resolvedProfileId))
               .filter((t) => String(t.startDate || '') === date && !t.parentTodoId)
-              .map((t) => ({ id: t.id, title: String(t.title || ''), checked: !!t.isCompleted, points: parseInt(t.points || 0, 10) || 0 }));
+              .map(normalizeTask);
           } catch (_) {}
         }
         tasksStore[key] = list;
@@ -320,12 +331,12 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          const id = parseInt(btn.dataset.editId, 10);
-          const task = tasks.find((t) => t.id === id);
+          const id = String(btn.dataset.editId || '');
+          const task = tasks.find((t) => String(t.id) === id);
           if (!task) return;
           localStorage.setItem('todoEditMode', '1');
           localStorage.setItem('todoEditTask', JSON.stringify(task));
-          localStorage.setItem('todoAddPresetDate', formatDateKey(currentYear, currentMonth, selectedDay));
+          localStorage.setItem('todoAddPresetDate', task.startDate || formatDateKey(currentYear, currentMonth, selectedDay));
           if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
             TeamTodo.navigate('todo_add');
           }
@@ -335,7 +346,7 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
-          deleteTask(parseInt(btn.dataset.deleteId, 10));
+          deleteTask(String(btn.dataset.deleteId || ''));
         });
       });
     }
@@ -343,13 +354,14 @@
     function deleteTask(id) {
       const key = `${currentYear}-${currentMonth}-${selectedDay}`;
       const list = tasksStore[key] || [];
-      const idx = list.findIndex((t) => t.id === id);
+      const idx = list.findIndex((t) => String(t.id) === String(id));
       if (idx < 0) return;
 
       const task = list[idx];
+      const delta = parseInt(task.points || 0, 10) || taskPointValue;
       const finish = () => {
-        targetTotalPoints = Math.max(0, targetTotalPoints - taskPointValue);
-        if (task.checked) currentTotalPoints = Math.max(0, currentTotalPoints - taskPointValue);
+        targetTotalPoints = Math.max(0, targetTotalPoints - delta);
+        if (task.checked) currentTotalPoints = Math.max(0, currentTotalPoints - delta);
         list.splice(idx, 1);
         saveProgressState();
         updateProgress();
