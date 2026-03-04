@@ -118,13 +118,13 @@
 <div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden">
 <div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-30 border-b border-primary/10">
 <div class="flex items-center gap-2">
-<button class="flex items-center justify-center rounded-xl h-10 w-10 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<button id="goalDetailBackBtn" class="flex items-center justify-center rounded-xl h-10 w-10 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
 <span class="material-symbols-outlined">arrow_back_ios_new</span>
 </button>
 </div>
 <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">목표 상세</h2>
 <div class="flex w-12 items-center justify-end">
-<button class="flex items-center justify-center rounded-xl h-10 w-10 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+<button id="goalDetailMoreBtn" class="flex items-center justify-center rounded-xl h-10 w-10 text-slate-500 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
 <span class="material-symbols-outlined">more_vert</span>
 </button>
 </div>
@@ -247,16 +247,16 @@
 <span class="text-[10px] text-slate-400 whitespace-nowrap">10.15</span>
 </div>
 </div>
-<button class="w-full mt-3 py-2 text-xs font-medium text-slate-400 flex items-center justify-center gap-1 hover:text-primary transition-colors">
+<button id="goalHistoryAddBtn" class="w-full mt-3 py-2 text-xs font-medium text-slate-400 flex items-center justify-center gap-1 hover:text-primary transition-colors">
 <span class="material-symbols-outlined text-sm">add</span> 기록 추가하기
             </button>
 </div>
 <div class="grid grid-cols-2 gap-3 pt-2">
-<button class="w-full py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
+<button id="goalEditBtn" class="w-full py-3.5 rounded-xl border border-slate-200 dark:border-slate-700 text-slate-600 dark:text-slate-300 font-bold text-sm bg-white dark:bg-slate-800 hover:bg-slate-50 dark:hover:bg-slate-700 transition-colors flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-lg">edit</span>
                     수정하기
                 </button>
-<button class="w-full py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
+<button id="goalCompleteBtn" class="w-full py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors flex items-center justify-center gap-2">
 <span class="material-symbols-outlined text-lg">check_circle</span>
                     완료 처리
                 </button>
@@ -285,9 +285,55 @@
         const titleEl = document.getElementById('goalTitle');
         if (titleEl) titleEl.textContent = selectedTitle;
       }
+      const selectedGoalId = localStorage.getItem('selectedGoalId') || '';
 
-      const backBtn = document.querySelector('.sticky.top-0 button');
+      const backBtn = document.getElementById('goalDetailBackBtn');
       if (backBtn) backBtn.addEventListener('click', function () { go('goal_list'); });
+
+      const moreBtn = document.getElementById('goalDetailMoreBtn');
+      if (moreBtn) {
+        moreBtn.addEventListener('click', function () {
+          localStorage.setItem('goalEditMode', '1');
+          if (selectedGoalId) localStorage.setItem('editingGoalId', selectedGoalId);
+          if (selectedTitle) localStorage.setItem('editingGoalTitle', selectedTitle);
+          go('goal_add');
+        });
+      }
+
+      const editBtn = document.getElementById('goalEditBtn');
+      if (editBtn) {
+        editBtn.addEventListener('click', function () {
+          localStorage.setItem('goalEditMode', '1');
+          if (selectedGoalId) localStorage.setItem('editingGoalId', selectedGoalId);
+          if (selectedTitle) localStorage.setItem('editingGoalTitle', selectedTitle);
+          go('goal_add');
+        });
+      }
+
+      const historyAddBtn = document.getElementById('goalHistoryAddBtn');
+      if (historyAddBtn) {
+        historyAddBtn.addEventListener('click', function () { go('goal_add'); });
+      }
+
+      const completeBtn = document.getElementById('goalCompleteBtn');
+      if (completeBtn) {
+        let isDone = localStorage.getItem('goalDone:' + selectedGoalId) === '1';
+        const setDoneUi = function (done) {
+          isDone = done;
+          completeBtn.innerHTML = done
+            ? '<span class="material-symbols-outlined text-lg">undo</span>완료 취소'
+            : '<span class="material-symbols-outlined text-lg">check_circle</span>완료 처리';
+          completeBtn.className = done
+            ? 'w-full py-3.5 rounded-xl bg-slate-700 text-white font-bold text-sm shadow-lg shadow-slate-700/20 transition-colors flex items-center justify-center gap-2'
+            : 'w-full py-3.5 rounded-xl bg-primary text-white font-bold text-sm shadow-lg shadow-primary/20 hover:bg-primary-dark transition-colors flex items-center justify-center gap-2';
+        };
+        setDoneUi(isDone);
+        completeBtn.addEventListener('click', function () {
+          const next = !isDone;
+          localStorage.setItem('goalDone:' + selectedGoalId, next ? '1' : '0');
+          setDoneUi(next);
+        });
+      }
 
       const navItems = document.querySelectorAll('.fixed.bottom-0 a');
       if (navItems.length >= 5) {
