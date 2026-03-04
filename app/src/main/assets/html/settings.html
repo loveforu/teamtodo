@@ -16,6 +16,7 @@
       setTimeout(function(){
         d.classList.remove('tt-preparing');
         d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
       },250);
     })();
   </script>
@@ -90,14 +91,7 @@
         <div class="flex flex-col gap-6 bg-white dark:bg-background-dark px-4 py-4 transition-colors duration-300">
           <div class="flex flex-col gap-3">
             <p class="text-slate-700 dark:text-slate-300 text-sm font-medium">테마 컬러</p>
-            <div class="grid grid-cols-6 gap-3 pt-1">
-              <button class="theme-btn size-10 rounded-full bg-[#eb4770] border-2 border-transparent" data-color="#eb4770" data-light="#fff5f7"><span class="material-symbols-outlined text-white text-xl">check</span></button>
-              <button class="theme-btn size-10 rounded-full bg-[#FFAB91] border-2 border-transparent" data-color="#FFAB91" data-light="#FFF3E0"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
-              <button class="theme-btn size-10 rounded-full bg-[#FBC02D] border-2 border-transparent" data-color="#FBC02D" data-light="#FFFDE7"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
-              <button class="theme-btn size-10 rounded-full bg-[#4DB6AC] border-2 border-transparent" data-color="#4DB6AC" data-light="#E0F2F1"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
-              <button class="theme-btn size-10 rounded-full bg-[#4FC3F7] border-2 border-transparent" data-color="#4FC3F7" data-light="#E1F5FE"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
-              <button class="theme-btn size-10 rounded-full bg-[#BA68C8] border-2 border-transparent" data-color="#BA68C8" data-light="#F3E5F5"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
-            </div>
+            <div id="themePalette" class="grid grid-cols-6 gap-3 pt-1"></div>
           </div>
 
           <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-surface-dark transition-colors duration-300">
@@ -174,6 +168,29 @@
         localStorage.setItem('themeLight', lightColor);
         if (window.TeamTodo && typeof TeamTodo.applyTheme === 'function') TeamTodo.applyTheme(color);
       }
+    }
+
+    function renderThemePalette() {
+      const palette = document.getElementById('themePalette');
+      if (!palette) return [];
+      const themes = [
+        ['#eb4770', '#fff5f7'], ['#FFAB91', '#FFF3E0'], ['#FBC02D', '#FFFDE7'],
+        ['#4DB6AC', '#E0F2F1'], ['#4FC3F7', '#E1F5FE'], ['#BA68C8', '#F3E5F5'],
+        ['#F06292', '#FCE4EC'], ['#FF8A65', '#FBE9E7'], ['#AED581', '#F1F8E9'],
+        ['#26A69A', '#E0F2F1'], ['#7986CB', '#E8EAF6'], ['#9575CD', '#EDE7F6'],
+        ['#78909C', '#ECEFF1'], ['#FF7043', '#FBE9E7'], ['#8BC34A', '#F1F8E9'],
+        ['#26C6DA', '#E0F7FA'], ['#8D6E63', '#EFEBE9'], ['#BDBDBD', '#FAFAFA']
+      ];
+      palette.innerHTML = themes.map(function (item, idx) {
+        const color = item[0];
+        const light = item[1];
+        return '<button class="theme-btn size-10 rounded-full border-2 border-transparent"'
+          + ' data-color="' + color + '" data-light="' + light + '"'
+          + ' style="background:' + color + '">'
+          + '<span class="material-symbols-outlined text-white text-xl ' + (idx === 0 ? '' : 'hidden') + '">check</span>'
+          + '</button>';
+      }).join('');
+      return Array.from(palette.querySelectorAll('.theme-btn'));
     }
 
     function toggleDarkMode(isDark, persist) {
@@ -257,7 +274,7 @@
       toggleDarkMode(darkOn, false);
       darkToggle.addEventListener('change', function(){ toggleDarkMode(this.checked, true); });
 
-      const allThemeButtons = Array.from(document.querySelectorAll('.theme-btn'));
+      const allThemeButtons = renderThemePalette();
       const savedColor = localStorage.getItem('themeColor') || '#eb4770';
       const selectedBtn = allThemeButtons.find((b) => b.dataset.color === savedColor) || allThemeButtons[0];
       if (selectedBtn) setTheme(selectedBtn.dataset.color, selectedBtn.dataset.light, selectedBtn, false);
