@@ -6,6 +6,7 @@ captures/
 
 # Local Android/IDE state
 .android-home/
+.xdg-config/
 .idea/
 *.iml
 local.properties
