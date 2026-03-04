@@ -1,0 +1,930 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>오늘의 할일</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#eb4770',
+            'background-light': '#ffffff',
+            'background-dark': '#211115'
+          },
+          fontFamily: {
+            display: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: max(884px, 100dvh);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .custom-checkbox {
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border: 2px solid #eb4770;
+      border-radius: 9999px;
+      background: transparent;
+      cursor: pointer;
+      transition: all .2s;
+      flex-shrink: 0;
+    }
+    .custom-checkbox:checked {
+      background-color: #eb4770;
+      border-color: #eb4770;
+      background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+      background-size: 14px 14px;
+      background-position: center;
+      background-repeat: no-repeat;
+    }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+
+    .task-checked .task-main {
+      text-decoration: line-through;
+      text-decoration-thickness: 2px;
+      text-decoration-color: rgb(var(--teamtodo-primary-rgb, 235 71 112) / 0.45);
+      color: #64748b;
+    }
+    .task-checked .task-sub {
+      text-decoration: line-through;
+      color: #94a3b8;
+    }
+
+    #celebrationOverlay {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .35s ease;
+    }
+    #celebrationOverlay.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    .confetti-piece {
+      position: absolute;
+      top: -20px;
+      width: 8px;
+      height: 8px;
+      border-radius: 2px;
+      animation: confettiFall linear forwards;
+    }
+
+    @keyframes confettiFall {
+      0% { transform: translateY(-16px) rotate(0deg); opacity: 1; }
+      100% { transform: translateY(110vh) rotate(560deg); opacity: 0; }
+    }
+    @keyframes fireworkBurst {
+      0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+      100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+    }
+    .firework-particle {
+      position: absolute;
+      width: 6px;
+      height: 6px;
+      border-radius: 9999px;
+      animation: fireworkBurst 1s ease-out forwards;
+    }
+    @keyframes sheetRowIn {
+      0% { opacity: 0; transform: translateY(8px); }
+      100% { opacity: 1; transform: translateY(0); }
+    }
+
+    #sheetBackdrop {
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity .25s ease;
+    }
+    #sheetBackdrop.active {
+      opacity: 1;
+      pointer-events: auto;
+    }
+
+    #bottomSheet {
+      transform: translateY(100%);
+      transition: transform .35s cubic-bezier(0.16, 1, 0.3, 1);
+    }
+    #bottomSheet.show {
+      transform: translateY(0);
+    }
+
+    .fly-heart {
+      position: fixed;
+      pointer-events: none;
+      z-index: 120;
+      color: var(--primary-color);
+      font-size: 24px;
+    }
+    #noticePanel {
+      opacity: 0;
+      transform: translateY(-8px) scale(.98);
+      pointer-events: none;
+      transition: opacity .2s ease, transform .2s ease;
+    }
+    #noticePanel.show {
+      opacity: 1;
+      transform: translateY(0) scale(1);
+      pointer-events: auto;
+    }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+  <div id="appShell" class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden">
+    <header class="fixed top-0 left-1/2 -translate-x-1/2 z-30 w-full max-w-md bg-white dark:bg-background-dark shadow-sm border-b border-primary/10">
+      <div class="flex items-center p-4 pb-2 justify-between">
+        <button id="openDatePickerBtn" class="text-primary flex size-12 shrink-0 items-center justify-center rounded-xl hover:bg-primary/10 transition-colors">
+          <span class="material-symbols-outlined text-3xl">event_available</span>
+        </button>
+        <div class="flex-1 text-center">
+          <h1 class="text-lg font-bold">오늘의 할일</h1>
+          <p id="selectedDateLabel" class="text-[11px] text-slate-500"></p>
+        </div>
+        <div class="flex w-12 items-center justify-end">
+          <button id="openNoticeBtn" class="flex items-center justify-center rounded-xl h-10 w-10 bg-primary/10 text-primary hover:bg-primary/20 transition-colors">
+            <span class="material-symbols-outlined">notifications</span>
+          </button>
+        </div>
+      </div>
+
+      <div class="px-4 pb-3">
+        <div class="flex flex-col gap-3 p-4 bg-primary/5 rounded-xl border border-primary/10">
+          <div class="flex justify-between items-end">
+            <div>
+              <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">Daily Progress</p>
+              <div class="flex items-center gap-1.5 mt-0.5">
+                <svg id="headerHeart" viewBox="0 0 24 24" class="text-primary w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2">
+                  <path d="M12 21s-7-4.35-9.33-8.28C.89 9.78 2.24 6 5.73 5.28A5.3 5.3 0 0 1 12 8.09a5.3 5.3 0 0 1 6.27-2.81c3.49.72 4.84 4.5 3.06 7.44C19 16.65 12 21 12 21z"></path>
+                </svg>
+                <p class="text-base font-bold">오늘의 포인트</p>
+              </div>
+            </div>
+            <p id="pointsText" class="text-sm font-bold text-primary">0 / 200 p</p>
+          </div>
+          <div class="relative h-3 w-full rounded-full bg-primary/20 overflow-hidden">
+            <div id="progressFill" class="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-500" style="width: 0%"></div>
+          </div>
+          <div class="flex justify-between items-center">
+            <p id="growthText" class="text-primary text-sm font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span>시작이 반이에요!</p>
+            <p id="pointsRemaining" class="text-slate-400 text-xs italic">목표 달성까지 200p</p>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <main id="mainScroll" class="flex-1 overflow-y-auto no-scrollbar pb-24 pt-0">
+      <section class="mx-4 mt-3">
+        <div class="flex justify-between items-center mb-3 px-1">
+          <h2 class="text-base font-bold">진행 중인 목표</h2>
+          <button id="goGoalsBtn" class="text-xs text-primary font-medium flex items-center gap-0.5">전체보기 <span class="material-symbols-outlined text-sm">chevron_right</span></button>
+        </div>
+        <div class="flex gap-3 overflow-x-auto pb-2 -mx-4 px-4 no-scrollbar">
+          <div class="goal-progress-card shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 cursor-pointer" data-goal-title="바디프로필 촬영">
+            <div class="flex items-start justify-between mb-2"><span class="text-[10px] font-bold text-blue-500 bg-blue-50 px-2 py-0.5 rounded-full">건강</span><span class="text-[10px] text-slate-400">65%</span></div>
+            <p class="text-sm font-bold mb-2">바디프로필 촬영</p>
+            <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div class="h-full w-[65%] bg-blue-400 rounded-full"></div></div>
+          </div>
+          <div class="goal-progress-card shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 cursor-pointer" data-goal-title="정보처리기사">
+            <div class="flex items-start justify-between mb-2"><span class="text-[10px] font-bold text-purple-500 bg-purple-50 px-2 py-0.5 rounded-full">자격증</span><span class="text-[10px] text-slate-400">30%</span></div>
+            <p class="text-sm font-bold mb-2">정보처리기사</p>
+            <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div class="h-full w-[30%] bg-purple-400 rounded-full"></div></div>
+          </div>
+          <div class="goal-progress-card shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 cursor-pointer" data-goal-title="TOEIC 900점">
+            <div class="flex items-start justify-between mb-2"><span class="text-[10px] font-bold text-green-500 bg-green-50 px-2 py-0.5 rounded-full">어학</span><span class="text-[10px] text-slate-400">15%</span></div>
+            <p class="text-sm font-bold mb-2">TOEIC 900점</p>
+            <div class="h-1.5 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden"><div class="h-full w-[15%] bg-green-400 rounded-full"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mx-4 mt-3 p-4 bg-primary/10 rounded-xl border border-primary/20 flex items-start gap-2">
+        <span class="material-symbols-outlined text-primary text-xl">format_quote</span>
+        <p class="text-sm font-medium">오늘의 명언: 어제보다 나은 오늘을 위해!</p>
+      </section>
+
+      <section class="mx-4 mt-4 mb-4">
+        <div class="flex items-center justify-between pb-3">
+          <h2 class="text-lg font-bold">할일 목록</h2>
+        </div>
+        <div id="taskList" class="space-y-3"></div>
+      </section>
+    </main>
+
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 rounded-xl text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1">check_circle</span><p class="text-xs font-bold">할일</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><p class="text-xs font-medium">캘린더</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><p class="text-xs font-medium">팀</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><p class="text-xs font-medium">목표</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">settings</span><p class="text-xs font-medium">설정</p></a>
+    </nav>
+  </div>
+
+  <div id="celebrationOverlay" class="fixed inset-0 z-[100] bg-black/80 flex items-center justify-center pointer-events-none">
+    <div id="confettiContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+    <div id="fireworkContainer" class="absolute inset-0 overflow-hidden pointer-events-none"></div>
+    <div class="text-center px-6">
+      <h2 class="text-4xl font-extrabold text-white mb-3">축하합니다!</h2>
+      <p class="text-white/90 text-lg">오늘 목표를 달성했어요</p>
+      <span class="material-symbols-outlined text-yellow-300 text-7xl mt-5 inline-block">emoji_events</span>
+    </div>
+  </div>
+
+  <div id="sheetBackdrop" class="fixed inset-0 z-[101] bg-black/40"></div>
+  <div class="fixed inset-x-0 bottom-0 z-[102] flex justify-center pointer-events-none">
+    <div id="bottomSheet" class="w-full max-w-md h-[80vh] pointer-events-auto bg-white dark:bg-slate-900 rounded-t-3xl shadow-2xl p-6 flex flex-col">
+      <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-5"></div>
+      <div class="flex justify-between items-center mb-2">
+        <div>
+          <h3 id="sheetTitle" class="text-xl font-bold">응원한 친구들</h3>
+          <p id="sheetSubtitle" class="text-sm text-slate-500">0명이 응원했어요</p>
+        </div>
+        <button id="sheetClose" class="p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div id="sheetList" class="flex-1 overflow-y-auto no-scrollbar space-y-3 pr-1"></div>
+    </div>
+  </div>
+
+  <div id="commentModal" class="fixed inset-0 z-[103] bg-black/40 backdrop-blur-sm items-center justify-center px-4 hidden">
+    <div class="w-full max-w-xs bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 border border-primary/20">
+      <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">chat</span>코멘트 남기기</h3>
+      <textarea id="commentInput" class="w-full h-24 rounded-xl border-primary/20 bg-primary/5 focus:border-primary focus:ring-primary/50 resize-none p-3 text-sm mb-4 outline-none" placeholder="코멘트를 입력하세요"></textarea>
+      <div class="flex gap-3">
+        <button id="commentClose" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 font-semibold text-sm">취소</button>
+        <button id="commentSend" class="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-sm">전송</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="noticePanel" class="fixed z-[105] top-20 rounded-2xl border border-primary/20 bg-white/95 dark:bg-slate-900/95 backdrop-blur-xl shadow-2xl p-3">
+    <div class="flex items-center justify-between px-1 pb-2">
+      <h3 class="text-sm font-bold flex items-center gap-1.5"><span class="material-symbols-outlined text-primary text-base">notifications</span>알림</h3>
+      <button id="noticeClose" class="size-7 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 flex items-center justify-center">
+        <span class="material-symbols-outlined text-base">close</span>
+      </button>
+    </div>
+    <div class="space-y-2 text-xs">
+      <div class="p-3 rounded-xl bg-primary/5 border border-primary/10">오늘 목표 달성까지 <span id="noticeRemain" class="font-bold text-primary">200p</span> 남았어요.</div>
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">달력에서 날짜를 고르면 해당 날짜 할일로 바로 돌아옵니다.</div>
+      <div class="p-3 rounded-xl bg-slate-50 dark:bg-slate-800 border border-slate-200/70 dark:border-slate-700">할일 완료 시 포인트가 즉시 반영됩니다.</div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const MAX_POINTS = 200;
+      const TODAY_KEY = new Date().toISOString().slice(0, 10);
+
+      let tasks = [];
+      const isLocalSampleMode = () => localStorage.getItem('localSampleMode') === 'true';
+
+      const supporterNames = ['민수', '지유', '서준', '유진', '하늘', '도윤', '가은', '시우', '지민', '채원'];
+      const supporterMsgs = ['오늘도 화이팅!', '정말 멋져요!', '조금만 더 힘내요!', '꾸준함이 답이에요!', '최고예요!'];
+
+      const taskList = document.getElementById('taskList');
+      const pointsText = document.getElementById('pointsText');
+      const progressFill = document.getElementById('progressFill');
+      const pointsRemaining = document.getElementById('pointsRemaining');
+      const growthText = document.getElementById('growthText');
+      const headerHeart = document.getElementById('headerHeart');
+
+      const celebrationOverlay = document.getElementById('celebrationOverlay');
+      const confettiContainer = document.getElementById('confettiContainer');
+      const fireworkContainer = document.getElementById('fireworkContainer');
+
+      const sheetBackdrop = document.getElementById('sheetBackdrop');
+      const bottomSheet = document.getElementById('bottomSheet');
+      const sheetTitle = document.getElementById('sheetTitle');
+      const sheetSubtitle = document.getElementById('sheetSubtitle');
+      const sheetList = document.getElementById('sheetList');
+      const sheetClose = document.getElementById('sheetClose');
+
+      const commentModal = document.getElementById('commentModal');
+      const commentClose = document.getElementById('commentClose');
+      const commentSend = document.getElementById('commentSend');
+      const goGoalsBtn = document.getElementById('goGoalsBtn');
+      const openDatePickerBtn = document.getElementById('openDatePickerBtn');
+      const openNoticeBtn = document.getElementById('openNoticeBtn');
+      const appShell = document.getElementById('appShell');
+      const selectedDateLabel = document.getElementById('selectedDateLabel');
+      const noticePanel = document.getElementById('noticePanel');
+      const noticeClose = document.getElementById('noticeClose');
+      const noticeRemain = document.getElementById('noticeRemain');
+      const quoteTextEl = document.querySelector('section.mx-4.mt-3.p-4 p.text-sm');
+
+      let currentPoints = 0;
+      let celebrationShown = false;
+      let fireworkTimer = null;
+      const fromCalendar = localStorage.getItem('todoDateFromCalendar') === '1';
+      let selectedDate = fromCalendar
+        ? (localStorage.getItem('todoSelectedDate') || TODAY_KEY)
+        : TODAY_KEY;
+      if (!fromCalendar) {
+        localStorage.setItem('todoSelectedDate', TODAY_KEY);
+      } else {
+        localStorage.removeItem('todoDateFromCalendar');
+      }
+
+      function formatDateLabel(dateStr) {
+        const d = new Date(dateStr + 'T00:00:00');
+        if (Number.isNaN(d.getTime())) return dateStr;
+        const days = ['일', '월', '화', '수', '목', '금', '토'];
+        return `${d.getFullYear()}년 ${d.getMonth() + 1}월 ${d.getDate()}일 (${days[d.getDay()]})`;
+      }
+
+      function normalizeTodos(rows) {
+        const source = Array.isArray(rows) ? rows : [];
+        const parents = source.filter((t) => !t.parentTodoId);
+        const children = source.filter((t) => !!t.parentTodoId);
+        const childMap = {};
+        children.forEach((c) => {
+          const pid = String(c.parentTodoId || '');
+          if (!childMap[pid]) childMap[pid] = [];
+          childMap[pid].push(c);
+        });
+
+        return parents.map((p) => {
+          const pid = String(p.id || '');
+          const kids = (childMap[pid] || []).map((c) => ({
+            id: c.id,
+            label: String(c.title || '세부 할일'),
+            points: parseInt(c.points || 0, 10) || 0,
+            checked: !!c.isCompleted,
+            likes: 0
+          }));
+          const title = [p.startTime ? (p.startTime + ' -') : '', String(p.title || '')].join(' ').trim();
+          if (kids.length > 0) {
+            return {
+              id: p.id,
+              type: 'group',
+              title: title,
+              subtitle: p.endTime ? (p.startTime + ' ~ ' + p.endTime) : '세부 할일 포함',
+              points: kids.reduce((a, b) => a + (b.points || 0), 0),
+              likes: 0,
+              children: kids
+            };
+          }
+          return {
+            id: p.id,
+            type: 'single',
+            title: title,
+            subtitle: p.endTime ? (p.startTime + ' ~ ' + p.endTime) : '오늘 할일',
+            points: parseInt(p.points || 0, 10) || 0,
+            likes: 0,
+            checked: !!p.isCompleted
+          };
+        });
+      }
+
+      function fetchTodosForDate(dateStr, done) {
+        const profileId = localStorage.getItem('currentProfileId') || '';
+        const forceLocalSample = isLocalSampleMode();
+        let resolvedProfileId = profileId;
+        if (forceLocalSample) {
+          const samplePid = localStorage.getItem('localSamplePrimaryProfileId') || '';
+          if (samplePid) {
+            resolvedProfileId = samplePid;
+            localStorage.setItem('currentProfileId', samplePid);
+          }
+        }
+        if (!resolvedProfileId) {
+          try {
+            const localProfiles = JSON.parse(localStorage.getItem('localSampleProfiles') || '[]');
+            if (Array.isArray(localProfiles) && localProfiles.length > 0) {
+              resolvedProfileId = String(localProfiles[0].id || '');
+              if (resolvedProfileId) localStorage.setItem('currentProfileId', resolvedProfileId);
+              if (localProfiles[0] && localProfiles[0].name) {
+                localStorage.setItem('currentProfileName', String(localProfiles[0].name));
+              }
+            }
+          } catch (_) {}
+        }
+        if (forceLocalSample) {
+          try {
+            const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+            tasks = normalizeTodos(local.filter((t) => String(t.profileId || '') === String(resolvedProfileId)));
+          } catch (_) { tasks = []; }
+          if (typeof done === 'function') done();
+          return;
+        }
+        if (!resolvedProfileId || !window.TeamTodo || typeof TeamTodo.getTodos !== 'function') {
+          try {
+            const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+            tasks = normalizeTodos(local.filter((t) => String(t.profileId || '') === String(resolvedProfileId)));
+          } catch (_) { tasks = []; }
+          if (typeof done === 'function') done();
+          return;
+        }
+        TeamTodo.getTodos(resolvedProfileId, dateStr, function (rows) {
+          const arr = Array.isArray(rows) ? rows : [];
+          if (arr.length > 0) {
+            tasks = normalizeTodos(arr);
+          } else {
+            try {
+              const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+              tasks = normalizeTodos(local.filter((t) => String(t.profileId || '') === String(resolvedProfileId)));
+            } catch (_) { tasks = []; }
+          }
+          if (typeof done === 'function') done();
+        });
+      }
+
+      function applySelectedDate(dateStr, done) {
+        selectedDate = dateStr || TODAY_KEY;
+        localStorage.setItem('todoSelectedDate', selectedDate);
+        if (selectedDateLabel) selectedDateLabel.textContent = formatDateLabel(selectedDate);
+        fetchTodosForDate(selectedDate, done);
+      }
+
+      function setHeaderHeartFilled(filled) {
+        if (!headerHeart) return;
+        headerHeart.setAttribute('fill', filled ? 'currentColor' : 'none');
+        headerHeart.setAttribute('stroke', 'currentColor');
+      }
+
+      function applyHeaderOffset() {
+        const header = document.querySelector('header.fixed');
+        const main = document.getElementById('mainScroll');
+        if (!header || !main) return;
+        main.style.paddingTop = `${header.offsetHeight + 8}px`;
+      }
+
+      function placeNoticePanel() {
+        if (!noticePanel || !appShell) return;
+        const rect = appShell.getBoundingClientRect();
+        const margin = 12;
+        noticePanel.style.left = `${Math.max(8, rect.left + margin)}px`;
+        noticePanel.style.width = `${Math.max(240, rect.width - margin * 2)}px`;
+      }
+
+      function openTodoDetail(task) {
+        try {
+          localStorage.setItem('selectedTodoTask', JSON.stringify(task || {}));
+        } catch (_) {}
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          TeamTodo.navigate('todo_detail');
+        }
+      }
+
+      function sumPoints() {
+        let total = 0;
+        tasks.forEach((task) => {
+          if (task.type === 'single') {
+            if (task.checked) total += task.points;
+          } else {
+            task.children.forEach((c) => {
+              if (c.checked) total += c.points;
+            });
+          }
+        });
+        return total;
+      }
+
+      function groupPoints(task) {
+        return task.children.reduce((acc, child) => acc + child.points, 0);
+      }
+
+      function updateHeader() {
+        currentPoints = sumPoints();
+        const pct = Math.min(100, (currentPoints / MAX_POINTS) * 100);
+
+        pointsText.textContent = `${currentPoints} / ${MAX_POINTS} p`;
+        progressFill.style.width = `${pct}%`;
+        if (currentPoints >= MAX_POINTS) {
+          pointsRemaining.textContent = '오늘 목표 달성 완료!';
+          growthText.innerHTML = '<span class="material-symbols-outlined text-sm">trending_up</span>+15% 성장 중!';
+          if (noticeRemain) noticeRemain.textContent = '0p';
+        } else {
+          const remain = Math.max(0, MAX_POINTS - currentPoints);
+          pointsRemaining.textContent = `목표 달성까지 ${remain}p`;
+          if (noticeRemain) noticeRemain.textContent = `${remain}p`;
+          if (currentPoints === 0) {
+            growthText.innerHTML = '<span class="material-symbols-outlined text-sm">trending_up</span>시작이 반이에요!';
+          } else {
+            growthText.innerHTML = '<span class="material-symbols-outlined text-sm">trending_up</span>좋은 흐름이에요!';
+          }
+        }
+
+        setHeaderHeartFilled(currentPoints >= MAX_POINTS);
+
+        if (currentPoints >= MAX_POINTS && !celebrationShown) {
+          celebrationShown = true;
+          triggerCelebration();
+        } else if (currentPoints < MAX_POINTS) {
+          celebrationShown = false;
+        }
+      }
+
+      function refreshPointsFromApi() {
+        if (isLocalSampleMode()) return;
+        const profileId = localStorage.getItem('currentProfileId') || '';
+        if (!profileId || !window.TeamTodo || typeof TeamTodo.getPoints !== 'function') return;
+        TeamTodo.getPoints(profileId, function (d) {
+          if (d && typeof d.points === 'number') {
+            currentPoints = Math.max(0, d.points);
+            const pct = Math.min(100, (currentPoints / MAX_POINTS) * 100);
+            pointsText.textContent = `${currentPoints} / ${MAX_POINTS} p`;
+            progressFill.style.width = `${pct}%`;
+          }
+        });
+      }
+
+      function refreshQuoteFromApi() {
+        if (isLocalSampleMode()) return;
+        if (!quoteTextEl || !window.TeamTodo || typeof TeamTodo.getDailyQuote !== 'function') return;
+        TeamTodo.getDailyQuote(function (q) {
+          const text = q && q.text ? String(q.text) : '';
+          if (text) quoteTextEl.textContent = `오늘의 명언: ${text}`;
+        });
+      }
+
+      function persistLocalTodoCompletion(todoId, completed) {
+        try {
+          const rows = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+          const idx = rows.findIndex((r) => String(r.id) === String(todoId));
+          if (idx >= 0) {
+            rows[idx].isCompleted = !!completed;
+            localStorage.setItem('localSampleTodos', JSON.stringify(rows));
+          }
+        } catch (_) {}
+      }
+
+      function singleTaskHTML(task) {
+        return `
+          <div class="task-card ${task.checked ? 'task-checked' : ''} flex items-center gap-4 bg-primary/5 dark:bg-slate-800/60 border-primary/30 p-4 rounded-xl border shadow-sm" data-task-id="${task.id}">
+            <input type="checkbox" class="custom-checkbox task-checkbox" data-id="${task.id}" ${task.checked ? 'checked' : ''} />
+            <div class="flex flex-col flex-1 min-w-0">
+              <p class="task-main text-base font-semibold">${task.title}</p>
+              <p class="task-sub text-sm text-slate-500">${task.subtitle}</p>
+            </div>
+            <button class="cheer-btn flex items-center gap-1 text-slate-400 hover:text-primary" data-title="${task.title}" data-likes="${task.likes}">
+              <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1">thumb_up</span>
+              <span class="text-xs font-bold">${task.likes}</span>
+            </button>
+            <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+${task.points}p</span>
+          </div>
+        `;
+      }
+
+      function groupTaskHTML(task) {
+        const totalPoints = groupPoints(task);
+        const children = task.children.map((c) => `
+          <div class="flex items-center gap-3 p-3 pl-4 border-b border-primary/5 last:border-b-0 hover:bg-primary/5 transition-colors">
+            <input type="checkbox" class="custom-checkbox sub-checkbox" data-parent="${task.id}" data-id="${c.id}" ${c.checked ? 'checked' : ''} />
+            <span class="text-sm flex-1 ${c.checked ? 'line-through text-slate-400' : 'text-slate-600 dark:text-slate-400'}">${c.label}</span>
+            <button class="cheer-btn flex items-center gap-1 text-slate-300 hover:text-primary" data-title="${task.title} - ${c.label}" data-likes="${c.likes}">
+              <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">thumb_up</span>
+              <span class="text-xs font-bold">${c.likes}</span>
+            </button>
+            <span class="text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">+${c.points}p</span>
+          </div>
+        `).join('');
+
+        return `
+          <div class="bg-primary/5 dark:bg-slate-800/60 border-primary/30 rounded-xl border shadow-sm overflow-hidden" data-task-id="${task.id}">
+            <div class="flex items-center gap-4 p-4 pb-2">
+              <div class="flex-1">
+                <p class="text-base font-semibold">${task.title}</p>
+                <p class="text-sm text-slate-500">${task.subtitle}</p>
+              </div>
+              <button class="cheer-btn flex items-center gap-1 text-slate-400 hover:text-primary" data-title="${task.title}" data-likes="${task.likes}">
+                <span class="material-symbols-outlined text-lg" style="font-variation-settings:'FILL' 1">thumb_up</span>
+                <span class="text-xs font-bold">${task.likes}</span>
+              </button>
+              <span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+${totalPoints}p</span>
+            </div>
+            <div class="border-t border-primary/10 bg-white/40 dark:bg-black/20">${children}</div>
+          </div>
+        `;
+      }
+
+      function renderTasks() {
+        taskList.innerHTML = tasks.map((task) => task.type === 'single' ? singleTaskHTML(task) : groupTaskHTML(task)).join('');
+
+        taskList.querySelectorAll('.task-checkbox').forEach((el) => {
+          el.addEventListener('change', (e) => {
+            const id = String(e.target.dataset.id || '');
+            const task = tasks.find((t) => String(t.id) === id);
+            if (!task) return;
+            const prev = task.checked;
+            task.checked = e.target.checked;
+            if (!prev && task.checked) flyHeart(e.target);
+            if (isLocalSampleMode()) {
+              persistLocalTodoCompletion(id, !!task.checked);
+              renderTasks();
+              updateHeader();
+              return;
+            }
+            if (window.TeamTodo && typeof TeamTodo.completeTodo === 'function') {
+              TeamTodo.completeTodo(id, !!task.checked, function () {
+                renderTasks();
+                updateHeader();
+              });
+            } else {
+              renderTasks();
+              updateHeader();
+            }
+          });
+        });
+
+        taskList.querySelectorAll('.sub-checkbox').forEach((el) => {
+          el.addEventListener('change', (e) => {
+            const parentId = String(e.target.dataset.parent || '');
+            const id = String(e.target.dataset.id || '');
+            const parent = tasks.find((t) => String(t.id) === parentId);
+            if (!parent || !Array.isArray(parent.children)) return;
+            const child = parent.children.find((c) => String(c.id) === id);
+            if (!child) return;
+            const prev = child.checked;
+            child.checked = e.target.checked;
+            if (!prev && child.checked) flyHeart(e.target);
+            if (isLocalSampleMode()) {
+              persistLocalTodoCompletion(id, !!child.checked);
+              renderTasks();
+              updateHeader();
+              return;
+            }
+            if (window.TeamTodo && typeof TeamTodo.completeTodo === 'function') {
+              TeamTodo.completeTodo(id, !!child.checked, function () {
+                renderTasks();
+                updateHeader();
+              });
+            } else {
+              renderTasks();
+              updateHeader();
+            }
+          });
+        });
+
+        taskList.querySelectorAll('.cheer-btn').forEach((el) => {
+          el.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const title = el.dataset.title || '할일';
+            const likes = parseInt(el.dataset.likes || '0', 10);
+            openBottomSheet(title, likes);
+          });
+        });
+
+        // 카드 클릭 시 할일 상세로 이동
+        taskList.querySelectorAll('[data-task-id]').forEach((card) => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('button, input, a, textarea, label')) return;
+            const id = String(card.dataset.taskId || '');
+            const task = tasks.find((t) => String(t.id) === id);
+            if (!task) return;
+            openTodoDetail(task);
+          });
+        });
+      }
+
+      function flyHeart(sourceEl) {
+        const heart = document.createElement('span');
+        heart.className = 'material-symbols-outlined fly-heart';
+        heart.textContent = 'favorite';
+        heart.style.fontVariationSettings = "'FILL' 1";
+        document.body.appendChild(heart);
+
+        const from = sourceEl.getBoundingClientRect();
+        const to = headerHeart.getBoundingClientRect();
+        const sx = from.left + from.width / 2;
+        const sy = from.top + from.height / 2;
+        const tx = to.left + to.width / 2;
+        const ty = to.top + to.height / 2;
+
+        const start = performance.now();
+        const duration = 900;
+
+        function step(now) {
+          const p = Math.min((now - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          const angle = p * Math.PI * 3;
+          const amp = 50 * Math.sin(Math.PI * p) * (1 - p);
+          const x = sx + (tx - sx) * ease + Math.cos(angle) * amp;
+          const y = sy + (ty - sy) * ease + Math.sin(angle) * amp;
+          heart.style.left = `${x}px`;
+          heart.style.top = `${y}px`;
+          heart.style.transform = `translate(-50%, -50%) scale(${1 - p * .35}) rotate(${p * 540}deg)`;
+          heart.style.opacity = p > .85 ? String((1 - p) * 6) : '1';
+          if (p < 1) requestAnimationFrame(step);
+          else {
+            heart.remove();
+            setHeaderHeartFilled(true);
+            headerHeart.animate(
+              [{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }],
+              { duration: 280, easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)' }
+            );
+            setTimeout(() => setHeaderHeartFilled(sumPoints() >= MAX_POINTS), 600);
+          }
+        }
+
+        requestAnimationFrame(step);
+      }
+
+      function generateFriendsList(count) {
+        const colors = ['bg-blue-100 text-blue-500', 'bg-yellow-100 text-yellow-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-pink-100 text-pink-600', 'bg-orange-100 text-orange-600'];
+        const icons = ['face', 'face_3', 'face_6', 'sentiment_satisfied', 'mood', 'emoji_emotions'];
+        let html = '';
+        for (let i = 0; i < count; i++) {
+          const name = supporterNames[i % supporterNames.length];
+          const msg = supporterMsgs[i % supporterMsgs.length];
+          const color = colors[i % colors.length];
+          const icon = icons[i % icons.length];
+          const pts = [5, 10, 15][i % 3];
+          html += `
+            <div class="flex items-center gap-3 p-2 rounded-xl hover:bg-slate-50 dark:hover:bg-slate-800" style="opacity:0; animation:sheetRowIn .28s ease forwards; animation-delay:${i * 0.04}s">
+              <div class="size-10 rounded-full ${color} flex items-center justify-center"><span class="material-symbols-outlined text-lg">${icon}</span></div>
+              <div class="flex-1">
+                <p class="font-semibold">${name}</p>
+                <p class="text-xs text-slate-500">${msg}</p>
+              </div>
+              <span class="text-xs font-bold text-primary">+${pts}p</span>
+            </div>
+          `;
+        }
+        return html;
+      }
+
+      function openBottomSheet(title, likes) {
+        sheetTitle.textContent = `"${title}" 응원`;
+        sheetSubtitle.textContent = `${likes}명이 응원했어요`;
+        sheetList.innerHTML = generateFriendsList(likes);
+
+        sheetBackdrop.classList.add('active');
+        bottomSheet.classList.add('show');
+      }
+
+      function closeBottomSheet() {
+        sheetBackdrop.classList.remove('active');
+        bottomSheet.classList.remove('show');
+      }
+
+      function triggerCelebration() {
+        if (celebrationOverlay.classList.contains('show')) return;
+        celebrationOverlay.classList.add('show');
+
+        confettiContainer.innerHTML = '';
+        fireworkContainer.innerHTML = '';
+        const colors = ['#eb4770', '#fbbf24', '#f472b6', '#60a5fa', '#34d399', '#ffffff'];
+
+        for (let i = 0; i < 70; i++) {
+          const confetti = document.createElement('div');
+          confetti.className = 'confetti-piece';
+          confetti.style.left = `${Math.random() * 100}%`;
+          confetti.style.background = colors[Math.floor(Math.random() * colors.length)];
+          confetti.style.animationDuration = `${0.9 + Math.random() * 1.2}s`;
+          confettiContainer.appendChild(confetti);
+          setTimeout(() => confetti.remove(), 2300);
+        }
+
+        const fireworkColors = ['#eb4770', '#ffd1dc', '#f472b6', '#fbbf24', '#ffffff'];
+        function createFirework(x, y) {
+          for (let i = 0; i < 26; i++) {
+            const p = document.createElement('div');
+            p.className = 'firework-particle';
+            p.style.left = `${x}px`;
+            p.style.top = `${y}px`;
+            p.style.backgroundColor = fireworkColors[Math.floor(Math.random() * fireworkColors.length)];
+            const angle = Math.random() * Math.PI * 2;
+            const velocity = 55 + Math.random() * 90;
+            p.style.setProperty('--tx', `${Math.cos(angle) * velocity}px`);
+            p.style.setProperty('--ty', `${Math.sin(angle) * velocity}px`);
+            fireworkContainer.appendChild(p);
+            setTimeout(() => p.remove(), 1000);
+          }
+        }
+
+        createFirework(window.innerWidth / 2, window.innerHeight * 0.34);
+        fireworkTimer = window.setInterval(() => {
+          createFirework(Math.random() * window.innerWidth, Math.random() * (window.innerHeight * 0.45));
+        }, 320);
+
+        setTimeout(() => {
+          celebrationOverlay.classList.remove('show');
+          if (fireworkTimer) {
+            clearInterval(fireworkTimer);
+            fireworkTimer = null;
+          }
+          fireworkContainer.innerHTML = '';
+        }, 2400);
+      }
+
+      // modal close
+      commentClose.addEventListener('click', () => {
+        commentModal.classList.add('hidden');
+        commentModal.classList.remove('flex');
+      });
+      commentSend.addEventListener('click', () => {
+        commentModal.classList.add('hidden');
+        commentModal.classList.remove('flex');
+      });
+      commentModal.addEventListener('click', (e) => {
+        if (e.target === commentModal) {
+          commentModal.classList.add('hidden');
+          commentModal.classList.remove('flex');
+        }
+      });
+      openDatePickerBtn.addEventListener('click', () => {
+        localStorage.setItem('calendarReturnToTodo', '1');
+        localStorage.setItem('todoSelectedDate', selectedDate || TODAY_KEY);
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          TeamTodo.navigate('calendar');
+        }
+      });
+      openNoticeBtn.addEventListener('click', () => {
+        placeNoticePanel();
+        noticePanel.classList.toggle('show');
+      });
+      noticeClose.addEventListener('click', () => {
+        noticePanel.classList.remove('show');
+      });
+      document.addEventListener('click', (e) => {
+        if (!noticePanel.classList.contains('show')) return;
+        if (e.target.closest('#noticePanel') || e.target.closest('#openNoticeBtn')) return;
+        noticePanel.classList.remove('show');
+      });
+
+      // sheet close
+      sheetClose.addEventListener('click', closeBottomSheet);
+      sheetBackdrop.addEventListener('click', closeBottomSheet);
+
+      // nav
+      const bottomNavLinks = document.querySelectorAll('#bottomNav a');
+      const bottomNavScreens = ['todo_main', 'calendar', 'team_list', 'goal_list', 'settings'];
+      bottomNavLinks.forEach((el, idx) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate(bottomNavScreens[idx]);
+          }
+        });
+      });
+      if (goGoalsBtn) {
+        goGoalsBtn.addEventListener('click', () => {
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate('goal_list');
+          }
+        });
+      }
+      const goalCards = document.querySelectorAll('.goal-progress-card');
+      goalCards.forEach((card) => {
+        card.addEventListener('click', () => {
+          const title = card.dataset.goalTitle || '';
+          if (title) localStorage.setItem('selectedGoalTitle', title);
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate('goal_detail');
+          }
+        });
+      });
+
+      setHeaderHeartFilled(false);
+      applyHeaderOffset();
+      placeNoticePanel();
+      window.addEventListener('resize', applyHeaderOffset);
+      window.addEventListener('resize', placeNoticePanel);
+      applySelectedDate(selectedDate, function () {
+        renderTasks();
+        updateHeader();
+        refreshPointsFromApi();
+      });
+      refreshQuoteFromApi();
+    });
+  </script>
+</body>
+</html>
+
+

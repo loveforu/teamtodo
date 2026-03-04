@@ -1,0 +1,208 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link rel="stylesheet" href="../vendor/plus-jakarta.css" />
+  <link rel="stylesheet" href="../vendor/material-symbols.css" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#eb4770",
+            "primary-dark": "#d4365d",
+            "background-light": "#f8f6f6",
+            "background-dark": "#211115"
+          },
+          fontFamily: {
+            display: ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { min-height: max(884px, 100dvh); overflow-y: scroll; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      width: 1em; height: 1em; display: inline-block; overflow: hidden; font-size: 24px;
+    }
+    .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .no-scrollbar::-webkit-scrollbar { display: none; }
+    .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+    .avatar-radio:checked + div { box-shadow: 0 0 0 4px #eb4770; transform: scale(0.96); }
+    .avatar-radio:checked + div .check-icon { opacity: 1; transform: scale(1); }
+    .avatar-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; }
+  </style>
+  <script src="app.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+  <div class="relative flex h-full min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-hidden">
+    <div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-20 border-b border-slate-100 dark:border-slate-800">
+      <button id="btnBack" class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 transition-colors">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">아바타 선택</h2>
+    </div>
+
+    <div class="flex-1 flex flex-col overflow-hidden relative">
+      <div class="px-5 py-4 shrink-0 bg-white z-10">
+        <div class="flex p-1.5 gap-2 bg-slate-100 rounded-2xl relative">
+          <input checked class="peer/female hidden" id="tab-female" name="gender-tab" type="radio" />
+          <label class="flex-1 py-3 text-center rounded-xl text-sm font-bold cursor-pointer transition-all z-10 peer-checked/female:bg-white peer-checked/female:text-primary peer-checked/female:shadow-sm text-slate-500 flex items-center justify-center gap-1.5" for="tab-female">
+            <span class="material-symbols-outlined text-[18px]">female</span>여성
+          </label>
+          <input class="peer/male hidden" id="tab-male" name="gender-tab" type="radio" />
+          <label class="flex-1 py-3 text-center rounded-xl text-sm font-bold cursor-pointer transition-all z-10 peer-checked/male:bg-white peer-checked/male:text-primary peer-checked/male:shadow-sm text-slate-500 flex items-center justify-center gap-1.5" for="tab-male">
+            <span class="material-symbols-outlined text-[18px]">male</span>남성
+          </label>
+        </div>
+      </div>
+
+      <div class="flex-1 overflow-y-auto no-scrollbar bg-white px-5 pb-32">
+        <div id="femaleGrid" class="avatar-grid pb-10"></div>
+        <div id="maleGrid" class="avatar-grid pb-10 hidden"></div>
+      </div>
+
+      <div class="absolute bottom-[80px] left-0 right-0 p-5 pt-12 pb-6 bg-gradient-to-t from-white via-white to-transparent z-20">
+        <button id="btnSelectDone" class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 transition-all text-base">선택 완료</button>
+      </div>
+    </div>
+
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 bg-white/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+      <a id="navTodo" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">check_circle</span><span class="text-xs font-medium">할일</span></a>
+      <a id="navCalendar" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><span class="text-xs font-medium">캘린더</span></a>
+      <a id="navTeam" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><span class="text-xs font-medium">팀</span></a>
+      <a id="navGoal" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><span class="text-xs font-medium">목표</span></a>
+      <a id="navSettings" class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">settings</span><span class="text-xs font-bold">설정</span></a>
+    </nav>
+  </div>
+
+<script>
+(function(){
+  const FEMALE_NAMES = ['소연','지아','민서','예린','하윤','수아','서윤','다은','나리','유나'];
+  const MALE_NAMES = ['민호','준서','도윤','태양','시우','현우','건우','정우','주원','하준'];
+  const FEMALE_AVATARS = [
+    '../avatarimage/girl/girl_01.png',
+    '../avatarimage/girl/girl_02.png',
+    '../avatarimage/girl/girl_03.png',
+    '../avatarimage/girl/girl_04.png',
+    '../avatarimage/girl/girl_05.png',
+    '../avatarimage/girl/girl_06.png',
+    '../avatarimage/girl/girl_07.png',
+    '../avatarimage/girl/girl_08.png',
+    '../avatarimage/girl/girl_09.png',
+    '../avatarimage/girl/girl_10.png'
+  ];
+  const MALE_AVATARS = [
+    '../avatarimage/man/man_01.png',
+    '../avatarimage/man/man_02.png',
+    '../avatarimage/man/man_03.png',
+    '../avatarimage/man/man_04.png',
+    '../avatarimage/man/man_05.png',
+    '../avatarimage/man/man_06.png',
+    '../avatarimage/man/man_07.png',
+    '../avatarimage/man/man_08.png',
+    '../avatarimage/man/man_09.png',
+    '../avatarimage/man/man_10.png'
+  ];
+
+  function makePortrait(type, i){
+    const list = type === 'female' ? FEMALE_AVATARS : MALE_AVATARS;
+    return list[i];
+  }
+
+  function renderGrid(type, rootId, names){
+    const root = document.getElementById(rootId);
+    root.innerHTML = '';
+    for(let i=0;i<10;i++){
+      const url = makePortrait(type, i);
+      const item = document.createElement('div');
+      item.className = 'flex flex-col items-center gap-2 mb-1';
+      item.innerHTML =
+        '<label class="relative cursor-pointer group rounded-full w-full">' +
+        '<input class="avatar-radio sr-only" name="avatar-selection" type="radio" data-type="'+type+'" data-index="'+i+'" value="'+url+'" />' +
+        '<div class="aspect-square rounded-full bg-slate-100 overflow-hidden ring-2 ring-transparent transition-all duration-200 hover:ring-primary/30 relative shadow-sm">' +
+        '<img alt="" class="w-full h-full object-cover" src="'+url+'" loading="eager" onerror="this.onerror=null;this.src=\'https://api.dicebear.com/9.x/lorelei-neutral/png?seed='+type+i+'&size=256\';" />' +
+        '<div class="check-icon absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-200"><span class="material-symbols-outlined text-white" style="font-size:28px;">check</span></div>' +
+        '</div></label>' +
+        '<span class="text-[11px] text-slate-600 font-medium truncate w-full text-center">'+names[i]+'</span>';
+      root.appendChild(item);
+    }
+  }
+
+  function toggleTab(type){
+    document.getElementById('femaleGrid').classList.toggle('hidden', type !== 'female');
+    document.getElementById('maleGrid').classList.toggle('hidden', type !== 'male');
+  }
+
+  function applyInitialSelection(){
+    const savedType = localStorage.getItem('selectedAvatarType') || localStorage.getItem('editingAvatarType') || 'female';
+    const savedIndex = Math.min(9, parseInt(localStorage.getItem('selectedAvatarIndex') || localStorage.getItem('editingAvatarIndex') || '0', 10) || 0);
+    const tab = document.getElementById(savedType === 'male' ? 'tab-male' : 'tab-female');
+    tab.checked = true;
+    toggleTab(savedType);
+    const target = document.querySelector('input[name="avatar-selection"][data-type="'+savedType+'"][data-index="'+savedIndex+'"]');
+    if(target) target.checked = true;
+  }
+
+  function completeSelection(){
+    const selected = document.querySelector('input[name="avatar-selection"]:checked');
+    if(!selected){ alert('아바타를 선택해 주세요.'); return; }
+    localStorage.setItem('selectedAvatarType', selected.dataset.type || 'female');
+    localStorage.setItem('selectedAvatarIndex', selected.dataset.index || '0');
+    localStorage.setItem('selectedAvatarUrl', selected.value || '');
+    TeamTodo.navigate('avatar_select');
+  }
+
+  function nav(id, screen){
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.addEventListener('click', function(e){ e.preventDefault(); TeamTodo.navigate(screen); });
+  }
+
+  document.addEventListener('DOMContentLoaded', function(){
+    renderGrid('female', 'femaleGrid', FEMALE_NAMES);
+    renderGrid('male', 'maleGrid', MALE_NAMES);
+    applyInitialSelection();
+
+    document.getElementById('tab-female').addEventListener('change', function(){ if(this.checked) toggleTab('female'); });
+    document.getElementById('tab-male').addEventListener('change', function(){ if(this.checked) toggleTab('male'); });
+    document.getElementById('btnBack').addEventListener('click', function(){ TeamTodo.navigate('avatar_select'); });
+    document.getElementById('btnSelectDone').addEventListener('click', completeSelection);
+
+    nav('navTodo','todo_main');
+    nav('navCalendar','calendar');
+    nav('navTeam','team_list');
+    nav('navGoal','goal_list');
+    nav('navSettings','settings');
+  });
+})();
+</script>
+</body>
+</html>
+
+
+

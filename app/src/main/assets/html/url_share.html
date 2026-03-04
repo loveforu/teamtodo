@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>링크 공유 받기</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: { extend: { colors: { primary: '#eb4770' }, fontFamily: { display: ['Plus Jakarta Sans', 'sans-serif'] } } }
+    };
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; min-height: max(884px, 100dvh); }
+  </style>
+</head>
+<body class="bg-white dark:bg-slate-900 text-slate-900 dark:text-slate-100">
+  <div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-slate-900 shadow-2xl">
+    <header class="sticky top-0 z-20 border-b border-primary/10 bg-white dark:bg-slate-900">
+      <div class="flex items-center p-4 pb-2 justify-between">
+        <button id="btnBack" class="text-primary flex size-10 items-center justify-center rounded-full hover:bg-primary/10">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h1 class="text-lg font-bold">공유 링크 저장</h1>
+        <div class="w-10"></div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto p-4 pb-28">
+      <section class="p-4 rounded-xl border border-primary/20 bg-primary/5">
+        <p class="text-xs text-slate-500 mb-1">공유된 URL</p>
+        <p id="urlText" class="text-sm break-all font-semibold text-primary"></p>
+      </section>
+
+      <section class="mt-4">
+        <div class="flex items-center justify-between mb-2">
+          <h2 class="text-base font-bold">링크를 저장할 할일 선택</h2>
+          <button id="refreshBtn" class="text-xs font-bold text-primary">새로고침</button>
+        </div>
+        <div id="todoList" class="space-y-2"></div>
+      </section>
+      <p id="msg" class="mt-3 text-xs text-slate-500"></p>
+    </main>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', function () {
+      const url = (localStorage.getItem('sharedUrlPending') || '').trim();
+      const profileId = localStorage.getItem('currentProfileId') || '';
+      const msgEl = document.getElementById('msg');
+      const listEl = document.getElementById('todoList');
+      document.getElementById('urlText').textContent = url || '공유 URL이 없습니다.';
+
+      function navBack() {
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('todo_main');
+      }
+
+      function saveTo(todo) {
+        if (!url || !todo || !todo.id) return;
+        msgEl.textContent = '링크를 저장하는 중입니다...';
+        if (window.TeamTodo && typeof TeamTodo.saveLink === 'function') {
+          TeamTodo.saveLink(String(todo.id), url, (todo.title || '공유 링크'), function () {
+            msgEl.textContent = '저장되었습니다.';
+            localStorage.removeItem('sharedUrlPending');
+            setTimeout(navBack, 220);
+          });
+          return;
+        }
+        msgEl.textContent = '저장 API를 사용할 수 없습니다.';
+      }
+
+      function render(todos) {
+        if (!Array.isArray(todos) || todos.length === 0) {
+          listEl.innerHTML = '<div class="p-4 rounded-xl border border-dashed border-slate-300 text-sm text-slate-500 text-center">저장 가능한 할일이 없습니다.</div>';
+          return;
+        }
+        listEl.innerHTML = todos
+          .filter((t) => !t.parentTodoId)
+          .map((t) => `
+            <button class="todo-item w-full text-left p-3 rounded-xl border border-slate-200 dark:border-slate-700 hover:border-primary/40 hover:bg-primary/5 transition-colors" data-id="${String(t.id)}">
+              <p class="text-sm font-bold">${String(t.title || '')}</p>
+              <p class="text-xs text-slate-500 mt-0.5">${String((t.startDate || '') + ' ' + (t.startTime || '')).trim()}</p>
+            </button>
+          `).join('');
+        listEl.querySelectorAll('.todo-item').forEach((btn) => {
+          btn.addEventListener('click', function () {
+            const id = btn.getAttribute('data-id');
+            const todo = todos.find((x) => String(x.id) === id);
+            saveTo(todo);
+          });
+        });
+      }
+
+      function loadTodos() {
+        if (!profileId) {
+          msgEl.textContent = '선택된 프로필이 없습니다.';
+          return;
+        }
+        const today = new Date().toISOString().slice(0, 10);
+        msgEl.textContent = '할일 목록을 불러오는 중입니다...';
+        if (window.TeamTodo && typeof TeamTodo.getTodos === 'function') {
+          TeamTodo.getTodos(profileId, today, function (rows) {
+            msgEl.textContent = '저장할 할일을 선택하세요.';
+            render(Array.isArray(rows) ? rows : []);
+          });
+          return;
+        }
+        msgEl.textContent = '할일 API를 사용할 수 없습니다.';
+      }
+
+      document.getElementById('btnBack').addEventListener('click', navBack);
+      document.getElementById('refreshBtn').addEventListener('click', loadTodos);
+      loadTodos();
+    });
+  </script>
+</body>
+</html>
+

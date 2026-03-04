@@ -1,0 +1,248 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "var(--primary-color)",
+                        "primary-light": "var(--primary-light)", 
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#18181b", 
+                        "surface-dark": "#27272a",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style type="text/tailwindcss">
+        :root {
+            --primary-color: #eb4770;
+            --primary-light: #fff5f7;
+        }
+        .theme-btn.active {
+            box-shadow: 0 0 0 2px #fff, 0 0 0 4px var(--primary-color);
+        }
+        .profile-card-bg {
+            background-color: var(--primary-light);
+        }
+        .dark .profile-card-bg {
+            background-color: #27272a; 
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            overscroll-behavior: none;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300">
+<div class="relative flex min-h-screen w-full flex-col max-w-md mx-auto bg-white dark:bg-background-dark shadow-xl transition-colors duration-300">
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-primary/10 transition-colors duration-300">
+<div class="text-primary flex size-12 shrink-0 items-center justify-start cursor-pointer transition-colors duration-300">
+<span class="material-symbols-outlined text-3xl">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">설정</h2>
+</div>
+<div class="flex-1 overflow-y-auto pb-24">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-6">프로필</h3>
+<div class="flex flex-col gap-4 bg-white dark:bg-background-dark px-4 py-4 transition-colors duration-300">
+<div class="flex items-center gap-4 p-5 rounded-2xl profile-card-bg border border-primary/10 transition-colors duration-300" id="profile-card">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-16 w-16 border-2 border-primary/20 shadow-sm transition-colors duration-300 overflow-hidden bg-white shrink-0">
+<img alt="Sophisticated Female Avatar" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuCPFihPiK1LBUrhqiy-9kt7mkmAKXGLPvtkLuvYpVyP3jrIsBb8Hiv_-XKMp7OBvOgy0KjgamsGvmfP1jI8Eu1bNtMktYerdf_Ksnamc-C8f0JO2UkraH1eiH6qfo50OKyPYkDY3QFWVdNFqlu1r0D9Wq_lQ2WdPQ89sJIIu5aJE7joxiYqhenVW7Y_ywb-PlH2CFf5RXUnkysfz6iVFswbBiyCFm0KEziMrXuZZhcQug1pMUs3borW7xJKD-3s13Y_kC2uPvrvhks"/>
+</div>
+<div class="flex flex-col justify-center flex-1 overflow-hidden">
+<div class="flex items-center gap-2 mb-1">
+<p class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight truncate">김다이어리</p>
+<span class="px-2 py-0.5 rounded-full bg-white/50 dark:bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider transition-colors duration-300 whitespace-nowrap">PRIMARY</span>
+</div>
+<p class="text-slate-600 dark:text-slate-400 text-sm font-normal transition-colors duration-300 truncate">diary_user@gmail.com</p>
+</div>
+</div>
+<div class="flex gap-3">
+<button class="flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-4 bg-primary text-white text-sm font-bold leading-normal transition-all hover:brightness-90 active:scale-95 shadow-sm shadow-primary/20 profile-select-btn" id="profile-select-btn">
+<span class="truncate">프로필 선택</span>
+</button>
+<button class="flex-1 cursor-pointer items-center justify-center overflow-hidden rounded-xl h-12 px-4 bg-white dark:bg-surface-dark text-primary border border-primary/20 dark:border-slate-700 text-sm font-bold leading-normal transition-all hover:bg-primary/5 active:scale-95">
+<span class="truncate">프로필 관리</span>
+</button>
+</div>
+</div>
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] px-4 pb-2 pt-6">테마 설정</h3>
+<div class="flex flex-col gap-6 bg-white dark:bg-background-dark px-4 py-4 transition-colors duration-300">
+<div class="flex flex-col gap-3">
+<p class="text-slate-700 dark:text-slate-300 text-sm font-medium">파스텔 팔레트</p>
+<div class="grid grid-cols-6 gap-3 pt-1">
+<button aria-label="Pink Theme" class="theme-btn size-10 rounded-full bg-[#eb4770] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#eb4770', '#fff5f7', this)">
+<span class="material-symbols-outlined text-white text-xl">check</span>
+</button>
+<button aria-label="Peach Theme" class="theme-btn size-10 rounded-full bg-[#FFAB91] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#FFAB91', '#FFF3E0', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Yellow Theme" class="theme-btn size-10 rounded-full bg-[#FBC02D] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#FBC02D', '#FFFDE7', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Mint Theme" class="theme-btn size-10 rounded-full bg-[#4DB6AC] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#4DB6AC', '#E0F2F1', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Sky Blue Theme" class="theme-btn size-10 rounded-full bg-[#4FC3F7] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#4FC3F7', '#E1F5FE', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Lavender Theme" class="theme-btn size-10 rounded-full bg-[#BA68C8] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#BA68C8', '#F3E5F5', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Rose Theme" class="theme-btn size-10 rounded-full bg-[#F06292] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#F06292', '#FCE4EC', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Orange Theme" class="theme-btn size-10 rounded-full bg-[#FF8A65] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#FF8A65', '#FBE9E7', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Lime Theme" class="theme-btn size-10 rounded-full bg-[#AED581] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#AED581', '#F1F8E9', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Teal Theme" class="theme-btn size-10 rounded-full bg-[#26A69A] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#26A69A', '#E0F2F1', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Indigo Theme" class="theme-btn size-10 rounded-full bg-[#7986CB] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#7986CB', '#E8EAF6', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Purple Theme" class="theme-btn size-10 rounded-full bg-[#9575CD] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#9575CD', '#EDE7F6', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Blue Grey Theme" class="theme-btn size-10 rounded-full bg-[#78909C] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#78909C', '#ECEFF1', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Deep Orange Theme" class="theme-btn size-10 rounded-full bg-[#FF7043] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#FF7043', '#FBE9E7', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Light Green Theme" class="theme-btn size-10 rounded-full bg-[#8BC34A] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#8BC34A', '#F1F8E9', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Cyan Theme" class="theme-btn size-10 rounded-full bg-[#26C6DA] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#26C6DA', '#E0F7FA', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Brown Theme" class="theme-btn size-10 rounded-full bg-[#8D6E63] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#8D6E63', '#EFEBE9', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+<button aria-label="Grey Theme" class="theme-btn size-10 rounded-full bg-[#BDBDBD] border-2 border-transparent flex items-center justify-center shrink-0 transition-all active:scale-90 shadow-sm" onclick="setTheme('#BDBDBD', '#FAFAFA', this)">
+<span class="material-symbols-outlined text-white text-xl hidden">check</span>
+</button>
+</div>
+</div>
+<div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-surface-dark transition-colors duration-300">
+<div class="flex items-center gap-3">
+<span class="material-symbols-outlined text-primary transition-colors duration-300">dark_mode</span>
+<span class="text-slate-900 dark:text-slate-100 text-sm font-medium">다크 모드</span>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input class="sr-only peer" id="darkModeToggle" onchange="toggleDarkMode(this)" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all dark:border-gray-600 peer-checked:bg-primary transition-colors duration-300"></div>
+</label>
+</div>
+</div>
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-between gap-1 border-t border-primary/10 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-2 pb-6 pt-2 z-20 transition-colors duration-300">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors duration-300">check_circle</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em] group-hover:text-primary transition-colors duration-300">할일</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors duration-300">calendar_month</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em] group-hover:text-primary transition-colors duration-300">캘린더</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors duration-300">groups</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em] group-hover:text-primary transition-colors duration-300">팀</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors duration-200 group" href="#">
+<span class="material-symbols-outlined group-hover:text-primary transition-colors duration-300">flag</span>
+<p class="text-xs font-medium leading-normal tracking-[0.015em] group-hover:text-primary transition-colors duration-300">목표</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary transition-colors duration-300 nav-active-item" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">settings</span>
+<p class="text-xs font-bold leading-normal tracking-[0.015em]">설정</p>
+</a>
+</div>
+</div>
+<script>
+        function setTheme(color, lightColor, btn) {
+            // Update CSS variables
+            document.documentElement.style.setProperty('--primary-color', color);
+            document.documentElement.style.setProperty('--primary-light', lightColor);
+            // Remove checkmark and shadow from all buttons
+            const buttons = document.querySelectorAll('.theme-btn');
+            buttons.forEach(b => {
+                b.style.boxShadow = 'none';
+                const icon = b.querySelector('.material-symbols-outlined');
+                if(icon) icon.classList.add('hidden');
+            });
+            // Add checkmark and shadow to selected button
+            // Box shadow color logic: Primary color with ~30% opacity (4D in hex)
+            btn.style.boxShadow = `0 0 0 2px #fff, 0 0 0 4px ${color}4D`;
+            const icon = btn.querySelector('.material-symbols-outlined');
+            if(icon) icon.classList.remove('hidden');
+            // Force update other elements that might not react immediately via Tailwind classes
+            const profileCard = document.getElementById('profile-card');
+            if(profileCard && !document.documentElement.classList.contains('dark')) {
+                 // In light mode, apply the light pastel color directly if needed, though variable handles it
+            }
+            // Update navigation icon active state color if it's using inline styles or needs specific handling
+            const navActiveIcon = document.querySelector('.nav-active-item span');
+            if(navActiveIcon) {
+                // It uses text-primary so it should update automatically via CSS variable
+            }
+        }
+        function toggleDarkMode(checkbox) {
+            if (checkbox.checked) {
+                document.documentElement.classList.add('dark');
+            } else {
+                document.documentElement.classList.remove('dark');
+            }
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+             // Default Theme
+             const defaultColor = '#eb4770';
+             // Default light color
+             const defaultLightColor = '#fff5f7';
+             // Ensure CSS var is set initially
+             document.documentElement.style.setProperty('--primary-color', defaultColor);
+             document.documentElement.style.setProperty('--primary-light', defaultLightColor);
+             // Initialize button state
+             const defaultBtn = document.querySelector(`button[onclick*="'${defaultColor}'"]`);
+             if(defaultBtn) {
+                 defaultBtn.style.boxShadow = `0 0 0 2px #fff, 0 0 0 4px ${defaultColor}4D`;
+                 const icon = defaultBtn.querySelector('.material-symbols-outlined');
+                 if(icon) icon.classList.remove('hidden');
+             }
+             // Check system preference for dark mode
+             if (window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches) {
+                 // Optional: Auto-enable dark mode based on system preference
+                 // document.getElementById('darkModeToggle').checked = true;
+                 // toggleDarkMode(document.getElementById('darkModeToggle'));
+             }
+        });
+    </script>
+</div>
+</body></html>

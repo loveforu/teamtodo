@@ -1,0 +1,379 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>프로필 선택</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#eb4770',
+            'background-light': '#ffffff',
+            'background-dark': '#211115'
+          },
+          fontFamily: {
+            display: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root { --primary-color: #eb4770; --primary-light: #fff5f7; }
+    body { min-height: max(884px, 100dvh); -webkit-tap-highlight-color: transparent; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 500, 'GRAD' 0, 'opsz' 24; }
+    .profile-avatar { aspect-ratio: 1/1; width: 100%; border-radius: 9999px; overflow: hidden; }
+    .section-title { color: var(--primary-color); }
+    .my-dot {
+      position: absolute;
+      bottom: 2px;
+      right: 2px;
+      width: 20px;
+      height: 20px;
+      border-radius: 9999px;
+      background: #22c55e;
+      border: 3px solid white;
+      box-shadow: 0 0 0 3px rgb(34 197 94 / 0.28);
+    }
+    .my-dot::after {
+      content: '';
+      position: absolute;
+      inset: -5px;
+      border-radius: 9999px;
+      border: 2px solid rgb(34 197 94 / 0.5);
+      animation: myDotPulse 1.6s ease-out infinite;
+    }
+    @keyframes myDotPulse {
+      0% { transform: scale(0.82); opacity: 0.9; }
+      70% { transform: scale(1.18); opacity: 0.1; }
+      100% { transform: scale(1.18); opacity: 0; }
+    }
+  </style>
+  <script src="app.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen flex flex-col relative">
+  <header class="flex items-center justify-between p-4 w-full z-20">
+    <button id="btnBack" class="flex items-center justify-center size-10 rounded-full hover:bg-primary/10 transition-colors text-slate-900 dark:text-slate-100" aria-label="뒤로가기">
+      <span class="material-symbols-outlined">arrow_back</span>
+    </button>
+    <h2 class="text-lg font-bold">프로필 선택</h2>
+    <div class="size-10"></div>
+  </header>
+
+  <main class="flex-1 flex flex-col items-center px-6 w-full max-w-lg mx-auto z-10 pb-20 overflow-y-auto no-scrollbar">
+    <div class="text-center mt-8 mb-10">
+      <h1 class="text-3xl font-bold tracking-tight mb-3">누구로 사용할까요?</h1>
+      <p class="text-slate-500 dark:text-slate-400 text-base">선택한 프로필로 데이터가 열립니다.</p>
+    </div>
+
+    <section class="w-full mb-6">
+      <h3 class="section-title text-sm font-bold mb-4 px-1">내 프로필</h3>
+      <div id="myGrid" class="w-full grid grid-cols-2 gap-x-8 gap-y-10 px-4"></div>
+    </section>
+
+    <section class="w-full">
+      <h3 class="section-title text-sm font-bold mb-4 px-1">함께하는 팀원</h3>
+      <div id="teamGrid" class="w-full grid grid-cols-2 gap-x-8 gap-y-10 px-4"></div>
+    </section>
+  </main>
+
+  <div class="fixed -top-24 -left-24 size-64 bg-primary/5 rounded-full blur-3xl pointer-events-none z-0"></div>
+  <div class="fixed -bottom-24 -right-24 size-96 bg-primary/10 rounded-full blur-3xl pointer-events-none z-0"></div>
+
+  <script>
+    const PROFILE_CACHE_MY = 'profileSelectCacheMy';
+    const PROFILE_CACHE_TEAM = 'profileSelectCacheTeam';
+    const PROFILE_CACHE_AT = 'profileSelectCacheAt';
+    const PROFILE_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+    const AVATAR_ICONS_MALE = ['face', 'sentiment_satisfied', 'mood', 'person', 'self_improvement', 'psychiatry'];
+    const AVATAR_ICONS_FEMALE = ['face_3', 'sentiment_very_satisfied', 'emoji_emotions', 'person', 'spa', 'favorite'];
+
+    function escHtml(s) {
+      return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    }
+
+    function splitProfilesForView(list) {
+      const all = Array.isArray(list) ? list : [];
+      return {
+        my: all.filter((p) => p && p.isMyAccount !== false),
+        team: all.filter((p) => p && p.isMyAccount === false)
+      };
+    }
+
+    function getLocalSampleProfiles() {
+      try {
+        const parsed = JSON.parse(localStorage.getItem('localSampleProfiles') || '[]');
+        return Array.isArray(parsed) ? parsed : [];
+      } catch (_) {
+        return [];
+      }
+    }
+
+    function applyLocalSampleProfiles() {
+      const local = getLocalSampleProfiles();
+      if (!local.length) return false;
+      const split = splitProfilesForView(local);
+      renderMyProfiles(split.my);
+      renderTeamProfiles(split.team);
+      saveProfileCache(split.my, split.team);
+      return true;
+    }
+
+    function avatarInner(profile) {
+      if (profile && profile.photoUrl) {
+        return '<img src="' + profile.photoUrl + '" alt="" class="w-full h-full object-cover" onerror="this.style.display=\'none\'">';
+      }
+      const idx = Math.abs(parseInt(profile && profile.avatarIndex, 10) || 0);
+      const list = (profile && profile.avatarType === 'female') ? AVATAR_ICONS_FEMALE : AVATAR_ICONS_MALE;
+      const icon = list[idx % list.length];
+      return '<span class="material-symbols-outlined !text-5xl text-primary/70">' + icon + '</span>';
+    }
+
+    function buildProfileButton(profile, isTeam) {
+      const isMainAccount = !!(profile && profile.isMyAccount);
+      const wrapper = document.createElement('button');
+      wrapper.className = 'group flex flex-col items-center gap-4';
+      wrapper.innerHTML = '' +
+        '<div class="relative w-full aspect-square rounded-full p-1 border-2 border-transparent group-hover:border-primary transition-all duration-300">' +
+          '<div class="profile-avatar bg-white dark:bg-slate-800 shadow-sm flex items-center justify-center">' + avatarInner(profile) + '</div>' +
+          (isMainAccount ? '<span class="my-dot"></span>' : '') +
+          (isTeam ? '<span class="absolute top-1 left-1 px-2 py-0.5 rounded-full text-[10px] font-bold bg-sky-100 text-sky-600">팀원</span>' : '') +
+        '</div>' +
+        '<span class="text-lg font-semibold group-hover:text-primary transition-colors text-center w-full truncate">' + escHtml(profile && profile.name || (isTeam ? '팀원' : '프로필')) + '</span>';
+      return wrapper;
+    }
+
+    function clearEditing() {
+      localStorage.removeItem('editingProfileId');
+      localStorage.removeItem('editingProfileName');
+      localStorage.removeItem('editingAvatarType');
+      localStorage.removeItem('editingAvatarIndex');
+      localStorage.removeItem('editingIsMyAccount');
+      localStorage.removeItem('editingPhotoUrl');
+      localStorage.removeItem('selectedAvatarType');
+      localStorage.removeItem('selectedAvatarIndex');
+      localStorage.removeItem('selectedAvatarUrl');
+    }
+
+    function goCreateProfile() {
+      clearEditing();
+      if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+        TeamTodo.navigate('avatar_select');
+      }
+    }
+
+    function selectMine(p) {
+      const isMainAccount = !!(p && p.isMyAccount);
+      localStorage.setItem('currentProfileId', (p && p.id) || '');
+      localStorage.setItem('currentProfileName', (p && p.name) || '');
+      localStorage.setItem('currentProfileOwnerUid', (p && p.ownerUid) || '');
+      localStorage.setItem('isViewingFriendTodo', isMainAccount ? 'false' : 'true');
+      if (!isMainAccount) {
+        openFriendTodo(p);
+        return;
+      }
+      if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+        TeamTodo.navigate('todo_main');
+      }
+    }
+
+    function selectTeam(p) {
+      localStorage.setItem('isViewingFriendTodo', 'true');
+      openFriendTodo(p);
+    }
+
+    function openFriendTodo(p) {
+      const payload = {
+        screen: 'friend_todo',
+        targetProfileId: (p && p.id) || '',
+        targetOwnerUid: (p && p.ownerUid) || '',
+        targetName: (p && p.name) || '팀원'
+      };
+
+      localStorage.setItem('targetProfileId', payload.targetProfileId);
+      localStorage.setItem('targetOwnerUid', payload.targetOwnerUid);
+      localStorage.setItem('targetProfileName', payload.targetName);
+      localStorage.setItem('isViewingFriendTodo', 'true');
+
+      try {
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          TeamTodo.navigate('friend_todo');
+          return;
+        }
+      } catch (_) {}
+      try {
+        location.href = 'teamtodo://navigate?screen=friend_todo';
+      } catch (_) {}
+    }
+
+    function renderMyProfiles(profiles) {
+      const grid = document.getElementById('myGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+
+      if (!Array.isArray(profiles) || profiles.length === 0) {
+        const add = document.createElement('button');
+        add.className = 'group col-span-2 flex flex-col items-center gap-4';
+        add.innerHTML = '' +
+          '<div class="w-32 h-32 rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm border-2 border-dashed border-primary/30">' +
+            '<span class="material-symbols-outlined !text-5xl">add</span>' +
+          '</div>' +
+          '<span class="text-lg font-semibold group-hover:text-primary transition-colors">프로필 추가</span>';
+        add.addEventListener('click', goCreateProfile);
+        grid.appendChild(add);
+        return;
+      }
+
+      profiles.forEach((p) => {
+        const btn = buildProfileButton(p, false);
+        btn.addEventListener('click', () => selectMine(p));
+        grid.appendChild(btn);
+      });
+
+      const add = document.createElement('button');
+      add.className = 'group flex flex-col items-center gap-4';
+      add.innerHTML = '' +
+        '<div class="w-full aspect-square rounded-full bg-primary/5 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-white transition-all duration-300 shadow-sm border-2 border-dashed border-primary/30">' +
+          '<span class="material-symbols-outlined !text-4xl">add</span>' +
+        '</div>' +
+        '<span class="text-lg font-semibold group-hover:text-primary transition-colors">프로필 추가</span>';
+      add.addEventListener('click', goCreateProfile);
+      grid.appendChild(add);
+    }
+
+    function renderTeamProfiles(profiles) {
+      const grid = document.getElementById('teamGrid');
+      if (!grid) return;
+      grid.innerHTML = '';
+      if (!Array.isArray(profiles) || profiles.length === 0) {
+        const empty = document.createElement('div');
+        empty.className = 'col-span-2 text-center text-slate-400 dark:text-slate-500 py-3';
+        empty.textContent = '함께하는 팀원이 없습니다.';
+        grid.appendChild(empty);
+        return;
+      }
+
+      profiles.forEach((p) => {
+        const btn = buildProfileButton(p, true);
+        btn.addEventListener('click', () => selectTeam(p));
+        grid.appendChild(btn);
+      });
+    }
+
+    function saveProfileCache(myProfiles, teamProfiles) {
+      try {
+        if (Array.isArray(myProfiles)) localStorage.setItem(PROFILE_CACHE_MY, JSON.stringify(myProfiles));
+        if (Array.isArray(teamProfiles)) localStorage.setItem(PROFILE_CACHE_TEAM, JSON.stringify(teamProfiles));
+        localStorage.setItem(PROFILE_CACHE_AT, String(Date.now()));
+      } catch (_) {}
+    }
+
+    function loadProfileCache() {
+      try {
+        const at = Number(localStorage.getItem(PROFILE_CACHE_AT) || 0);
+        if (!at || (Date.now() - at) > PROFILE_CACHE_TTL_MS) return false;
+        const my = JSON.parse(localStorage.getItem(PROFILE_CACHE_MY) || 'null');
+        const team = JSON.parse(localStorage.getItem(PROFILE_CACHE_TEAM) || 'null');
+        if (Array.isArray(my)) renderMyProfiles(my);
+        if (Array.isArray(team)) renderTeamProfiles(team);
+        return Array.isArray(my) || Array.isArray(team);
+      } catch (_) {
+        return false;
+      }
+    }
+
+    let profilesRequested = false;
+    function requestProfiles() {
+      if (profilesRequested) return;
+      profilesRequested = true;
+      if (window.TeamTodo && typeof TeamTodo.call === 'function') {
+        TeamTodo.call('getProfilesForSelection', {});
+        return;
+      }
+      if (window.AndroidBridge && typeof AndroidBridge.call === 'function') {
+        AndroidBridge.call('getProfilesForSelection', '{}');
+      }
+    }
+
+    const prevNative = window.onNativeEvent;
+    window.onNativeEvent = function (event, data) {
+      if (typeof prevNative === 'function') {
+        try { prevNative(event, data); } catch (_) {}
+      }
+      if (event === 'onMyProfiles' || event === 'onProfilesForSelection') {
+        const split = splitProfilesForView(Array.isArray(data) ? data : []);
+        if (split.my.length || split.team.length) {
+          renderMyProfiles(split.my);
+          renderTeamProfiles(split.team);
+          saveProfileCache(split.my, split.team);
+        } else {
+          applyLocalSampleProfiles();
+        }
+      }
+      if (event === 'onTeamProfiles') {
+        const team = Array.isArray(data) ? data : [];
+        const my = (() => { try { return JSON.parse(localStorage.getItem(PROFILE_CACHE_MY) || '[]'); } catch (_) { return []; } })();
+        if (team.length) {
+          renderTeamProfiles(team);
+          saveProfileCache(Array.isArray(my) ? my : [], team);
+        } else {
+          applyLocalSampleProfiles();
+        }
+      }
+    };
+
+    window.onBridgeReady = function () { requestProfiles(); };
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const backBtn = document.getElementById('btnBack');
+      if (backBtn) {
+        backBtn.addEventListener('click', () => {
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate('settings');
+          }
+        });
+      }
+
+      const usedCache = loadProfileCache();
+      if (!usedCache) {
+        const localApplied = applyLocalSampleProfiles();
+        if (!localApplied) {
+          renderMyProfiles([]);
+          renderTeamProfiles([]);
+        }
+      }
+      requestProfiles();
+
+      setTimeout(() => {
+        const hasRendered = !!document.querySelector('#myGrid button, #teamGrid button');
+        if (!hasRendered) applyLocalSampleProfiles();
+      }, 1200);
+    });
+  </script>
+</body>
+</html>

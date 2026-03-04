@@ -1,0 +1,318 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>설정</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: 'var(--primary-color)',
+            'primary-light': 'var(--primary-light)',
+            'background-light': '#f8f6f6',
+            'background-dark': '#18181b',
+            'surface-dark': '#27272a'
+          },
+          fontFamily: { display: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
+  <style>
+    :root { --primary-color:#eb4770; --primary-light:#fff5f7; }
+    body { min-height:max(884px,100dvh); -webkit-tap-highlight-color:transparent; font-family:'Plus Jakarta Sans',sans-serif; }
+    .material-symbols-outlined { font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24; }
+    .theme-btn.active { box-shadow:0 0 0 2px #fff,0 0 0 4px var(--primary-color); }
+    .no-scrollbar::-webkit-scrollbar { display:none; }
+    .no-scrollbar { -ms-overflow-style:none; scrollbar-width:none; }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 transition-colors duration-300">
+  <div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl transition-colors duration-300">
+    <header class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-10 border-b border-primary/10 transition-colors duration-300">
+      <button id="btnBack" class="text-primary flex size-12 shrink-0 items-center justify-start cursor-pointer transition-colors duration-300" aria-label="뒤로가기">
+        <span class="material-symbols-outlined text-3xl">arrow_back</span>
+      </button>
+      <h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">설정</h1>
+    </header>
+
+    <main class="flex-1 overflow-y-auto pb-24 no-scrollbar">
+      <section>
+        <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold px-4 pb-2 pt-6">프로필</h2>
+        <div class="flex flex-col gap-4 bg-white dark:bg-background-dark px-4 py-4 transition-colors duration-300">
+          <div class="flex items-center gap-4 p-5 rounded-2xl bg-primary/10 border border-primary/10 transition-colors duration-300" id="profile-card">
+            <div class="aspect-square rounded-full h-16 w-16 border-2 border-primary/20 shadow-sm overflow-hidden bg-white shrink-0">
+              <img id="profile-avatar" alt="프로필 아바타" class="w-full h-full object-cover" src="" />
+            </div>
+            <div class="flex flex-col justify-center flex-1 overflow-hidden">
+              <div class="flex items-center gap-2 mb-1">
+                <p id="profile-name" class="text-slate-900 dark:text-slate-100 text-lg font-bold truncate">프로필</p>
+                <span id="profile-primary-badge" class="px-2 py-0.5 rounded-full bg-white/50 dark:bg-primary/20 text-primary text-[10px] font-bold uppercase tracking-wider whitespace-nowrap">PRIMARY</span>
+              </div>
+              <p id="profile-email" class="text-slate-600 dark:text-slate-400 text-sm truncate">현재 선택된 프로필</p>
+            </div>
+          </div>
+
+          <div class="flex gap-3">
+            <button id="profile-select-btn" class="flex-1 rounded-xl h-12 px-4 bg-primary text-white text-sm font-bold transition-all hover:brightness-90 active:scale-95 shadow-sm shadow-primary/20">프로필 선택</button>
+            <button id="profile-manage-btn" class="flex-1 rounded-xl h-12 px-4 bg-white dark:bg-surface-dark text-primary border border-primary/20 dark:border-slate-700 text-sm font-bold transition-all hover:bg-primary/5 active:scale-95">프로필 관리</button>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold px-4 pb-2 pt-6">테마 설정</h2>
+        <div class="flex flex-col gap-6 bg-white dark:bg-background-dark px-4 py-4 transition-colors duration-300">
+          <div class="flex flex-col gap-3">
+            <p class="text-slate-700 dark:text-slate-300 text-sm font-medium">테마 컬러</p>
+            <div class="grid grid-cols-6 gap-3 pt-1">
+              <button class="theme-btn size-10 rounded-full bg-[#eb4770] border-2 border-transparent" data-color="#eb4770" data-light="#fff5f7"><span class="material-symbols-outlined text-white text-xl">check</span></button>
+              <button class="theme-btn size-10 rounded-full bg-[#FFAB91] border-2 border-transparent" data-color="#FFAB91" data-light="#FFF3E0"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
+              <button class="theme-btn size-10 rounded-full bg-[#FBC02D] border-2 border-transparent" data-color="#FBC02D" data-light="#FFFDE7"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
+              <button class="theme-btn size-10 rounded-full bg-[#4DB6AC] border-2 border-transparent" data-color="#4DB6AC" data-light="#E0F2F1"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
+              <button class="theme-btn size-10 rounded-full bg-[#4FC3F7] border-2 border-transparent" data-color="#4FC3F7" data-light="#E1F5FE"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
+              <button class="theme-btn size-10 rounded-full bg-[#BA68C8] border-2 border-transparent" data-color="#BA68C8" data-light="#F3E5F5"><span class="material-symbols-outlined text-white text-xl hidden">check</span></button>
+            </div>
+          </div>
+
+          <div class="flex items-center justify-between p-4 rounded-xl bg-slate-50 dark:bg-surface-dark transition-colors duration-300">
+            <div class="flex items-center gap-3">
+              <span class="material-symbols-outlined text-primary">dark_mode</span>
+              <span class="text-slate-900 dark:text-slate-100 text-sm font-medium">다크 모드</span>
+            </div>
+            <label class="relative inline-flex items-center cursor-pointer">
+              <input class="sr-only peer" id="darkModeToggle" type="checkbox" />
+              <div class="w-11 h-6 bg-slate-200 rounded-full peer dark:bg-slate-700 peer-checked:after:translate-x-full after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+            </label>
+          </div>
+        </div>
+      </section>
+
+      <section>
+        <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold px-4 pb-2 pt-6">데이터 관리</h2>
+        <div class="flex flex-col gap-3 bg-white dark:bg-background-dark px-4 py-4 transition-colors duration-300">
+          <button id="seed-sample-btn" class="w-full rounded-xl h-12 px-4 bg-primary text-white text-sm font-bold transition-all hover:brightness-90 active:scale-95 shadow-sm shadow-primary/20">샘플 데이터 생성</button>
+          <button id="reset-data-btn" class="w-full rounded-xl h-12 px-4 bg-white dark:bg-surface-dark text-red-500 border border-red-200 dark:border-red-900/50 text-sm font-bold transition-all hover:bg-red-50 dark:hover:bg-red-900/20 active:scale-95">내 데이터 초기화</button>
+          <p id="data-manage-msg" class="text-xs text-slate-500 dark:text-slate-400 px-1">샘플 데이터로 화면 테스트 후 초기화할 수 있습니다.</p>
+        </div>
+      </section>
+    </main>
+
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70] transition-colors duration-300">
+      <a id="navTodo" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">check_circle</span><span class="text-xs font-medium">할일</span></a>
+      <a id="navCalendar" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><span class="text-xs font-medium">캘린더</span></a>
+      <a id="navTeam" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><span class="text-xs font-medium">팀</span></a>
+      <a id="navGoal" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><span class="text-xs font-medium">목표</span></a>
+      <a id="navSettings" class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">settings</span><span class="text-xs font-bold">설정</span></a>
+    </nav>
+  </div>
+
+  <script>
+    const MALE_COUNT = 10;
+    const FEMALE_COUNT = 10;
+
+    function avatarUrl(profile) {
+      if (profile && profile.photoUrl) return profile.photoUrl;
+      const type = (profile && profile.avatarType) === 'male' ? 'man' : 'girl';
+      const max = type === 'man' ? MALE_COUNT : FEMALE_COUNT;
+      const idx = Math.max(1, Math.min(max, (parseInt(profile && profile.avatarIndex, 10) || 0) + 1));
+      return 'avatarimage/' + type + '/' + type + '_' + String(idx).padStart(2, '0') + '.png';
+    }
+
+    function renderProfile(profile) {
+      if (!profile) return;
+      const nameEl = document.getElementById('profile-name');
+      const emailEl = document.getElementById('profile-email');
+      const avatarEl = document.getElementById('profile-avatar');
+      const badgeEl = document.getElementById('profile-primary-badge');
+
+      nameEl.textContent = profile.name || localStorage.getItem('currentProfileName') || '프로필';
+      const email = profile.email || profile.ownerEmail || localStorage.getItem('currentUserEmail') || '';
+      emailEl.textContent = email || '현재 선택된 프로필';
+      avatarEl.src = avatarUrl(profile);
+      badgeEl.style.display = profile.isMyAccount === false ? 'none' : 'inline-flex';
+    }
+
+    function setTheme(color, lightColor, btn, persist) {
+      document.documentElement.style.setProperty('--primary-color', color);
+      document.documentElement.style.setProperty('--primary-light', lightColor);
+      document.querySelectorAll('.theme-btn').forEach((b) => {
+        b.classList.remove('active');
+        const icon = b.querySelector('.material-symbols-outlined');
+        if (icon) icon.classList.add('hidden');
+      });
+      btn.classList.add('active');
+      const icon = btn.querySelector('.material-symbols-outlined');
+      if (icon) icon.classList.remove('hidden');
+      if (persist !== false) {
+        localStorage.setItem('themeColor', color);
+        localStorage.setItem('themeLight', lightColor);
+        if (window.TeamTodo && typeof TeamTodo.applyTheme === 'function') TeamTodo.applyTheme(color);
+      }
+    }
+
+    function toggleDarkMode(isDark, persist) {
+      document.documentElement.classList.toggle('dark', !!isDark);
+      if (persist !== false) localStorage.setItem('darkMode', String(!!isDark));
+    }
+
+    function buildLocalSample() {
+      const baseId = Date.now();
+      let pid = '';
+      try {
+        const cachedMy = JSON.parse(localStorage.getItem('profileSelectCacheMy') || '[]');
+        if (Array.isArray(cachedMy) && cachedMy.length > 0) pid = String(cachedMy[0].id || '');
+      } catch (_) {}
+      if (!pid || localStorage.getItem('isViewingFriendTodo') === 'true') {
+        pid = 'local-me-' + baseId;
+      }
+      const pname = localStorage.getItem('currentProfileName') || '샘플 프로필';
+      const fid = 'local-friend-' + baseId;
+      const today = new Date();
+      const dateKey = `${today.getFullYear()}-${String(today.getMonth() + 1).padStart(2, '0')}-${String(today.getDate()).padStart(2, '0')}`;
+      const profiles = [
+        { id: pid, name: pname, avatarType: 'female', avatarIndex: 0, isMyAccount: true, photoUrl: '' },
+        { id: fid, name: '민수', avatarType: 'male', avatarIndex: 1, isMyAccount: false, photoUrl: '' }
+      ];
+      const todos = [
+        { id: 'l1', profileId: pid, title: '아침 명상', startDate: dateKey, endDate: dateKey, startTime: '09:00', endTime: '09:20', points: 30, isCompleted: false, parentTodoId: '' },
+        { id: 'l2', profileId: pid, title: '스트레칭', startDate: dateKey, endDate: dateKey, startTime: '14:00', endTime: '14:20', points: 40, isCompleted: false, parentTodoId: '' },
+        { id: 'l3', profileId: pid, title: '물 2L 마시기', startDate: dateKey, endDate: dateKey, startTime: '10:00', endTime: '21:00', points: 40, isCompleted: false, parentTodoId: '' },
+        { id: 'l31', profileId: pid, title: '500ml 마시기 (1)', startDate: dateKey, endDate: dateKey, startTime: '', endTime: '', points: 20, isCompleted: false, parentTodoId: 'l3' },
+        { id: 'l32', profileId: pid, title: '500ml 마시기 (2)', startDate: dateKey, endDate: dateKey, startTime: '', endTime: '', points: 20, isCompleted: false, parentTodoId: 'l3' },
+        { id: 'f1', profileId: fid, title: '친구 할일 샘플', startDate: dateKey, endDate: dateKey, startTime: '11:00', endTime: '12:00', points: 25, isCompleted: false, parentTodoId: '' }
+      ];
+      localStorage.setItem('localSampleMode', 'true');
+      localStorage.setItem('localSampleProfiles', JSON.stringify(profiles));
+      localStorage.setItem('localSampleTodos', JSON.stringify(todos));
+      localStorage.setItem('localSampleGoals', JSON.stringify([]));
+      localStorage.setItem('localSampleTeams', JSON.stringify([{ id: 't1', name: '팀투두 샘플팀', members: [pid, fid], isJoined: true }]));
+      localStorage.setItem('localSamplePrimaryProfileId', pid);
+      localStorage.setItem('currentProfileId', pid);
+      localStorage.setItem('currentProfileName', pname);
+      localStorage.setItem('isViewingFriendTodo', 'false');
+      localStorage.setItem('todoSelectedDate', dateKey);
+      localStorage.removeItem('profileSelectCacheMy');
+      localStorage.removeItem('profileSelectCacheTeam');
+      localStorage.removeItem('profileSelectCacheAt');
+    }
+
+    document.addEventListener('DOMContentLoaded', function () {
+      const nav = (id, screen) => {
+        const el = document.getElementById(id);
+        if (!el) return;
+        el.addEventListener('click', function (e) {
+          e.preventDefault();
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate(screen);
+        });
+      };
+      nav('navTodo','todo_main');
+      nav('navCalendar','calendar');
+      nav('navTeam','team_list');
+      nav('navGoal','goal_list');
+      nav('navSettings','settings');
+
+      document.getElementById('btnBack').addEventListener('click', function(){ if(window.TeamTodo) TeamTodo.navigate('todo_main'); });
+      document.getElementById('profile-select-btn').addEventListener('click', function(){ if(window.TeamTodo) TeamTodo.navigate('profile_select'); });
+      document.getElementById('profile-manage-btn').addEventListener('click', function(){ if(window.TeamTodo) TeamTodo.navigate('profile_manage'); });
+
+      const seedProfile = {
+        id: localStorage.getItem('currentProfileId') || '',
+        name: localStorage.getItem('currentProfileName') || '프로필',
+        avatarType: localStorage.getItem('editingAvatarType') || 'female',
+        avatarIndex: parseInt(localStorage.getItem('editingAvatarIndex') || '0', 10) || 0,
+        photoUrl: localStorage.getItem('editingPhotoUrl') || '',
+        isMyAccount: true
+      };
+      renderProfile(seedProfile);
+
+      const darkToggle = document.getElementById('darkModeToggle');
+      const darkOn = localStorage.getItem('darkMode') === 'true';
+      darkToggle.checked = darkOn;
+      toggleDarkMode(darkOn, false);
+      darkToggle.addEventListener('change', function(){ toggleDarkMode(this.checked, true); });
+
+      const allThemeButtons = Array.from(document.querySelectorAll('.theme-btn'));
+      const savedColor = localStorage.getItem('themeColor') || '#eb4770';
+      const selectedBtn = allThemeButtons.find((b) => b.dataset.color === savedColor) || allThemeButtons[0];
+      if (selectedBtn) setTheme(selectedBtn.dataset.color, selectedBtn.dataset.light, selectedBtn, false);
+      allThemeButtons.forEach((btn) => btn.addEventListener('click', function(){ setTheme(btn.dataset.color, btn.dataset.light, btn, true); }));
+
+      const msgEl = document.getElementById('data-manage-msg');
+      document.getElementById('seed-sample-btn').addEventListener('click', function () {
+        if (msgEl) msgEl.textContent = '샘플 데이터를 생성 중입니다...';
+        buildLocalSample();
+        if (window.TeamTodo && typeof TeamTodo.call === 'function') {
+          TeamTodo.call('seedSampleData', {});
+        } else if (window.TeamTodo && typeof TeamTodo.seedSampleData === 'function') {
+          TeamTodo.seedSampleData();
+        }
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          setTimeout(function () { TeamTodo.navigate('todo_main'); }, 120);
+        }
+      });
+      document.getElementById('reset-data-btn').addEventListener('click', function () {
+        localStorage.removeItem('localSampleMode');
+        localStorage.removeItem('localSampleProfiles');
+        localStorage.removeItem('localSampleTodos');
+        localStorage.removeItem('localSampleGoals');
+        localStorage.removeItem('localSampleTeams');
+        localStorage.removeItem('localSamplePrimaryProfileId');
+        if (window.TeamTodo && typeof TeamTodo.resetMyData === 'function') TeamTodo.resetMyData();
+        if (msgEl) msgEl.textContent = '데이터 초기화 완료.';
+      });
+
+      const prevOnNativeEvent = window.onNativeEvent;
+      window.onNativeEvent = function (event, data) {
+        if (typeof prevOnNativeEvent === 'function') { try { prevOnNativeEvent(event, data); } catch (_) {} }
+        if (event === 'onSampleSeeded') {
+          if (msgEl) msgEl.textContent = '샘플 데이터 생성 완료.';
+        }
+        if (event === 'onError') {
+          if (msgEl) msgEl.textContent = '샘플 데이터 생성 중 오류가 발생했습니다.';
+        }
+        if ((event === 'onMyProfiles' || event === 'onProfiles' || event === 'onProfilesForSelection') && Array.isArray(data) && data.length) {
+          const currentId = localStorage.getItem('currentProfileId') || '';
+          const profile = data.find((p)=>String(p.id||'')===currentId) || data[0];
+          renderProfile(profile);
+        }
+        if (event === 'onCurrentUser' && data && data.email) {
+          localStorage.setItem('currentUserEmail', String(data.email));
+          const emailEl = document.getElementById('profile-email');
+          if (emailEl && (!emailEl.textContent || emailEl.textContent === '현재 선택된 프로필')) emailEl.textContent = String(data.email);
+        }
+      };
+
+      if (window.TeamTodo && typeof TeamTodo.call === 'function') {
+        TeamTodo.call('getProfilesForSelection', {});
+        TeamTodo.call('getCurrentUser', {});
+      }
+    });
+  </script>
+</body>
+</html>

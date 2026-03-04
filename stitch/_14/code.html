@@ -1,0 +1,579 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>목표 추가/수정</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "primary-light": "#fdecee",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "sans": ["Plus Jakarta Sans", "sans-serif"],
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: max(884px, 100dvh);
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased; 
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;color: inherit; 
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .toggle-checkbox:checked {
+            right: 0;
+            border-color: #eb4770;
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #eb4770;
+        }
+        .period-radio:checked + div {
+            background-color: #eb4770;
+            color: white;
+            border-color: #eb4770;
+        }
+        .style-radio:checked + div {
+            border-color: #eb4770;
+            background-color: #fdecee;
+            color: #eb4770;
+        }
+        .style-radio:checked + div .check-icon {
+            opacity: 1;
+        }
+        .style-radio:checked + div span.material-symbols-outlined:not(.check-icon) {
+            color: #eb4770;
+        }
+        .measure-radio:checked + div {
+            border-color: #eb4770;
+            background-color: #fdecee;
+            color: #eb4770;
+        }
+        .measure-radio:checked + div span.material-symbols-outlined {
+            color: #eb4770;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden">
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-30 border-b border-primary/10">
+<button class="text-slate-500 hover:text-primary transition-colors flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">목표 추가/수정</h2>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 text-slate-400 transition-colors hover:text-primary">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto pb-40 z-10 no-scrollbar p-6 space-y-8">
+<div class="space-y-3">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300">목표 제목</label>
+<div class="relative">
+<input class="w-full rounded-2xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-800/50 p-4 pl-12 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-primary/20 transition-all outline-none" placeholder="예: 매일 30분 독서하기" type="text"/>
+<span class="material-symbols-outlined absolute left-4 top-1/2 -translate-y-1/2 text-slate-400">flag</span>
+</div>
+</div>
+<div class="space-y-3">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300">카테고리</label>
+<div class="grid grid-cols-2 gap-3">
+<label class="cursor-pointer group">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="size-10 rounded-xl bg-blue-100 text-blue-500 flex items-center justify-center">
+<span class="material-symbols-outlined">account_balance_wallet</span>
+</div>
+<span class="font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary transition-colors">재정</span>
+</div>
+</label>
+<label class="cursor-pointer group">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="size-10 rounded-xl bg-green-100 text-green-500 flex items-center justify-center">
+<span class="material-symbols-outlined">fitness_center</span>
+</div>
+<span class="font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary transition-colors">건강</span>
+</div>
+</label>
+<label class="cursor-pointer group">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="size-10 rounded-xl bg-purple-100 text-purple-500 flex items-center justify-center">
+<span class="material-symbols-outlined">work</span>
+</div>
+<span class="font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary transition-colors">커리어</span>
+</div>
+</label>
+<label class="cursor-pointer group">
+<input class="peer sr-only" name="category" type="radio"/>
+<div class="flex items-center gap-3 p-3 rounded-2xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 peer-checked:border-primary peer-checked:bg-primary/5 transition-all">
+<div class="size-10 rounded-xl bg-orange-100 text-orange-500 flex items-center justify-center">
+<span class="material-symbols-outlined">menu_book</span>
+</div>
+<span class="font-semibold text-slate-600 dark:text-slate-300 group-hover:text-primary transition-colors">학습</span>
+</div>
+</label>
+<button class="flex items-center gap-3 p-3 rounded-2xl border border-dashed border-slate-300 dark:border-slate-600 bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800 hover:border-primary/50 transition-all col-span-2 justify-center group">
+<div class="size-8 rounded-full bg-slate-200 dark:bg-slate-700 text-slate-500 group-hover:bg-primary/10 group-hover:text-primary flex items-center justify-center transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</div>
+<span class="font-semibold text-slate-500 dark:text-slate-400 group-hover:text-primary transition-colors">카테고리 추가</span>
+</button>
+</div>
+</div>
+<div class="space-y-3">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300">기간 설정</label>
+<div class="flex p-1 bg-slate-100 dark:bg-slate-800 rounded-xl">
+<label class="flex-1 cursor-pointer">
+<input checked="" class="period-radio sr-only" name="period" type="radio"/>
+<div class="w-full py-2.5 rounded-lg text-sm font-bold text-center text-slate-500 transition-all">월간</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="period-radio sr-only" name="period" type="radio"/>
+<div class="w-full py-2.5 rounded-lg text-sm font-bold text-center text-slate-500 transition-all">분기</div>
+</label>
+<label class="flex-1 cursor-pointer">
+<input class="period-radio sr-only" name="period" type="radio"/>
+<div class="w-full py-2.5 rounded-lg text-sm font-bold text-center text-slate-500 transition-all">연간</div>
+</label>
+</div>
+</div>
+<div class="p-5 bg-primary/5 rounded-2xl border border-primary/10">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="size-8 rounded-full bg-white text-primary flex items-center justify-center shadow-sm">
+<span class="material-symbols-outlined text-xl">monitoring</span>
+</div>
+<span class="font-bold text-slate-800 dark:text-slate-200">진척 관리 활성화</span>
+</div>
+<div class="relative inline-block w-12 h-7 align-middle select-none transition duration-200 ease-in">
+<input checked="" class="toggle-checkbox absolute block w-5 h-5 rounded-full bg-white border-4 appearance-none cursor-pointer top-1 left-1 transition-all duration-300" id="progress-toggle" type="checkbox"/>
+<label class="toggle-label block overflow-hidden h-7 rounded-full bg-slate-300 cursor-pointer transition-colors duration-300" for="progress-toggle"></label>
+</div>
+</div>
+<div class="mb-6 space-y-3" id="measurement-section">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">진척 관리 방법</p>
+<div class="grid grid-cols-3 gap-2">
+<label class="cursor-pointer">
+<input checked="" class="measure-radio sr-only" id="method-numeric" name="measure-method" type="radio" value="numeric"/>
+<div class="w-full py-2.5 px-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-center text-slate-500 transition-all flex flex-col items-center justify-center gap-1 h-20 hover:border-primary/50">
+<span class="material-symbols-outlined text-xl mb-1 text-slate-400">123</span>
+                                수치 입력
+                            </div>
+</label>
+<label class="cursor-pointer">
+<input class="measure-radio sr-only" id="method-subtasks" name="measure-method" type="radio" value="subtasks"/>
+<div class="w-full py-2.5 px-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-center text-slate-500 transition-all flex flex-col items-center justify-center gap-1 h-20 hover:border-primary/50">
+<span class="material-symbols-outlined text-xl mb-1 text-slate-400">checklist</span>
+                                하위 할 일
+                            </div>
+</label>
+<label class="cursor-pointer">
+<input class="measure-radio sr-only" id="method-simple" name="measure-method" type="radio" value="simple"/>
+<div class="w-full py-2.5 px-1 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-xs font-bold text-center text-slate-500 transition-all flex flex-col items-center justify-center gap-1 h-20 hover:border-primary/50">
+<span class="material-symbols-outlined text-xl mb-1 text-slate-400">check_circle</span>
+                                단순 체크
+                            </div>
+</label>
+</div>
+</div>
+<div class="mb-6 space-y-3" id="target-setting-section">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider">진척 목표 설정</p>
+<div class="bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700" id="numeric-input-view">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">목표 값</label>
+<div class="flex items-center gap-3">
+<div class="relative flex-1">
+<input class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 pl-3 pr-12 text-slate-900 dark:text-white placeholder:text-slate-400 focus:border-primary focus:ring-primary/20 transition-all outline-none text-right font-bold" placeholder="0" type="number"/>
+<span class="absolute right-4 top-1/2 -translate-y-1/2 text-slate-400 text-sm">원/회</span>
+</div>
+<div class="w-24">
+<select class="w-full rounded-xl border-slate-200 dark:border-slate-700 bg-slate-50 dark:bg-slate-900 p-3 text-slate-700 dark:text-slate-300 text-sm focus:border-primary focus:ring-primary/20 outline-none">
+<option>단위</option>
+<option>만원</option>
+<option>회</option>
+<option>kg</option>
+<option>km</option>
+<option>시간</option>
+</select>
+</div>
+</div>
+</div>
+<div class="hidden bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700" id="steps-input-view">
+<label class="block text-sm font-bold text-slate-700 dark:text-slate-300 mb-2">세부 항목 편집</label>
+<div class="space-y-2 mb-3">
+<div class="flex items-center gap-2 group">
+<div class="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">1</div>
+<input class="flex-1 bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 text-sm focus:ring-1 focus:ring-primary/50 text-slate-700 dark:text-slate-300 placeholder:text-slate-400" placeholder="첫 번째 단계 입력" value="기획 단계"/>
+<button class="text-slate-300 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="flex items-center gap-2 group">
+<div class="size-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-xs font-bold">2</div>
+<input class="flex-1 bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 text-sm focus:ring-1 focus:ring-primary/50 text-slate-700 dark:text-slate-300 placeholder:text-slate-400" placeholder="두 번째 단계 입력" value="초안 작성"/>
+<button class="text-slate-300 hover:text-red-500 transition-colors">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+<div class="flex items-center gap-2 group">
+<div class="size-6 rounded-full bg-slate-100 dark:bg-slate-700 text-slate-400 flex items-center justify-center text-xs font-bold">3</div>
+<input class="flex-1 bg-slate-50 dark:bg-slate-900 border-none rounded-lg py-2 px-3 text-sm focus:ring-1 focus:ring-primary/50 text-slate-700 dark:text-slate-300 placeholder:text-slate-400" placeholder="다음 단계 추가..."/>
+<button class="text-slate-300 hover:text-red-500 transition-colors opacity-0 pointer-events-none">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+<button class="w-full py-2 rounded-lg border border-dashed border-slate-300 dark:border-slate-600 text-slate-500 hover:text-primary hover:border-primary/50 hover:bg-primary/5 transition-all text-sm font-semibold flex items-center justify-center gap-1">
+<span class="material-symbols-outlined text-lg">add</span> 항목 추가하기
+                        </button>
+</div>
+</div>
+<div id="progress-options">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">진척 관리 UI 선택</p>
+<div class="grid grid-cols-2 gap-3 max-h-[320px] overflow-y-auto no-scrollbar pb-2">
+<label class="cursor-pointer relative">
+<input checked="" class="style-radio sr-only" name="ui-style" type="radio" value="step"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">stairs</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">징검다리</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="mountain"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">landscape</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">등산 코스</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="flower"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">local_florist</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">꽃길</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="stars"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">auto_awesome</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">별자리 잇기</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="wall"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">foundation</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">성벽 쌓기</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="train"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">train</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">기차 여행</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="leaves"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">eco</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">나뭇잎 채우기</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="puzzle"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">extension</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">퍼즐 맞추기</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="water"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">water_drop</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">물 채우기</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative">
+<input class="style-radio sr-only" name="ui-style" type="radio" value="climb"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center text-slate-400">
+<span class="material-symbols-outlined text-3xl">trending_up</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">계단 오르기</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+</div>
+</div>
+<div class="mt-6 border-t border-slate-200 dark:border-slate-700 pt-6" id="animation-options">
+<p class="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-3">완료 애니메이션 선택</p>
+<div class="grid grid-cols-2 gap-3 max-h-[300px] overflow-y-auto no-scrollbar pb-1">
+<label class="cursor-pointer relative shrink-0">
+<input checked="" class="style-radio sr-only" name="anim-style" type="radio" value="star"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-yellow-400 text-4xl">star</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">빛나는 별</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="sprout"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-green-500 text-4xl">psychiatry</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">자라나는 새싹</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="trophy"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-yellow-500 text-4xl">emoji_events</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">황금 트로피</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="fireworks"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-red-500 text-4xl">celebration</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">폭죽</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="hearts"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-pink-500 text-4xl">favorite</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">하트 뿅뿅</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="rainbow"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-indigo-500 text-4xl">looks</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">무지개</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="balloons"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-blue-400 text-4xl">toys</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">풍선 파티</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="gems"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-purple-600 text-4xl">diamond</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">보석 상자</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="levelup"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-orange-500 text-4xl">upgrade</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">레벨 업</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="medal"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-yellow-600 text-4xl">military_tech</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">메달 획득</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+<label class="cursor-pointer relative shrink-0">
+<input class="style-radio sr-only" name="anim-style" type="radio" value="tree"/>
+<div class="p-3 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 transition-all h-full hover:border-primary/30">
+<div class="h-16 bg-slate-50 dark:bg-slate-700 rounded-lg mb-2 flex items-center justify-center">
+<span class="material-symbols-outlined text-emerald-600 text-4xl">forest</span>
+</div>
+<span class="block text-sm font-bold text-center text-slate-700 dark:text-slate-300">성장하는 나무</span>
+<span class="material-symbols-outlined check-icon absolute top-2 right-2 text-primary opacity-0 transition-opacity text-lg">check_circle</span>
+</div>
+</label>
+</div>
+</div>
+</div>
+<div class="fixed bottom-[88px] left-1/2 -translate-x-1/2 w-full max-w-md px-6 pb-6 z-20 pointer-events-none">
+<button class="w-full py-4 rounded-2xl bg-primary text-white font-bold text-lg shadow-xl shadow-primary/30 hover:bg-primary/90 active:scale-95 transition-all pointer-events-auto flex items-center justify-center gap-2">
+<span class="material-symbols-outlined">save</span>
+                    저장하기
+                </button>
+</div>
+</div>
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-around items-end border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-2 pb-6 pt-2 z-[70]">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">task_alt</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">할일</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">calendar_month</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">캘린더</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">group</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">팀</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px] font-bold" style="font-variation-settings: 'FILL' 1">flag</span>
+</div>
+<p class="text-xs font-bold leading-normal tracking-[0.015em]">목표</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">설정</p>
+</a>
+</div>
+<script>
+            document.addEventListener('DOMContentLoaded', () => {
+                const toggle = document.getElementById('progress-toggle');
+                const progressOptions = document.getElementById('progress-options');
+                const measurementSection = document.getElementById('measurement-section');
+                const targetSettingSection = document.getElementById('target-setting-section');
+                const animationOptions = document.getElementById('animation-options');
+                const methodRadios = document.querySelectorAll('input[name="measure-method"]');
+                const numericInputView = document.getElementById('numeric-input-view');
+                const stepsInputView = document.getElementById('steps-input-view');
+                function updateVisibility() {
+                    if (toggle.checked) {
+                        progressOptions.classList.remove('hidden');
+                        measurementSection.classList.remove('hidden');
+                        targetSettingSection.classList.remove('hidden');
+                        animationOptions.classList.remove('hidden');
+                        // Check which measurement method is selected and show appropriate input
+                        const selectedMethod = document.querySelector('input[name="measure-method"]:checked').value;
+                        if (selectedMethod === 'numeric') {
+                            numericInputView.classList.remove('hidden');
+                            stepsInputView.classList.add('hidden');
+                        } else {
+                            numericInputView.classList.add('hidden');
+                            stepsInputView.classList.remove('hidden');
+                        }
+                    } else {
+                        progressOptions.classList.add('hidden');
+                        measurementSection.classList.add('hidden');
+                        targetSettingSection.classList.add('hidden');
+                        animationOptions.classList.add('hidden');
+                    }
+                }
+                toggle.addEventListener('change', updateVisibility);
+                // Add event listeners for radio buttons to switch input views
+                methodRadios.forEach(radio => {
+                    radio.addEventListener('change', updateVisibility);
+                });
+                // Initialize state
+                updateVisibility();
+            });
+        </script>
+</div>
+
+</body></html>

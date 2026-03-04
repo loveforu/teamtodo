@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=block" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "sans": ["Plus Jakarta Sans", "sans-serif"],
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                    animation: {
+                        'fly-heart': 'flyHeart 1s ease-in-out forwards',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'ping-once': 'ping 0.5s cubic-bezier(0, 0, 0.2, 1) 1',
+                        'particle-burst': 'particleBurst 0.6s ease-out forwards',
+                        'confetti-fall': 'confettiFall 3s linear infinite',
+                        'slide-up': 'slideUp 0.5s cubic-bezier(0.16, 1, 0.3, 1) forwards',
+                        'firework': 'firework 1.5s ease-out infinite',
+                        'sparkle': 'sparkle 2s linear infinite',
+                    },
+                    keyframes: {
+                        flyHeart: {
+                            '0%': { transform: 'translate(0, 0) scale(1)', opacity: '1' },
+                            '20%': { transform: 'translate(var(--tx-start), var(--ty-start)) scale(1.1)', opacity: '1' },
+                            '100%': { transform: 'translate(var(--tx), var(--ty)) scale(0.5)', opacity: '0' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { filter: 'drop-shadow(0 0 0px rgba(235, 71, 112, 0))' },
+                            '50%': { filter: 'drop-shadow(0 0 8px rgba(235, 71, 112, 0.8))' }
+                        },
+                        particleBurst: {
+                            '0%': { transform: 'translate(0, 0) scale(0)', opacity: '1' },
+                            '100%': { transform: 'translate(var(--px), var(--py)) scale(1)', opacity: '0' }
+                        },
+                        confettiFall: {
+                            '0%': { transform: 'translateY(-10px) rotate(0deg)', opacity: '1' },
+                            '100%': { transform: 'translateY(100vh) rotate(720deg)', opacity: '0' }
+                        },
+                        slideUp: {
+                            '0%': { transform: 'translateY(100%)', opacity: '0' },
+                            '100%': { transform: 'translateY(0)', opacity: '1' }
+                        },
+                        firework: {
+                            '0%': { transform: 'translate(var(--x), var(--initialY))', width: 'var(--initialSize)', opacity: '1' },
+                            '50%': { width: '0.5rem', opacity: '1' },
+                            '100%': { width: 'var(--finalSize)', opacity: '0' }
+                        },
+                        sparkle: {
+                            '0%': { transform: 'scale(0) rotate(0deg)', opacity: '0' },
+                            '50%': { transform: 'scale(1) rotate(180deg)', opacity: '1' },
+                            '100%': { transform: 'scale(0) rotate(360deg)', opacity: '0' }
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: max(884px, 100dvh);}
+        .material-symbols-outlined {
+            font-display: block;overflow: hidden; 
+            white-space: nowrap;}
+        .custom-checkbox:checked {
+            background-image: url("data:image/svg+xml,%3csvg viewBox='0 0 16 16' fill='white' xmlns='http://www.w3.org/2000/svg'%3e%3cpath d='M12.207 4.793a1 1 0 010 1.414l-5 5a1 1 0 01-1.414 0l-2-2a1 1 0 011.414-1.414L6.5 9.086l4.293-4.293a1 1 0 011.414 0z'/%3e%3c/svg%3e");
+            background-color: #eb4770;
+            border-color: #eb4770;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 10px;
+            height: 10px;
+            background-color: #ffd1dc;
+            top: -20px;
+            opacity: 0;
+            z-index: 50;
+        }
+        .confetti-piece:nth-child(odd) { background-color: #eb4770; }
+        .confetti-piece:nth-child(even) { background-color: #fbbf24; }
+        .confetti-piece:nth-child(3n) { background-color: #f472b6; }
+        .confetti-piece:nth-child(4n) { background-color: #ffffff; }
+        #celebration-overlay {
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.5s ease;
+        }
+        #celebration-overlay.show {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        #bottom-sheet-container {
+            transform: translateY(100%);
+            transition: transform 0.4s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        #bottom-sheet-container.show {
+            transform: translateY(0);
+        }
+        .task-checked .task-text-main {
+            text-decoration: line-through;
+            text-decoration-color: rgba(235, 71, 112, 0.5);
+            text-decoration-thickness: 2px;
+            color: #64748b;
+        }
+        .task-checked .task-text-sub {
+            text-decoration: line-through;
+            color: #94a3b8;
+        }
+        .fly-heart-element {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            color: #eb4770;
+            font-size: 24px;
+        }
+        .firework-particle {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            animation: firework-burst 1s ease-out forwards;
+        }
+        @keyframes firework-burst {
+            0% { transform: translate(-50%, -50%) scale(1); opacity: 1; }
+            100% { transform: translate(var(--tx), var(--ty)) scale(0); opacity: 0; }
+        }
+        .star-shape {
+            clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden">
+<div class="sticky top-0 z-30 bg-white dark:bg-background-dark shadow-sm">
+<div class="flex items-center p-4 pb-2 justify-between border-b border-primary/10">
+<div class="text-primary flex size-12 shrink-0 items-center justify-center">
+<span class="material-symbols-outlined text-3xl">event_available</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center">오늘의 할 일</h2>
+<div class="flex w-12 items-center justify-end">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-primary/10 text-primary transition-colors hover:bg-primary/20">
+<span class="material-symbols-outlined">notifications</span>
+</button>
+</div>
+</div>
+<div class="px-4 pb-2 bg-white dark:bg-background-dark">
+<div class="flex flex-col gap-3 p-5 mt-2 bg-primary/5 rounded-xl border border-primary/10 relative overflow-hidden">
+<div class="flex gap-6 justify-between items-end relative z-10">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">Daily Progress</p>
+<div class="flex items-center gap-1.5 mt-0.5 relative">
+<div class="relative" id="target-heart-container">
+<span class="material-symbols-outlined text-primary text-xl transition-all duration-300" id="header-heart" style="font-variation-settings: 'FILL' 0">favorite</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold">오늘의 포인트</p>
+</div>
+</div>
+<p class="text-sm font-bold leading-normal text-[#d13a5e] transition-all duration-300" id="points-text">0 / 200 p</p>
+</div>
+<div class="relative h-3 w-full rounded-full bg-primary/20 overflow-hidden">
+<div class="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-500 ease-out" id="progress-fill" style="width: 0%;"></div>
+</div>
+<div class="flex justify-between items-center mt-1">
+<p class="text-primary text-sm font-semibold flex items-center gap-1" id="growth-text">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                        시작이 반이에요!
+                    </p>
+<p class="text-slate-400 text-xs italic" id="points-remaining">목표 달성까지 200p</p>
+</div>
+</div>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar z-10 pb-24">
+<div class="mx-4 mt-4">
+<div class="flex justify-between items-center mb-3 px-1">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-bold">진행 중인 목표</h3>
+<button class="text-xs text-primary font-medium hover:text-primary/80 transition-colors flex items-center gap-0.5">
+                    전체보기 <span class="material-symbols-outlined text-sm">chevron_right</span>
+</button>
+</div>
+<div class="flex gap-3 overflow-x-auto pb-4 -mx-4 px-4 no-scrollbar snap-x snap-mandatory">
+<div class="snap-center flex-shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 shadow-sm relative overflow-hidden group transition-transform hover:scale-[1.02]">
+<div class="absolute top-0 left-0 w-1 h-full bg-blue-400"></div>
+<div class="flex items-start justify-between mb-2 pl-2">
+<span class="text-[10px] font-bold text-blue-500 bg-blue-50 dark:bg-blue-900/30 px-2 py-0.5 rounded-full">건강</span>
+<span class="material-symbols-outlined text-slate-300 text-base">fitness_center</span>
+</div>
+<div class="pl-2">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 truncate">바디프로필 촬영</p>
+<div class="flex items-center gap-2 mb-1">
+<div class="h-1.5 flex-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-blue-400 w-[65%] rounded-full"></div>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">65%</span>
+</div>
+</div>
+</div>
+<div class="snap-center flex-shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 shadow-sm relative overflow-hidden group transition-transform hover:scale-[1.02]">
+<div class="absolute top-0 left-0 w-1 h-full bg-purple-400"></div>
+<div class="flex items-start justify-between mb-2 pl-2">
+<span class="text-[10px] font-bold text-purple-500 bg-purple-50 dark:bg-purple-900/30 px-2 py-0.5 rounded-full">자격증</span>
+<span class="material-symbols-outlined text-slate-300 text-base">school</span>
+</div>
+<div class="pl-2">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 truncate">정보처리기사</p>
+<div class="flex items-center gap-2 mb-1">
+<div class="h-1.5 flex-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-purple-400 w-[30%] rounded-full"></div>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">30%</span>
+</div>
+</div>
+</div>
+<div class="snap-center flex-shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 shadow-sm relative overflow-hidden group transition-transform hover:scale-[1.02]">
+<div class="absolute top-0 left-0 w-1 h-full bg-green-400"></div>
+<div class="flex items-start justify-between mb-2 pl-2">
+<span class="text-[10px] font-bold text-green-500 bg-green-50 dark:bg-green-900/30 px-2 py-0.5 rounded-full">어학</span>
+<span class="material-symbols-outlined text-slate-300 text-base">translate</span>
+</div>
+<div class="pl-2">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 truncate">TOEIC 900점</p>
+<div class="flex items-center gap-2 mb-1">
+<div class="h-1.5 flex-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-green-400 w-[15%] rounded-full"></div>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">15%</span>
+</div>
+</div>
+</div>
+<div class="snap-center flex-shrink-0 w-44 bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 rounded-xl p-3 shadow-sm relative overflow-hidden group transition-transform hover:scale-[1.02]">
+<div class="absolute top-0 left-0 w-1 h-full bg-orange-400"></div>
+<div class="flex items-start justify-between mb-2 pl-2">
+<span class="text-[10px] font-bold text-orange-500 bg-orange-50 dark:bg-orange-900/30 px-2 py-0.5 rounded-full">재테크</span>
+<span class="material-symbols-outlined text-slate-300 text-base">savings</span>
+</div>
+<div class="pl-2">
+<p class="text-sm font-bold text-slate-800 dark:text-slate-100 mb-1 truncate">1억 모으기</p>
+<div class="flex items-center gap-2 mb-1">
+<div class="h-1.5 flex-1 bg-slate-100 dark:bg-slate-700 rounded-full overflow-hidden">
+<div class="h-full bg-orange-400 w-[10%] rounded-full"></div>
+</div>
+<span class="text-[10px] text-slate-400 font-medium">10%</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mx-4 mt-2 p-4 bg-primary/[0.08] rounded-xl border border-primary/20 flex items-start gap-3">
+<div class="text-primary shrink-0">
+<span class="material-symbols-outlined text-xl">format_quote</span>
+</div>
+<div class="flex-1">
+<p class="dark:text-slate-300 text-sm font-medium leading-relaxed text-slate-800">
+                    오늘의 명언: 어제보다 나은 오늘을 위해!
+                </p>
+</div>
+</div>
+<div class="px-4 mb-4 mt-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight pb-4 pt-2">할 일 목록</h3>
+<div class="flex flex-col gap-3" id="task-list">
+<div class="relative flex items-center gap-4 bg-primary/[0.04] dark:bg-slate-800/60 border-primary/30 p-4 rounded-xl border shadow-sm transition-all duration-300 task-card" data-points="30" data-task-id="1">
+<div class="flex size-7 items-center justify-center shrink-0 relative">
+<input class="custom-checkbox h-6 w-6 rounded-full border-primary border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer task-checkbox" type="checkbox"/>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold transition-all duration-300 text-slate-700 task-text-main">오전 9:00 - 아침 명상</p>
+<p class="text-sm transition-all duration-300 text-slate-500 task-text-sub">10분간 호흡에 집중하기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary transition-colors cheer-btn" data-likes="5" data-task-name="아침 명상">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold">5</span>
+</button>
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+30 p</span>
+</div>
+</div>
+<div class="relative flex items-center gap-4 bg-primary/[0.04] dark:bg-slate-800/60 border-primary/30 p-4 rounded-xl border shadow-sm transition-all duration-300 task-card" data-points="40" data-task-id="2">
+<div class="flex size-7 items-center justify-center shrink-0">
+<input class="custom-checkbox h-6 w-6 rounded-full border-primary border-2 bg-transparent text-primary checked:bg-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer task-checkbox" type="checkbox"/>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold transition-all duration-300 text-slate-700 task-text-main">오전 10:30 - 영양제 복용</p>
+<p class="text-sm transition-all duration-300 text-slate-500 task-text-sub">멀티비타민 및 유산균</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary transition-colors cheer-btn" data-likes="2" data-task-name="영양제 복용">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold">2</span>
+</button>
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+40 p</span>
+</div>
+</div>
+<div class="relative flex items-center gap-4 bg-primary/[0.04] dark:bg-slate-800/60 border-primary/30 p-4 rounded-xl border shadow-sm transition-all duration-300 task-card" data-points="40" data-task-id="3">
+<div class="flex size-7 items-center justify-center shrink-0">
+<input class="custom-checkbox h-6 w-6 rounded-full border-primary border-2 bg-transparent text-primary checked:bg-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer task-checkbox" type="checkbox"/>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold transition-all duration-300 text-slate-700 task-text-main">오후 2:00 - 스트레칭</p>
+<p class="text-sm transition-all duration-300 text-slate-500 task-text-sub">목과 어깨 긴장 풀기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary transition-colors cheer-btn" data-likes="12" data-task-name="스트레칭">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold">12</span>
+</button>
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+40 p</span>
+</div>
+</div>
+<div class="flex flex-col bg-primary/[0.04] dark:bg-slate-800/60 border-primary/30 rounded-xl border shadow-sm transition-all duration-300 overflow-hidden parent-card" data-points="40" data-task-id="4">
+<div class="flex items-center gap-4 p-4 pb-2">
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold text-slate-700">물 2L 마시기</p>
+<p class="text-sm text-slate-500">수분 충전으로 건강 챙기기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary transition-colors cheer-btn" data-likes="8" data-task-name="물 2L 마시기">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold">8</span>
+</button>
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+40 p</span>
+</div>
+</div>
+<div class="flex flex-col gap-0 border-t border-primary/10 bg-white/40 dark:bg-black/20">
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-primary/5 hover:bg-primary/5 transition-colors sub-task-row" data-points="10">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">500ml (1회차)</span>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-primary/5 hover:bg-primary/5 transition-colors sub-task-row" data-points="10">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">500ml (2회차)</span>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-primary/5 hover:bg-primary/5 transition-colors sub-task-row" data-points="10">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">500ml (3회차)</span>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 hover:bg-primary/5 transition-colors sub-task-row" data-points="10">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">500ml (4회차)</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-primary/[0.04] dark:bg-slate-800/60 border-primary/30 rounded-xl border shadow-sm transition-all duration-300 overflow-hidden parent-card" data-points="50" data-task-id="5">
+<div class="flex items-center gap-4 p-4 pb-2">
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold text-slate-700">독서 30분</p>
+<p class="text-sm text-slate-500">성장하는 습관 만들기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="flex items-center gap-1 text-slate-400 hover:text-primary transition-colors cheer-btn" data-likes="3" data-task-name="독서 30분">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold">3</span>
+</button>
+<span class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-bold text-primary">+50 p</span>
+</div>
+</div>
+<div class="flex flex-col gap-0 border-t border-primary/10 bg-white/40 dark:bg-black/20">
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-primary/5 hover:bg-primary/5 transition-colors sub-task-row" data-points="17">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">10분 읽기</span>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-primary/5 hover:bg-primary/5 transition-colors sub-task-row" data-points="17">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">10분 읽기</span>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 hover:bg-primary/5 transition-colors sub-task-row" data-points="16">
+<input class="custom-checkbox h-5 w-5 rounded-full border-primary/50 border-2 bg-transparent text-primary focus:ring-0 focus:ring-offset-0 focus:outline-none transition-all cursor-pointer sub-task-checkbox" type="checkbox"/>
+<span class="text-sm text-slate-600 dark:text-slate-400">10분 읽기</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 z-50 bg-black/80 flex items-center justify-center pointer-events-none" id="celebration-overlay">
+<div class="absolute inset-0 pointer-events-none" id="fireworks-container"></div>
+<div class="absolute inset-0 overflow-hidden pointer-events-none" id="confetti-container"></div>
+<div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-full text-center transform scale-100 transition-transform duration-500 animate-pulse-glow z-10 px-4">
+<h2 class="text-4xl font-bold text-white mb-4 drop-shadow-xl" style="text-shadow: 0 0 20px rgba(235,71,112,0.8);">축하합니다!</h2>
+<p class="text-white/90 text-xl font-medium drop-shadow-md">오늘의 모든 목표를 달성했어요!</p>
+<div class="mt-8 flex justify-center relative">
+<span class="material-symbols-outlined text-yellow-300 text-7xl animate-bounce drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]">emoji_events</span>
+<span class="material-symbols-outlined text-white absolute -top-4 -right-4 text-2xl animate-spin">spark</span>
+<span class="material-symbols-outlined text-pink-300 absolute bottom-0 -left-6 text-xl animate-pulse">star</span>
+</div>
+</div>
+</div>
+<div class="fixed inset-0 z-[60] flex items-end justify-center pointer-events-none">
+<div class="absolute inset-0 bg-black/40 opacity-0 pointer-events-none transition-opacity duration-300" id="bottom-sheet-backdrop"></div>
+<div class="w-full max-w-md pointer-events-auto h-[80vh] flex flex-col" id="bottom-sheet-container">
+<div class="bg-white dark:bg-slate-900 rounded-t-3xl shadow-[0_-8px_30px_rgba(0,0,0,0.12)] border-t border-white/20 relative flex flex-col h-full">
+<div class="flex-none p-6 pb-2">
+<div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-6"></div>
+<div class="flex justify-between items-center mb-2">
+<div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-white" id="sheet-title">응원해준 친구들</h3>
+<p class="text-sm text-slate-500 mt-1" id="sheet-subtitle">이 할 일을 0명이 좋아합니다</p>
+</div>
+<button class="text-slate-400 hover:text-slate-600 dark:hover:text-slate-200 p-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800" id="close-sheet">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto p-6 pt-2 space-y-4" id="sheet-content"></div>
+<div class="flex-none p-6 pt-4 border-t border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 pb-10">
+<div class="flex gap-2 text-slate-400 text-xs items-center justify-center">
+<span class="material-symbols-outlined text-sm">info</span>
+<p>친구들의 응원은 큰 힘이 됩니다.</p>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 rounded-xl text-primary cursor-pointer transition-colors" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1">check_circle</span>
+</div>
+<p class="text-xs font-bold leading-normal tracking-[0.015em]">할일</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">calendar_month</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">캘린더</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">groups</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">팀</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">flag</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">목표</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">설정</p>
+</a>
+</div>
+</div>
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const taskCheckboxes = document.querySelectorAll('.task-checkbox');
+        const subTaskCheckboxes = document.querySelectorAll('.sub-task-checkbox');
+        const cheerButtons = document.querySelectorAll('.cheer-btn');
+        const totalPointsEl = document.getElementById('points-text');
+        const progressFill = document.getElementById('progress-fill');
+        const pointsRemaining = document.getElementById('points-remaining');
+        const growthText = document.getElementById('growth-text');
+        const headerHeart = document.getElementById('header-heart');
+        const celebrationOverlay = document.getElementById('celebration-overlay');
+        const bottomSheet = document.getElementById('bottom-sheet-container');
+        const bottomSheetBackdrop = document.getElementById('bottom-sheet-backdrop');
+        const closeSheetBtn = document.getElementById('close-sheet');
+        const sheetTitle = document.getElementById('sheet-title');
+        const sheetSubtitle = document.getElementById('sheet-subtitle');
+        const sheetContent = document.getElementById('sheet-content');
+        const fireworksContainer = document.getElementById('fireworks-container');
+        const MAX_POINTS = 200;
+        let currentPoints = 0;
+        let confettiInterval;
+        let fireworkInterval;
+        // Friend data generator
+        const names = ['민수', '영희', '지민', '철수', '혜원', '동엽', '수진', '정국', '지수', '나연', '재석', '호동', '유진', '성민', '가을'];
+        const messages = ['오늘도 화이팅이야!', '멋지다! 끝까지 힘내!', '벌써 다 했어? 대단해!', '너의 꾸준함을 응원해!', '최고야!', '좋은 습관 응원해', '오늘 하루도 수고했어'];
+        const colors = ['bg-blue-100 text-blue-500', 'bg-yellow-100 text-yellow-600', 'bg-green-100 text-green-600', 'bg-purple-100 text-purple-600', 'bg-pink-100 text-pink-600', 'bg-orange-100 text-orange-600'];
+        const icons = ['face', 'face_3', 'face_6', 'sentiment_satisfied', 'mood', 'emoji_emotions'];
+        function generateFriendsList(count) {
+            let html = '';
+            for (let i = 0; i < count; i++) {
+                const name = names[i % names.length];
+                const msg = messages[i % messages.length];
+                const colorClass = colors[i % colors.length];
+                const icon = icons[i % icons.length];
+                const points = [5, 10, 15][Math.floor(Math.random() * 3)];
+                html += `
+                <div class="flex items-center gap-4 p-3 rounded-2xl hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors animate-slide-up" style="animation-delay: ${i * 0.05}s; opacity: 0; animation-fill-mode: forwards;">
+                    <div class="size-12 rounded-full ${colorClass} flex items-center justify-center font-bold text-lg shrink-0">
+                        <span class="material-symbols-outlined text-2xl">${icon}</span>
+                    </div>
+                    <div class="flex-1">
+                        <p class="font-bold text-slate-900 dark:text-white">${name}</p>
+                        <p class="text-xs text-slate-500">${msg}</p>
+                    </div>
+                    <div class="flex items-center gap-1 bg-primary/10 px-3 py-1.5 rounded-full">
+                        <span class="material-symbols-outlined text-primary text-sm" style="font-variation-settings: 'FILL' 1">favorite</span>
+                        <span class="text-primary text-xs font-bold">+${points} p</span>
+                    </div>
+                </div>`;
+            }
+            return html;
+        }
+        function calculatePoints() {
+            let points = 0;
+            taskCheckboxes.forEach(checkbox => {
+                const card = checkbox.closest('.task-card');
+                if (checkbox.checked) {
+                    points += parseInt(card.dataset.points || 0);
+                    card.classList.add('task-checked');
+                    card.querySelector('.task-text-main').classList.add('line-through', 'text-slate-400', 'decoration-primary/50');
+                    card.querySelector('.task-text-main').classList.remove('text-slate-700');
+                } else {
+                    card.classList.remove('task-checked');
+                    card.querySelector('.task-text-main').classList.remove('line-through', 'text-slate-400', 'decoration-primary/50');
+                    card.querySelector('.task-text-main').classList.add('text-slate-700');
+                }
+            });
+            subTaskCheckboxes.forEach(checkbox => {
+                const row = checkbox.closest('.sub-task-row');
+                const textSpan = row.querySelector('span');
+                if (checkbox.checked) {
+                    points += parseInt(row.dataset.points || 0);
+                    textSpan.classList.add('line-through', 'text-slate-400');
+                    textSpan.classList.remove('text-slate-600', 'dark:text-slate-400');
+                } else {
+                    textSpan.classList.remove('line-through', 'text-slate-400');
+                    textSpan.classList.add('text-slate-600', 'dark:text-slate-400');
+                }
+            });
+            return points;
+        }
+        function updateUI(newPoints) {
+            const displayPoints = Math.min(newPoints, MAX_POINTS);
+            totalPointsEl.textContent = `${displayPoints} / ${MAX_POINTS} p`;
+            const percentage = (displayPoints / MAX_POINTS) * 100;
+            progressFill.style.width = `${percentage}%`;
+            if (displayPoints >= MAX_POINTS) {
+                pointsRemaining.textContent = "오늘의 목표 달성 완료!";
+                growthText.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span> +15% 성장 중`;
+                headerHeart.style.fontVariationSettings = "'FILL' 1";
+                triggerCelebration();
+            } else {
+                pointsRemaining.textContent = `목표 달성까지 ${MAX_POINTS - displayPoints}p`;
+                growthText.innerHTML = `<span class="material-symbols-outlined text-sm">trending_up</span> 시작이 반이에요!`;
+            }
+        }
+        function animateFlyingHeart(startX, startY) {
+            const heart = document.createElement('span');
+            heart.classList.add('material-symbols-outlined', 'fly-heart-element');
+            heart.textContent = 'favorite';
+            heart.style.fontVariationSettings = "'FILL' 1";
+            document.body.appendChild(heart);
+            const headerRect = headerHeart.getBoundingClientRect();
+            const targetX = headerRect.left + headerRect.width / 2;
+            const targetY = headerRect.top + headerRect.height / 2;
+            heart.style.left = `${startX}px`;
+            heart.style.top = `${startY}px`;
+            heart.style.transform = 'translate(-50%, -50%) scale(0.5)';
+            heart.style.opacity = '0';
+            const duration = 1000;
+            const startTime = performance.now();
+            function animate(currentTime) {
+                const elapsed = currentTime - startTime;
+                const progress = Math.min(elapsed / duration, 1);
+                const ease = 1 - Math.pow(1 - progress, 3);
+                const currentX = startX + (targetX - startX) * ease;
+                const currentY = startY + (targetY - startY) * ease;
+                const loops = 2; 
+                const angle = progress * Math.PI * 2 * loops;
+                const maxAmp = 60;
+                const amplitude = maxAmp * Math.sin(progress * Math.PI); 
+                const spiralX = Math.cos(angle) * amplitude * (1-ease);
+                const spiralY = Math.sin(angle) * amplitude * (1-ease);
+                heart.style.left = `${currentX + spiralX}px`;
+                heart.style.top = `${currentY + spiralY}px`;
+                heart.style.transform = `translate(-50%, -50%) scale(${1 + ease * 0.5}) rotate(${progress * 360}deg)`;
+                heart.style.opacity = progress < 0.1 ? progress * 10 : (progress > 0.9 ? (1-progress)*10 : 1);
+                if (progress < 1) {
+                    requestAnimationFrame(animate);
+                } else {
+                    heart.remove();
+                    headerHeart.style.fontVariationSettings = "'FILL' 1";
+                    headerHeart.animate([
+                        { transform: 'scale(1)', filter: 'drop-shadow(0 0 0 rgba(235, 71, 112, 0))' },
+                        { transform: 'scale(1.4)', filter: 'drop-shadow(0 0 10px rgba(235, 71, 112, 0.6))', offset: 0.5 },
+                        { transform: 'scale(1)', filter: 'drop-shadow(0 0 0 rgba(235, 71, 112, 0))' }
+                    ], {
+                        duration: 400,
+                        easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                    });
+                    if (currentPoints < MAX_POINTS) {
+                        setTimeout(() => {
+                            headerHeart.style.fontVariationSettings = "'FILL' 0";
+                        }, 600);
+                    }
+                }
+            }
+            requestAnimationFrame(animate);
+        }
+        function handleCheck(e) {
+            const checkbox = e.target;
+            const rect = checkbox.getBoundingClientRect();
+            const startX = rect.left + rect.width / 2;
+            const startY = rect.top + rect.height / 2;
+            const newPoints = calculatePoints();
+            if (checkbox.checked && newPoints > currentPoints) {
+                animateFlyingHeart(startX, startY);
+            }
+            currentPoints = newPoints;
+            updateUI(currentPoints);
+        }
+        function createFirework(x, y) {
+            const colors = ['#eb4770', '#ffd1dc', '#f472b6', '#fbbf24', '#ffffff'];
+            const particleCount = 30; 
+            for (let i = 0; i < particleCount; i++) {
+                const particle = document.createElement('div');
+                particle.classList.add('firework-particle');
+                particle.style.backgroundColor = colors[Math.floor(Math.random() * colors.length)];
+                const angle = Math.random() * Math.PI * 2;
+                const velocity = 50 + Math.random() * 100;
+                const tx = Math.cos(angle) * velocity;
+                const ty = Math.sin(angle) * velocity;
+                particle.style.left = x + 'px';
+                particle.style.top = y + 'px';
+                particle.style.setProperty('--tx', `${tx}px`);
+                particle.style.setProperty('--ty', `${ty}px`);
+                fireworksContainer.appendChild(particle);
+                setTimeout(() => particle.remove(), 1000);
+            }
+        }
+        function triggerCelebration() {
+            if (celebrationOverlay.classList.contains('show')) return;
+            const iconContainer = celebrationOverlay.querySelector('.mt-8');
+            iconContainer.innerHTML = `
+                <div class="relative">
+                    <span class="material-symbols-outlined text-yellow-300 text-7xl animate-bounce drop-shadow-[0_0_15px_rgba(253,224,71,0.8)]">celebration</span>
+                    <div class="absolute -top-10 -right-10 animate-ping">
+                             <span class="material-symbols-outlined text-white text-4xl">star</span>
+                        </div>
+                         <div class="absolute -bottom-5 -left-10 animate-bounce" style="animation-delay: 0.2s">
+                             <span class="material-symbols-outlined text-pink-300 text-3xl">favorite</span>
+                        </div>
+                    </div>
+                `;
+            celebrationOverlay.classList.add('show');
+            startConfetti();
+            fireworkInterval = setInterval(() => {
+                const x = Math.random() * window.innerWidth;
+                const y = Math.random() * (window.innerHeight * 0.5); 
+                createFirework(x, y);
+            }, 300);
+            createFirework(window.innerWidth / 2, window.innerHeight / 3);
+            setTimeout(() => {
+                celebrationOverlay.style.opacity = '0';
+                setTimeout(() => {
+                    celebrationOverlay.classList.remove('show');
+                    celebrationOverlay.style.opacity = '';
+                    stopConfetti();
+                    clearInterval(fireworkInterval);
+                }, 500);
+            }, 4000);
+        }
+        function startConfetti() {
+            const container = document.getElementById('confetti-container');
+            container.innerHTML = '';
+            confettiInterval = setInterval(() => {
+                 for (let i = 0; i < 8; i++) { 
+                    const confetti = document.createElement('div');
+                    confetti.classList.add('confetti-piece', 'active');
+                    const left = Math.random() * 100;
+                    const animDuration = 1.5 + Math.random() * 2; 
+                    const size = 6 + Math.random() * 8;
+                    confetti.style.left = `${left}%`;
+                    confetti.style.width = `${size}px`;
+                    confetti.style.height = `${size}px`;
+                    confetti.style.animationDuration = `${animDuration}s`;
+                    const shapeType = Math.random();
+                    if (shapeType > 0.6) {
+                        confetti.style.borderRadius = '50%';
+                    } else if (shapeType > 0.3) {
+                         confetti.style.borderRadius = '0';
+                    } else {
+                        confetti.classList.add('star-shape'); 
+                    }
+                    container.appendChild(confetti);
+                    setTimeout(() => {
+                        if (confetti.parentNode) confetti.remove();
+                    }, animDuration * 1000);
+                }
+            }, 80);
+        }
+        function stopConfetti() {
+            clearInterval(confettiInterval);
+            const container = document.getElementById('confetti-container');
+            container.innerHTML = '';
+        }
+        function openBottomSheet(taskName, likeCount) {
+            const count = parseInt(likeCount, 10);
+            sheetTitle.textContent = `'${taskName}' 응원`;
+            sheetSubtitle.textContent = `${count}명의 친구가 응원합니다`;
+            sheetContent.innerHTML = generateFriendsList(count);
+            bottomSheet.classList.add('show');
+            bottomSheetBackdrop.classList.remove('pointer-events-none', 'opacity-0');
+            bottomSheetBackdrop.classList.add('pointer-events-auto', 'opacity-100');
+        }
+        function closeBottomSheet() {
+            bottomSheet.classList.remove('show');
+            bottomSheetBackdrop.classList.add('pointer-events-none', 'opacity-0');
+            bottomSheetBackdrop.classList.remove('pointer-events-auto', 'opacity-100');
+        }
+        taskCheckboxes.forEach(cb => cb.addEventListener('change', handleCheck));
+        subTaskCheckboxes.forEach(cb => cb.addEventListener('change', handleCheck));
+        cheerButtons.forEach(btn => {
+            btn.addEventListener('click', (e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                const likeCount = btn.dataset.likes;
+                const taskName = btn.dataset.taskName;
+                openBottomSheet(taskName, likeCount);
+            });
+        });
+        closeSheetBtn.addEventListener('click', closeBottomSheet);
+        bottomSheetBackdrop.addEventListener('click', closeBottomSheet);
+    });
+</script>
+
+</body></html>

@@ -1,0 +1,453 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#eb4770",
+              "background-light": "#f8f6f6",
+              "background-dark": "#211115",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+            keyframes: {
+                scaleIn: {
+                    '0%': { transform: 'scale(0.8)', opacity: '0' },
+                    '100%': { transform: 'scale(1)', opacity: '1' },
+                },
+                fadeIn: {
+                    '0%': { opacity: '0' },
+                    '100%': { opacity: '1' }
+                },
+                slideUp: {
+                    '0%': { transform: 'translateY(100%)' },
+                    '100%': { transform: 'translateY(0)' }
+                }
+            },
+            animation: {
+                scaleIn: 'scaleIn 0.2s ease-out',
+                fadeIn: 'fadeIn 0.2s ease-out',
+                slideUp: 'slideUp 0.3s ease-out',
+            }
+          },
+        },
+      }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans KR', sans-serif;
+            -webkit-tap-highlight-color: transparent;
+            min-height: max(884px, 100dvh);
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+          display: none;
+        }
+        .no-scrollbar {
+          -ms-overflow-style: none;
+          scrollbar-width: none;
+        }
+        .view-hidden {
+            display: none !important;
+        }
+    </style>
+<script>
+        // State variables
+        let currentYear;
+        let currentMonth;
+        let selectedDay;
+        // Initial points setup
+        let currentTotalPoints = 2410;
+        let targetTotalPoints = 5000;
+        const taskPointValue = 50; // Points per task
+        // Initialize state with today's date
+        const today = new Date();
+        currentYear = today.getFullYear();
+        currentMonth = today.getMonth() + 1; // 1-12 based
+        selectedDay = today.getDate();
+        // Sample tasks data store
+        const tasksStore = {};
+        function getTasksForDate(year, month, day) {
+            const key = `${year}-${month}-${day}`;
+            if (!tasksStore[key]) {
+                const titles = [
+                    ['아침 요가 20분', '비타민 챙겨 먹기', '프로젝트 기획안 작성'],
+                    ['저녁 약속 (강남역)', '책 30페이지 읽기', '가계부 정리'],
+                    ['마트 장보기', '빨래 돌리기', '영어 단어 암기'],
+                    ['헬스장 가기', '개발 블로그 포스팅', '부모님께 전화하기'],
+                    ['방 청소', '밀린 이메일 확인', '유산균 먹기']
+                ];
+                // Use consistent random set for demo stability
+                // Using day % 5 ensures the same set of tasks for the same day number
+                const randomSet = titles[day % 5];
+                tasksStore[key] = randomSet.map((t, i) => ({
+                    id: Date.now() + i + (day * 100), // Unique-ish ID
+                    title: t,
+                    checked: i === 0 // First item checked by default for demo
+                }));
+            }
+            return tasksStore[key];
+        }
+        function toggleMonthPicker() {
+            const picker = document.getElementById('monthPicker');
+            const overlay = document.getElementById('pickerOverlay');
+            if (picker.classList.contains('translate-y-full')) {
+                picker.classList.remove('hidden');
+                overlay.classList.remove('hidden');
+                requestAnimationFrame(() => {
+                    picker.classList.remove('translate-y-full', 'opacity-0');
+                    overlay.classList.remove('opacity-0');
+                });
+            } else {
+                picker.classList.add('translate-y-full', 'opacity-0');
+                overlay.classList.add('opacity-0');
+                setTimeout(() => {
+                    picker.classList.add('hidden');
+                    overlay.classList.add('hidden');
+                }, 300);
+            }
+        }
+        function renderCalendar(year, month) {
+            document.querySelectorAll('.month-title').forEach(el => el.innerText = `${year}년 ${month}월`);
+            const firstDay = new Date(year, month - 1, 1).getDay(); // 0 is Sunday
+            const daysInMonth = new Date(year, month, 0).getDate();
+            const calendarGrid = document.getElementById('calendarGrid');
+            calendarGrid.innerHTML = ''; 
+            const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+            dayNames.forEach((day, index) => {
+                const dayHeader = document.createElement('p');
+                dayHeader.className = `${index === 0 ? 'text-primary' : 'text-slate-500'} text-[13px] font-bold h-10 flex items-center justify-center`;
+                dayHeader.innerText = day;
+                calendarGrid.appendChild(dayHeader);
+            });
+            if (firstDay > 0) {
+                const emptyCell = document.createElement('div');
+                emptyCell.className = 'h-12 w-full';
+                emptyCell.style.gridColumn = `span ${firstDay}`;
+                calendarGrid.appendChild(emptyCell);
+            }
+            for (let day = 1; day <= daysInMonth; day++) {
+                const btn = document.createElement('button');
+                btn.className = `calendar-day-btn h-12 w-full text-sm hover:bg-primary/5 rounded-full transition-colors relative flex items-center justify-center text-slate-900 dark:text-slate-100`;
+                btn.setAttribute('data-day', day);
+                btn.onclick = () => selectDate(day, btn);
+                btn.innerText = day;
+                calendarGrid.appendChild(btn);
+            }
+            if (selectedDay > daysInMonth) selectedDay = daysInMonth; 
+            let dayBtn = calendarGrid.querySelector(`button[data-day="${selectedDay}"]`);
+            if (dayBtn) {
+                selectDate(selectedDay, dayBtn);
+            } else {
+                const firstBtn = calendarGrid.querySelector(`button[data-day="1"]`);
+                if(firstBtn) selectDate(1, firstBtn);
+            }
+        }
+        function selectDate(day, element) {
+            selectedDay = day;
+            document.querySelectorAll('.calendar-day-btn').forEach(btn => {
+                btn.className = 'calendar-day-btn h-12 w-full text-sm hover:bg-primary/5 rounded-full transition-colors relative flex items-center justify-center text-slate-900 dark:text-slate-100';
+                btn.innerHTML = btn.getAttribute('data-day');
+            });
+            if (!element) {
+                element = document.querySelector(`button[data-day="${day}"]`);
+            }
+            if (element) {
+                element.classList.remove('text-slate-900', 'dark:text-slate-100', 'hover:bg-primary/5');
+                element.classList.add('text-white', 'font-bold', 'relative', 'group');
+                element.innerHTML = `
+                    <div class="active-indicator flex size-10 mx-auto items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30 transition-transform group-active:scale-95 animate-scaleIn">${day}</div>
+                `;
+            }
+            document.getElementById('taskDateTitle').innerText = `${currentMonth}월 ${day}일 할 일`;
+            renderTasks();
+        }
+        function renderTasks() {
+            const taskListContainer = document.getElementById('taskListContainer');
+            const tasks = getTasksForDate(currentYear, currentMonth, selectedDay);
+            const remainingBadge = document.getElementById('remainingCountBadge');
+            if (remainingBadge) remainingBadge.innerText = `${tasks.length}개`; 
+            if (tasks.length === 0) {
+                taskListContainer.innerHTML = `<div class="p-8 text-center text-slate-400 text-sm">등록된 할 일이 없습니다.<br>아래 버튼을 눌러 추가해보세요.</div>`;
+            } else {
+                let html = '';
+                tasks.forEach((task) => {
+                    const checkClass = task.checked 
+                        ? 'border-primary bg-primary text-white' 
+                        : 'border-slate-300 dark:border-slate-500 text-transparent';
+                    const textClass = task.checked
+                        ? 'text-slate-400 line-through decoration-slate-400'
+                        : 'text-slate-700 dark:text-slate-200';
+                    const opacityClass = task.checked ? 'opacity-60' : '';
+                    html += `
+                    <div class="group flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 hover:bg-primary/5 dark:hover:bg-primary/10 rounded-xl transition-colors border border-transparent hover:border-primary/10 ${opacityClass}" id="task-${task.id}">
+                        <div class="flex items-center gap-3 flex-1 cursor-pointer" onclick="toggleTaskCheck(${task.id})">
+                            <div class="size-5 rounded-full border-2 ${checkClass} flex items-center justify-center shrink-0 transition-colors">
+                                <span class="material-symbols-outlined text-[16px] ${task.checked ? '' : 'opacity-0'}">check</span>
+                            </div>
+                            <span class="text-sm font-medium ${textClass} transition-colors">${task.title}</span>
+                        </div>
+                        <div class="flex items-center gap-1">
+                            <button class="p-2 text-slate-400 hover:text-primary hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95">
+                                <span class="material-symbols-outlined text-[18px]">edit</span>
+                            </button>
+                            <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95" onclick="deleteTask(${task.id})">
+                                <span class="material-symbols-outlined text-[18px]">delete</span>
+                            </button>
+                        </div>
+                    </div>`;
+                });
+                taskListContainer.innerHTML = html;
+            }
+             // Add button - Visually clickable, no action as per request
+             const addBtn = document.createElement('button');
+             addBtn.className = "mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary font-bold text-sm transition-all active:scale-[0.98]";
+             addBtn.innerHTML = `<span class="material-symbols-outlined text-[20px]">add_circle</span>할 일 추가하기`;
+             addBtn.onclick = (e) => { e.preventDefault(); }; 
+             taskListContainer.appendChild(addBtn);
+        }
+        function toggleTaskCheck(id) {
+            const key = `${currentYear}-${currentMonth}-${selectedDay}`;
+            const task = tasksStore[key].find(t => t.id === id);
+            if(task) {
+                task.checked = !task.checked;
+                // Usually check/uncheck updates current points.
+                // Assuming standard behavior: checked adds points, unchecked removes.
+                if (task.checked) {
+                    currentTotalPoints += taskPointValue;
+                } else {
+                    currentTotalPoints = Math.max(0, currentTotalPoints - taskPointValue);
+                }
+                updateProgress();
+                renderTasks();
+            }
+        }
+        function deleteTask(id) {
+            // Remove popup as per "Eliminate all loading flickers" and "fully operational" request.
+            // Direct deletion for instant feedback.
+            const key = `${currentYear}-${currentMonth}-${selectedDay}`;
+            if (tasksStore[key]) {
+                const taskIndex = tasksStore[key].findIndex(t => t.id === id);
+                if (taskIndex > -1) {
+                    const task = tasksStore[key][taskIndex];
+                    // Logic requirement 1: Decrease Total Points (denominator) by 50
+                    targetTotalPoints = Math.max(0, targetTotalPoints - taskPointValue);
+                    // Logic requirement 2: If task was completed, decrease Current Points (numerator) by 50
+                    if (task.checked) {
+                        currentTotalPoints = Math.max(0, currentTotalPoints - taskPointValue);
+                    }
+                    // Remove from data store
+                    tasksStore[key].splice(taskIndex, 1);
+                    // Update UI immediately
+                    renderTasks();
+                    updateProgress();
+                }
+            }
+        }
+        function updateProgress() {
+            const bar = document.getElementById('progressBarInner');
+            if(bar) {
+                let pct = 0;
+                if (targetTotalPoints > 0) {
+                   pct = (currentTotalPoints / targetTotalPoints) * 100;
+                }
+                // Cap at 100% for visual bar
+                const visualPct = Math.min(pct, 100);
+                bar.style.width = `${visualPct}%`;
+                const pointsEl = document.getElementById('currentPoints');
+                const formattedCurrent = currentTotalPoints.toLocaleString();
+                const formattedTarget = targetTotalPoints.toLocaleString();
+                if(pointsEl) pointsEl.innerHTML = `+${formattedCurrent} p <span class="text-slate-400 font-normal">/ ${formattedTarget} p</span>`;
+            }
+        }
+        function selectMonth(year, month) {
+            currentYear = year;
+            currentMonth = month;
+            selectedDay = 1; 
+            document.querySelectorAll('#monthPicker .month-btn').forEach(btn => {
+               btn.className = "month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors";
+               if(parseInt(btn.dataset.month) === month) {
+                   btn.className = "month-btn py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 font-bold transition-colors";
+               }
+            });
+            toggleMonthPicker();
+            renderCalendar(year, month);
+        }
+        function changeYear(delta) {
+            currentYear += delta;
+            document.getElementById('pickerYearDisplay').innerText = `${currentYear}년`;
+        }
+        document.addEventListener('DOMContentLoaded', () => {
+             document.getElementById('pickerYearDisplay').innerText = `${currentYear}년`;
+             renderCalendar(currentYear, currentMonth);
+             updateProgress();
+        });
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full max-w-[480px] mx-auto flex-col bg-white dark:bg-slate-900 overflow-x-hidden shadow-xl pb-24" id="mainView">
+<div class="flex items-center p-4 pb-2 justify-center sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm z-30">
+<button class="flex items-center gap-1 px-4 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors" onclick="toggleMonthPicker()">
+<h2 class="month-title text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight"></h2>
+<span class="material-symbols-outlined text-sm pt-0.5">expand_more</span>
+</button>
+</div>
+<div class="px-4 pt-5 pb-2 text-center">
+<h3 class="text-primary tracking-tight text-2xl font-bold leading-tight">성공은 계속된다</h3>
+</div>
+<div class="flex flex-wrap items-center justify-center gap-6 p-4 pb-0">
+<div class="flex min-w-full flex-col gap-0.5 bg-primary/5 dark:bg-primary/10 p-4 rounded-xl">
+<div class="grid grid-cols-7 text-center gap-y-1" id="calendarGrid">
+</div>
+</div>
+</div>
+<div class="px-4 mt-6">
+<div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-5 rounded-2xl shadow-sm">
+<div class="flex items-center justify-between mb-4">
+<div class="flex items-center gap-2">
+<div class="bg-primary/10 p-1.5 rounded-lg text-primary">
+<span class="material-symbols-outlined text-[20px]">event_available</span>
+</div>
+<p class="text-base font-bold text-slate-900 dark:text-slate-100" id="taskDateTitle">할 일 목록</p>
+</div>
+<span class="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-md" id="remainingCountBadge">0개</span>
+</div>
+<div class="space-y-3" id="taskListContainer">
+</div>
+</div>
+</div>
+<div class="px-4 pt-8">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] pb-4">월간 진행도</h3>
+<div class="bg-primary/5 dark:bg-primary/20 rounded-xl p-4 mb-4">
+<div class="flex justify-between items-center mb-2">
+<span class="text-sm font-medium text-slate-600 dark:text-slate-400">현재 포인트</span>
+<span class="text-sm font-bold text-primary" id="currentPoints">+2,410 p <span class="text-slate-400 font-normal">/ 5,000 p</span></span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full transition-all duration-500" id="progressBarInner" style="width: 48%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
+<div class="flex items-center gap-2 mb-3">
+<span class="material-symbols-outlined text-amber-500">trending_down</span>
+<p class="text-sm font-bold text-slate-900 dark:text-slate-100">달성이 저조한 할 일</p>
+</div>
+<div class="space-y-3">
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-700 dark:text-slate-300">운동하기</span>
+<span class="font-bold text-primary">20%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 20%"></div>
+</div>
+</div>
+<div class="flex flex-col gap-1">
+<div class="flex justify-between text-xs mb-1">
+<span class="text-slate-700 dark:text-slate-300">독서하기</span>
+<span class="font-bold text-primary">35%</span>
+</div>
+<div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+<div class="bg-primary h-full rounded-full" style="width: 35%"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl flex items-center justify-between">
+<div class="flex items-center gap-3">
+<div class="bg-primary/10 p-2 rounded-lg">
+<span class="material-symbols-outlined text-primary">local_fire_department</span>
+</div>
+<div>
+<p class="text-xs text-slate-500 font-medium">연속 달성 중</p>
+<p class="text-xl font-extrabold text-slate-900 dark:text-slate-100">12일</p>
+</div>
+</div>
+<span class="material-symbols-outlined text-slate-300">chevron_right</span>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] border-t border-slate-100 dark:border-slate-800 bg-white/95 dark:bg-slate-900/95 backdrop-blur-md px-4 pb-6 pt-3 z-50" id="bottomNav">
+<div class="grid grid-cols-5 gap-1">
+<a class="group flex flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<div class="flex h-7 items-center justify-center mb-0.5 group-hover:-translate-y-0.5 transition-transform duration-300">
+<span class="material-symbols-outlined text-[26px]">check_circle</span>
+</div>
+<p class="text-[10px] font-bold leading-none">할일</p>
+</a>
+<a class="flex flex-col items-center justify-end gap-1 text-primary" href="#">
+<div class="flex h-7 items-center justify-center mb-0.5">
+<span class="material-symbols-outlined text-[26px]" style="font-variation-settings: 'FILL' 1">calendar_month</span>
+</div>
+<p class="text-[10px] font-bold leading-none">캘린더</p>
+</a>
+<a class="group flex flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<div class="flex h-7 items-center justify-center mb-0.5 group-hover:-translate-y-0.5 transition-transform duration-300">
+<span class="material-symbols-outlined text-[26px]">groups</span>
+</div>
+<p class="text-[10px] font-bold leading-none">팀</p>
+</a>
+<a class="group flex flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<div class="flex h-7 items-center justify-center mb-0.5 group-hover:-translate-y-0.5 transition-transform duration-300">
+<span class="material-symbols-outlined text-[26px]">flag</span>
+</div>
+<p class="text-[10px] font-bold leading-none">목표</p>
+</a>
+<a class="group flex flex-col items-center justify-end gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<div class="flex h-7 items-center justify-center mb-0.5 group-hover:-translate-y-0.5 transition-transform duration-300">
+<span class="material-symbols-outlined text-[26px]">settings</span>
+</div>
+<p class="text-[10px] font-bold leading-none">설정</p>
+</a>
+</div>
+</div>
+<div class="hidden fixed inset-0 bg-black/40 z-[60] opacity-0 transition-opacity duration-300" id="pickerOverlay" onclick="toggleMonthPicker()"></div>
+<div class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white dark:bg-slate-800 rounded-t-3xl z-[70] translate-y-full transition-all duration-300 ease-in-out shadow-2xl pb-10" id="monthPicker">
+<div class="flex flex-col items-center p-6">
+<div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div>
+<h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">월 선택</h3>
+<div class="flex items-center justify-center gap-8 mb-6">
+<button class="p-2 text-slate-400 hover:text-primary transition-colors" onclick="changeYear(-1)">
+<span class="material-symbols-outlined">chevron_left</span>
+</button>
+<span class="text-xl font-bold text-primary" id="pickerYearDisplay"></span>
+<button class="p-2 text-slate-400 hover:text-primary transition-colors" onclick="changeYear(1)">
+<span class="material-symbols-outlined">chevron_right</span>
+</button>
+</div>
+<div class="grid grid-cols-4 gap-3 w-full">
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="1" onclick="selectMonth(currentYear, 1)">1월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="2" onclick="selectMonth(currentYear, 2)">2월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="3" onclick="selectMonth(currentYear, 3)">3월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="4" onclick="selectMonth(currentYear, 4)">4월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="5" onclick="selectMonth(currentYear, 5)">5월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="6" onclick="selectMonth(currentYear, 6)">6월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="7" onclick="selectMonth(currentYear, 7)">7월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="8" onclick="selectMonth(currentYear, 8)">8월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="9" onclick="selectMonth(currentYear, 9)">9월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="10" onclick="selectMonth(currentYear, 10)">10월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="11" onclick="selectMonth(currentYear, 11)">11월</button>
+<button class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors" data-month="12" onclick="selectMonth(currentYear, 12)">12월</button>
+</div>
+</div>
+</div>
+
+</body></html>

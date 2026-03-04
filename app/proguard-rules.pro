@@ -1,0 +1,3 @@
+-keep class com.teamtodo.app.** { *; }
+-keep class com.google.firebase.** { *; }
+-dontwarn com.google.firebase.**

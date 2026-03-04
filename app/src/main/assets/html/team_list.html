@@ -1,0 +1,292 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>팀 목록</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#eb4770',
+            backgroundLight: '#f8f6f6',
+            backgroundDark: '#211115'
+          },
+          fontFamily: {
+            display: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: max(884px, 100dvh);
+    }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+    .nav-active .material-symbols-outlined {
+      font-variation-settings: 'FILL' 1, 'wght' 500, 'GRAD' 0, 'opsz' 24;
+    }
+  </style>
+</head>
+<body class="bg-backgroundLight dark:bg-backgroundDark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col">
+  <header class="sticky top-0 z-10 bg-backgroundLight/80 dark:bg-backgroundDark/80 backdrop-blur-md px-4 py-4 border-b border-primary/10">
+    <div class="flex items-center justify-between h-11 relative">
+      <div class="flex items-center justify-between w-full" id="default-header">
+        <div class="w-10"></div>
+        <h1 class="text-xl font-bold tracking-tight absolute left-1/2 -translate-x-1/2">팀 목록</h1>
+        <button class="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors" onclick="openSearch()">
+          <span class="material-symbols-outlined">search</span>
+        </button>
+      </div>
+
+      <div class="hidden absolute inset-0 bg-backgroundLight/80 dark:bg-backgroundDark/80 flex items-center w-full z-20" id="search-header">
+        <div class="relative flex-1">
+          <span class="material-symbols-outlined absolute left-3 top-1/2 -translate-y-1/2 text-slate-400">search</span>
+          <input id="search-input" type="text" placeholder="팀 검색 (예: 디자인)" class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none" />
+        </div>
+        <button class="ml-3 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap" onclick="closeSearch()">취소</button>
+      </div>
+    </div>
+
+    <div class="flex mt-6 border-b border-primary/5">
+      <button id="my-team-tab" class="flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary text-center transition-colors" onclick="switchTab('my')">내 팀</button>
+      <button id="explore-tab" class="flex-1 pb-3 text-sm font-medium text-slate-400 border-b-2 border-transparent text-center transition-colors" onclick="switchTab('explore')">탐색</button>
+    </div>
+  </header>
+
+  <main class="flex-1 p-4 space-y-6 mb-24 overflow-y-auto">
+    <section id="section-my-team" class="space-y-6">
+      <div class="space-y-4">
+        <div class="flex items-center justify-between pt-2">
+          <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">활동 중인 그룹</h2>
+          <span class="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">3개의 새 알림</span>
+        </div>
+
+        <article class="team-card bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center cursor-pointer">
+          <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined text-3xl">groups</span></div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-base truncate">디자인시스템 유닛</h3>
+            <p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>12명</p>
+            <div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold" onclick="event.stopPropagation()">탈퇴</button></div>
+          </div>
+        </article>
+
+        <article class="team-card bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center cursor-pointer">
+          <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined text-3xl">groups</span></div>
+          <div class="flex-1 min-w-0">
+            <h3 class="font-bold text-base truncate">프론트엔드 개발자</h3>
+            <p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>45명</p>
+            <div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold" onclick="event.stopPropagation()">탈퇴</button></div>
+          </div>
+        </article>
+      </div>
+    </section>
+
+    <section id="section-explore" class="hidden space-y-4">
+      <div id="default-explore-content" class="space-y-4">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 pt-2">모든 추천 그룹</h2>
+
+        <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
+          <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-orange-600"><span class="material-symbols-outlined text-3xl">directions_run</span></div>
+          <div class="flex-1"><h3 class="font-bold text-base">러닝 크루</h3><p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>8명 참여중</p><div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold">가입</button></div></div>
+        </article>
+
+        <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
+          <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center text-blue-600"><span class="material-symbols-outlined text-3xl">menu_book</span></div>
+          <div class="flex-1"><h3 class="font-bold text-base">북클럽</h3><p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>15명 참여중</p><div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold">가입</button></div></div>
+        </article>
+      </div>
+
+      <div id="section-search-results" class="hidden space-y-4">
+        <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 pt-2">검색 결과</h2>
+        <p class="pt-4 text-center text-sm text-slate-400">검색 결과 끝입니다.</p>
+      </div>
+    </section>
+
+    <button class="fixed bottom-24 right-4 md:right-[calc(50%-224px+16px)] z-40 w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/30 hover:scale-105 transition-transform active:scale-95">
+      <span class="material-symbols-outlined text-2xl">add</span>
+    </button>
+  </main>
+
+  <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-backgroundDark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">check_circle</span><p class="text-xs font-medium">할일</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><p class="text-xs font-medium">캘린더</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary nav-active" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">groups</span><p class="text-xs font-bold">팀</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><p class="text-xs font-medium">목표</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">settings</span><p class="text-xs font-medium">설정</p></a>
+  </nav>
+
+  <script>
+    function switchTab(tab) {
+      const myBtn = document.getElementById('my-team-tab');
+      const exBtn = document.getElementById('explore-tab');
+      const mySec = document.getElementById('section-my-team');
+      const exSec = document.getElementById('section-explore');
+      if (tab === 'my') {
+        myBtn.className = 'flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary text-center transition-colors';
+        exBtn.className = 'flex-1 pb-3 text-sm font-medium text-slate-400 border-b-2 border-transparent text-center transition-colors';
+        mySec.classList.remove('hidden');
+        exSec.classList.add('hidden');
+      } else {
+        exBtn.className = 'flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary text-center transition-colors';
+        myBtn.className = 'flex-1 pb-3 text-sm font-medium text-slate-400 border-b-2 border-transparent text-center transition-colors';
+        exSec.classList.remove('hidden');
+        mySec.classList.add('hidden');
+      }
+    }
+
+    function openSearch() {
+      document.getElementById('default-header').classList.add('hidden');
+      document.getElementById('search-header').classList.remove('hidden');
+      document.getElementById('search-input').focus();
+    }
+
+    function closeSearch() {
+      document.getElementById('search-header').classList.add('hidden');
+      document.getElementById('default-header').classList.remove('hidden');
+      document.getElementById('search-input').value = '';
+      document.getElementById('section-search-results').classList.add('hidden');
+      document.getElementById('default-explore-content').classList.remove('hidden');
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      function esc(s) {
+        return String(s || '').replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+      }
+      function renderTeams(rows) {
+        const list = Array.isArray(rows) ? rows : [];
+        const mySec = document.getElementById('section-my-team');
+        const exSec = document.getElementById('default-explore-content');
+        if (!mySec || !exSec) return;
+        const myTeams = list.filter((t) => !!t.isJoined || !!(Array.isArray(t.members) && t.members.length > 0));
+        const otherTeams = list.filter((t) => !myTeams.includes(t));
+
+        mySec.innerHTML = `<div class="space-y-4"><div class="flex items-center justify-between pt-2"><h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">활동 중인 그룹</h2><span class="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">${myTeams.length}개 팀</span></div>${myTeams.map((t) => `
+          <article class="team-card bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center cursor-pointer" data-team-id="${esc(t.id)}">
+            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center text-primary shrink-0"><span class="material-symbols-outlined text-3xl">groups</span></div>
+            <div class="flex-1 min-w-0">
+              <h3 class="font-bold text-base truncate">${esc(t.name || '팀')}</h3>
+              <p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>${Array.isArray(t.members) ? t.members.length : 0}명</p>
+              <div class="mt-2"><button class="leave-btn px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold" data-leave-id="${esc(t.id)}">탈퇴</button></div>
+            </div>
+          </article>
+        `).join('')}</div>`;
+        exSec.innerHTML = `<h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 pt-2">모든 추천 그룹</h2>${otherTeams.map((t) => `
+          <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
+            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center text-blue-600"><span class="material-symbols-outlined text-3xl">group_add</span></div>
+            <div class="flex-1"><h3 class="font-bold text-base">${esc(t.name || '팀')}</h3><p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>${Array.isArray(t.members) ? t.members.length : 0}명 참여중</p><div class="mt-2"><button class="join-btn px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold" data-join-id="${esc(t.id)}">가입</button></div></div>
+          </article>
+        `).join('')}`;
+
+        mySec.querySelectorAll('.team-card').forEach((card) => {
+          card.addEventListener('click', (e) => {
+            if (e.target.closest('button')) return;
+            if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('team_dashboard');
+          });
+        });
+        mySec.querySelectorAll('.leave-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault(); e.stopPropagation();
+            const id = btn.getAttribute('data-leave-id');
+            if (window.TeamTodo && typeof TeamTodo.leaveTeam === 'function') {
+              TeamTodo.leaveTeam(id, () => loadTeams());
+            }
+          });
+        });
+        exSec.querySelectorAll('.join-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = btn.getAttribute('data-join-id');
+            if (window.TeamTodo && typeof TeamTodo.joinTeam === 'function') {
+              TeamTodo.joinTeam(id, () => loadTeams());
+            }
+          });
+        });
+      }
+
+      function loadTeams() {
+        let hasRenderedLocal = false;
+        try {
+          const local = JSON.parse(localStorage.getItem('localSampleTeams') || '[]');
+          if (Array.isArray(local) && local.length > 0) {
+            renderTeams(local);
+            hasRenderedLocal = true;
+          }
+        } catch (_) {}
+
+        if (window.TeamTodo && typeof TeamTodo.getTeams === 'function') {
+          TeamTodo.getTeams((rows) => {
+            const arr = Array.isArray(rows) ? rows : [];
+            if (arr.length > 0) {
+              renderTeams(arr);
+              return;
+            }
+            if (!hasRenderedLocal) renderTeams([]);
+          });
+          return;
+        }
+        if (!hasRenderedLocal) renderTeams([]);
+      }
+
+      document.querySelectorAll('.team-card').forEach((card) => {
+        card.addEventListener('click', () => {
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate('team_dashboard');
+          }
+        });
+      });
+
+      const searchInput = document.getElementById('search-input');
+      searchInput.addEventListener('keydown', (e) => {
+        if (e.key !== 'Enter') return;
+        e.preventDefault();
+        switchTab('explore');
+        document.getElementById('default-explore-content').classList.add('hidden');
+        document.getElementById('section-search-results').classList.remove('hidden');
+      });
+
+      const bottomNavLinks = document.querySelectorAll('#bottomNav a');
+      const bottomNavScreens = ['todo_main', 'calendar', 'team_list', 'goal_list', 'settings'];
+      bottomNavLinks.forEach((el, idx) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate(bottomNavScreens[idx]);
+          }
+        });
+      });
+      loadTeams();
+    });
+  </script>
+</body>
+</html>
+
+

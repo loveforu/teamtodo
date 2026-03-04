@@ -1,0 +1,339 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>팀 목록 (통합 검색 및 추천 시스템)</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: 100vh;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .nav-active .material-symbols-outlined {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .search-container {
+            transition: all 0.3s ease-in-out;
+        }
+    </style>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            opacity: 1;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col" x-data="{ activeTab: 'my-team', searchMode: false }">
+<header class="sticky top-0 z-10 bg-background-light/80 dark:bg-background-dark/80 backdrop-blur-md px-4 py-4 border-b border-primary/10">
+<div class="flex items-center justify-between h-11 relative">
+<div class="flex items-center justify-between w-full transition-opacity duration-200" id="default-header">
+<div class="w-10"></div>
+<h1 class="text-xl font-bold tracking-tight absolute left-1/2 transform -translate-x-1/2">팀 목록</h1>
+<button class="p-2 rounded-lg bg-primary/10 text-primary hover:bg-primary/20 transition-colors" onclick="document.getElementById('default-header').classList.add('hidden'); document.getElementById('search-header').classList.remove('hidden'); document.getElementById('search-input').focus();">
+<span class="material-symbols-outlined">search</span>
+</button>
+</div>
+<div class="hidden absolute inset-0 bg-background-light/80 dark:bg-background-dark/80 flex items-center w-full z-20" id="search-header">
+<div class="relative flex-1">
+<span class="material-symbols-outlined absolute left-3 top-1/2 transform -translate-y-1/2 text-slate-400">search</span>
+<input class="w-full pl-10 pr-4 py-2 bg-white dark:bg-slate-800 border-none rounded-lg text-sm focus:ring-2 focus:ring-primary shadow-sm outline-none" id="search-input" placeholder="팀 검색 (예: 디자인)" type="text"/>
+</div>
+<button class="ml-3 text-sm font-medium text-slate-500 hover:text-primary whitespace-nowrap" onclick="
+                document.getElementById('search-header').classList.add('hidden'); 
+                document.getElementById('default-header').classList.remove('hidden'); 
+                document.getElementById('search-input').value = '';
+                document.getElementById('section-search-results').classList.add('hidden');
+                document.getElementById('default-explore-content').classList.remove('hidden');
+                // Switch back to My Team if we were there initially is optional, but sticking to Explore is fine or staying on current tab.
+                // Let's reset the view in Explore tab to default if we are there.
+            ">
+                취소
+            </button>
+</div>
+</div>
+<div class="flex mt-6 border-b border-primary/5">
+<button class="flex-1 pb-3 text-sm font-bold border-b-2 border-primary text-primary text-center transition-colors" id="my-team-tab" onclick="
+            this.classList.add('border-primary', 'text-primary', 'font-bold'); 
+            this.classList.remove('border-transparent', 'text-slate-400', 'font-medium'); 
+            document.getElementById('explore-tab').classList.remove('border-primary', 'text-primary', 'font-bold'); 
+            document.getElementById('explore-tab').classList.add('border-transparent', 'text-slate-400', 'font-medium'); 
+            document.getElementById('section-my-team').classList.remove('hidden'); 
+            document.getElementById('section-explore').classList.add('hidden');
+        ">
+            내 팀
+        </button>
+<button class="flex-1 pb-3 text-sm font-medium text-slate-400 hover:text-slate-600 dark:hover:text-slate-300 border-b-2 border-transparent hover:border-slate-300 text-center transition-colors" id="explore-tab" onclick="
+            this.classList.add('border-primary', 'text-primary', 'font-bold'); 
+            this.classList.remove('border-transparent', 'text-slate-400', 'font-medium'); 
+            document.getElementById('my-team-tab').classList.remove('border-primary', 'text-primary', 'font-bold'); 
+            document.getElementById('my-team-tab').classList.add('border-transparent', 'text-slate-400', 'font-medium'); 
+            document.getElementById('section-explore').classList.remove('hidden'); 
+            document.getElementById('section-my-team').classList.add('hidden');
+        ">
+            탐색
+        </button>
+</div>
+</header>
+<main class="flex-1 p-4 space-y-6 mb-24 overflow-y-auto">
+<section class="space-y-6" id="section-my-team">
+<div class="space-y-4">
+<div class="flex items-center justify-between pt-2">
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">활동 중인 그룹</h2>
+<span class="text-xs font-semibold text-primary bg-primary/10 px-2 py-1 rounded-full">3개의 새 알림</span>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div aria-label="Team thumbnail" class="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" role="img" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXsGu3s1pSGuXhzGbiYupGDNuekBEJxalRah7_o60EWN7jeWbwX465iY_v3tm1cRl7xEw2bcPMT9cVfw-YOiOz80g-hcpSAuzpSp6qV7vo-LFF-BjMPgxz4Czy8mmN1MhELAfqG1xAwmvhgS_eSnF3lNvjeJzmSQsZyUp3W1yI2OvY1FGVNHOJwSZJv-NX6QLbuRfQ9fY23SVvGfwBgoZERtzGjZCvCN_v0d5MES9j7CebYUmNEC81lUKnFq0kkWeLcgTiMftujUo')"></div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">디자인 시스템 유닛</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 12명</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"><span class="material-symbols-outlined text-sm">logout</span> 탈퇴</button>
+</div>
+</div>
+<div class="flex -space-x-2">
+<div class="w-6 h-6 rounded-full border-2 border-white dark:border-slate-800 bg-primary/20 flex items-center justify-center text-[10px] font-bold text-primary">+8</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div aria-label="Team thumbnail" class="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" role="img" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuAcTAleh4o3EcGoxTQEe7OL1D8QjiqezfBcINOOjgdk_K5ElN7WFnTKKID2QuCIKL94_3rwPs880ybqx4_AVVMg6BSRMJpR4gd-XkYzye__29NJFDJbzXdYdCRnJHhsq73p2KlzK6OzmIFu4Gy3BoMrfRWQjRgzqTlgaJQwFDTeiwHYfgqeHAotAXjS3bUEph54bqAEdQl9oA6lOvTyygUhyv8naxe2CgqtlL0CNW-HMpsv6JBSbie5VJOw5SetaVPRU3wv_cEFP-k')"></div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">프론트엔드 개발자</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 45명</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-slate-100 dark:bg-slate-700 text-slate-700 dark:text-slate-200 text-xs font-bold flex items-center gap-1 hover:bg-slate-200 dark:hover:bg-slate-600 transition-colors"><span class="material-symbols-outlined text-sm">logout</span> 탈퇴</button>
+</div>
+</div>
+</div>
+</div>
+<div class="space-y-4 pt-4 border-t border-primary/5">
+<div class="flex items-center justify-between">
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">추천 그룹</h2>
+<button class="text-xs text-primary font-bold hover:underline" onclick="document.getElementById('explore-tab').click()">더보기</button>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center shrink-0 text-orange-600">
+<span class="material-symbols-outlined text-3xl">directions_run</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">러닝 크루</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 8명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center shrink-0 text-blue-600">
+<span class="material-symbols-outlined text-3xl">menu_book</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">북클럽</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 15명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+</section>
+<section class="hidden space-y-4" id="section-explore">
+<div class="space-y-4" id="default-explore-content">
+<div class="flex items-center justify-between pt-2">
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">모든 추천 그룹</h2>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center shrink-0 text-orange-600">
+<span class="material-symbols-outlined text-3xl">directions_run</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">러닝 크루</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 8명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center shrink-0 text-blue-600">
+<span class="material-symbols-outlined text-3xl">menu_book</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">북클럽</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 15명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-purple-200 to-pink-200 flex items-center justify-center shrink-0 text-purple-600">
+<span class="material-symbols-outlined text-3xl">palette</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">전시회 탐방</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 23명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="hidden space-y-4" id="section-search-results">
+<div class="flex items-center justify-between pt-2">
+<h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">검색 결과</h2>
+</div>
+<div class="grid grid-cols-1 gap-4">
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/20 bg-primary/5 flex gap-4 items-center group transition-all">
+<div aria-label="Team thumbnail" class="w-16 h-16 rounded-lg bg-cover bg-center shrink-0" role="img" style="background-image: url('https://lh3.googleusercontent.com/aida-public/AB6AXuCXsGu3s1pSGuXhzGbiYupGDNuekBEJxalRah7_o60EWN7jeWbwX465iY_v3tm1cRl7xEw2bcPMT9cVfw-YOiOz80g-hcpSAuzpSp6qV7vo-LFF-BjMPgxz4Czy8mmN1MhELAfqG1xAwmvhgS_eSnF3lNvjeJzmSQsZyUp3W1yI2OvY1FGVNHOJwSZJv-NX6QLbuRfQ9fY23SVvGfwBgoZERtzGjZCvCN_v0d5MES9j7CebYUmNEC81lUKnFq0kkWeLcgTiMftujUo')"></div>
+<div class="flex-1 min-w-0">
+<div class="flex items-center gap-2">
+<span class="text-[10px] font-bold text-white bg-primary px-1.5 py-0.5 rounded">내 그룹</span>
+<h3 class="font-bold text-base truncate">디자인 시스템 유닛</h3>
+</div>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 12명</p>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-teal-200 to-emerald-200 flex items-center justify-center shrink-0 text-teal-600">
+<span class="material-symbols-outlined text-3xl">brush</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">디자인 스터디</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 42명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center group hover:border-primary/20 transition-all">
+<div class="w-16 h-16 rounded-lg bg-gradient-to-br from-indigo-200 to-violet-200 flex items-center justify-center shrink-0 text-indigo-600">
+<span class="material-symbols-outlined text-3xl">web</span>
+</div>
+<div class="flex-1 min-w-0">
+<h3 class="font-bold text-base truncate">UI/UX 디자인 포럼</h3>
+<p class="text-sm text-slate-500 dark:text-slate-400 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span> 128명 참여중</p>
+<div class="mt-2 flex gap-2">
+<button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold flex items-center gap-1 hover:bg-primary/90 transition-colors shadow-sm shadow-primary/30">
+<span class="material-symbols-outlined text-sm">add_circle</span> 가입
+                            </button>
+</div>
+</div>
+</div>
+</div>
+<div class="text-center pt-8 pb-4">
+<p class="text-sm text-slate-400">검색 결과의 끝입니다.</p>
+</div>
+</div>
+</section>
+<div class="fixed bottom-24 right-6 z-20">
+<button class="w-14 h-14 rounded-full bg-primary text-white flex items-center justify-center shadow-xl shadow-primary/30 hover:scale-105 transition-transform active:scale-95">
+<span class="material-symbols-outlined text-3xl">add</span>
+</button>
+</div>
+</main>
+<nav class="fixed bottom-0 left-0 right-0 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md border-t border-primary/10 px-4 pb-6 pt-2 z-30">
+<div class="flex justify-between items-center max-w-md mx-auto">
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors w-12" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="text-[10px] font-medium">할일</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors w-12" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<span class="text-[10px] font-medium">캘린더</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary nav-active w-12" href="#">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-bold">팀</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors w-12" href="#">
+<span class="material-symbols-outlined">flag</span>
+<span class="text-[10px] font-medium">목표</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors w-12" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</a>
+</div>
+</nav>
+<script>
+    const searchInput = document.getElementById('search-input');
+    const myTeamTab = document.getElementById('my-team-tab');
+    const exploreTab = document.getElementById('explore-tab');
+    const sectionMyTeam = document.getElementById('section-my-team');
+    const sectionExplore = document.getElementById('section-explore');
+    const defaultExploreContent = document.getElementById('default-explore-content');
+    const searchResultsSection = document.getElementById('section-search-results');
+    if(searchInput) {
+        searchInput.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                searchInput.blur();
+                // 1. Switch to Explore Tab automatically
+                // Reset Tab Styles
+                myTeamTab.classList.remove('border-primary', 'text-primary', 'font-bold');
+                myTeamTab.classList.add('border-transparent', 'text-slate-400', 'font-medium');
+                exploreTab.classList.add('border-primary', 'text-primary', 'font-bold');
+                exploreTab.classList.remove('border-transparent', 'text-slate-400', 'font-medium');
+                // Switch Sections
+                sectionMyTeam.classList.add('hidden');
+                sectionExplore.classList.remove('hidden');
+                // 2. Show Search Results, Hide Default Explore Content
+                defaultExploreContent.classList.add('hidden');
+                searchResultsSection.classList.remove('hidden');
+                // Simulate search logic just for visual feedback
+                console.log('Switching to explore tab and showing results for:', searchInput.value);
+            }
+        });
+    }
+</script>
+
+</body></html>

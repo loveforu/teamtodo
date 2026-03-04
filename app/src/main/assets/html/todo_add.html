@@ -1,0 +1,750 @@
+﻿<!DOCTYPE html>
+<html class="light" lang="ko"><head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent=\"html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}\";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" name="viewport"/>
+<script src="../vendor/tailwind.cdn.js"></script>
+<link href="../vendor/plus-jakarta.css" rel="stylesheet"/>
+<link href="../vendor/material-symbols.css" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans KR', sans-serif;
+            overscroll-behavior-y: none;
+            -webkit-tap-highlight-color: transparent;
+            min-height: 100vh;
+            min-height: 100dvh;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;direction: ltr;
+            display: inline-block;
+            line-height: 1;
+            text-transform: none;
+            letter-spacing: normal;
+            word-wrap: normal;
+            white-space: nowrap;-webkit-font-smoothing: antialiased;
+            text-rendering: optimizeLegibility;
+            -moz-osx-font-smoothing: grayscale;
+            font-feature-settings: 'liga';
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 20px;
+            width: 20px;
+            border-radius: 50%;
+            background: #ffffff;
+            cursor: pointer;
+            margin-top: -8px; 
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 4px;
+            cursor: pointer;
+            background: rgba(255,255,255,0.3);
+            border-radius: 2px;
+        }
+        .font-variation-settings-fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .snap-mandatory::-webkit-scrollbar {
+             display: none;
+        }
+        .bottom-nav-fix {
+            padding-bottom: env(safe-area-inset-bottom); 
+            padding-bottom: max(1.5rem, env(safe-area-inset-bottom));
+        }
+        .time-picker-dropdown {
+            background-color: white;
+        }
+        .dark .time-picker-dropdown {
+            background-color: #0f172a;
+        }
+        .material-symbols-outlined {
+             color: inherit;
+        }.toggle-checkbox {
+            position: absolute;
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-label {
+            width: 50px;
+            height: 28px;
+            background-color: #e2e8f0;border-radius: 9999px;
+            position: relative;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .dark .toggle-label {
+            background-color: #334155;}
+        .toggle-handle {
+            width: 24px;
+            height: 24px;
+            background-color: white;
+            border-radius: 50%;
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            transition: transform 0.3s;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+        .toggle-checkbox:checked + .toggle-label {
+            background-color: #eb4770;}
+        .toggle-checkbox:checked + .toggle-label .toggle-handle {
+            transform: translateX(22px);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+    <script src="app.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 h-screen w-full overflow-hidden flex justify-center">
+<div class="relative flex h-full w-full max-w-[480px] flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden" id="app-container">
+<div class="hidden absolute inset-0 z-40 bg-transparent" id="dismiss-overlay" onclick="closeAllTimePickers()"></div>
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-30 border-b border-slate-100 dark:border-slate-800 shrink-0">
+<div class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-start cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center">할 일 추가/수정</h2>
+<div class="flex w-12 items-center justify-end cursor-pointer hover:opacity-70 transition-opacity">
+<p class="text-primary text-base font-bold leading-normal tracking-[0.015em] shrink-0">저장</p>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar relative pb-[100px]" onclick="checkClickOutside(event)">
+<section class="space-y-2 px-4 py-4">
+<label class="block text-sm font-semibold text-slate-700 dark:text-slate-300 ml-1">제목</label>
+<input id="todoTitleInput" class="w-full h-14 bg-background-light dark:bg-slate-800 border-none rounded-xl px-4 focus:ring-2 focus:ring-primary/50 text-slate-900 dark:text-slate-100 placeholder:text-slate-400 font-medium" placeholder="제목을 입력하세요" type="text" value=""/>
+</section>
+<section class="mx-4 mt-2 mb-6 bg-gradient-to-br from-primary to-[#ff8fa3] p-6 rounded-2xl text-white shadow-lg shadow-primary/20">
+<div class="flex justify-between items-start mb-6">
+<div>
+<p class="text-sm font-medium opacity-90 mb-1">완료 시 획득 포인트</p>
+<h3 class="text-2xl font-extrabold tracking-tight flex items-baseline gap-0.5">
+<span class="transition-all duration-300" id="point-display">50</span>
+<span class="text-lg font-bold">p</span>
+</h3>
+</div>
+<div class="bg-white/20 p-2 rounded-lg backdrop-blur-sm">
+<span class="material-symbols-outlined text-white select-none">stars</span>
+</div>
+</div>
+<div class="relative w-full h-8 flex items-center">
+<input id="pointRange" class="w-full h-1.5 bg-white/30 rounded-lg appearance-none cursor-pointer accent-white focus:outline-none focus:ring-0 z-10 transition-opacity" max="100" min="0" oninput="document.getElementById('point-display').innerText = this.value" step="1" type="range" value="50"/>
+</div>
+<div class="flex justify-between mt-1 text-[11px] font-bold text-white/70 px-1">
+<span>0 p</span>
+<span>50 p</span>
+<span>100 p</span>
+</div>
+<div class="mt-4 pt-4 border-t border-white/20">
+<div class="flex items-start gap-2.5 mb-2">
+<span class="material-symbols-outlined text-[18px] mt-0.5 opacity-90 select-none">info</span>
+<p class="text-xs font-medium opacity-90 leading-relaxed">높은 포인트를 설정하면 완료 시 더 큰 보상을 받을 수 있습니다.</p>
+</div>
+<div class="flex items-start gap-2.5 bg-white/10 rounded-lg p-2.5">
+<span class="material-symbols-outlined text-[16px] mt-0.5 opacity-80 select-none">account_tree</span>
+<p class="text-[11px] font-medium opacity-80 leading-relaxed">세부 할 일이 있을 경우, 기본 포인트 대신 세부 할 일 포인트의 합산으로 계산됩니다.</p>
+</div>
+</div>
+</section>
+<div class="px-4 py-2 relative">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] pb-3">기간 설정</h3>
+<div class="bg-slate-50 dark:bg-slate-900/50 rounded-xl p-4">
+<div class="flex items-center justify-between mb-4">
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" onclick="changeMonth(-1)">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">chevron_left</span>
+</button>
+<button class="flex items-center gap-1 px-3 py-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors" onclick="toggleDatePicker()">
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold" id="current-month-year">2023년 10월</p>
+<span class="material-symbols-outlined text-slate-500 text-sm">arrow_drop_down</span>
+</button>
+<button class="p-2 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors" onclick="changeMonth(1)">
+<span class="material-symbols-outlined text-slate-600 dark:text-slate-400">chevron_right</span>
+</button>
+</div>
+<div class="grid grid-cols-7 text-center mb-2">
+<span class="text-xs font-bold text-red-400">일</span>
+<span class="text-xs font-bold text-slate-400">월</span>
+<span class="text-xs font-bold text-slate-400">화</span>
+<span class="text-xs font-bold text-slate-400">수</span>
+<span class="text-xs font-bold text-slate-400">목</span>
+<span class="text-xs font-bold text-slate-400">금</span>
+<span class="text-xs font-bold text-blue-400">토</span>
+</div>
+<div class="grid grid-cols-7 gap-y-2 select-none" id="calendar-grid">
+</div>
+</div>
+<div class="hidden absolute top-16 left-4 right-4 z-50 bg-white dark:bg-slate-800 rounded-2xl shadow-xl border border-slate-100 dark:border-slate-700 p-4 transition-all duration-300" id="date-picker-overlay">
+<div class="flex justify-between items-center mb-4 pb-2 border-b border-slate-100 dark:border-slate-700">
+<h4 class="text-base font-bold text-slate-900 dark:text-slate-100">날짜 이동</h4>
+<button class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-700" onclick="toggleDatePicker()">
+<span class="material-symbols-outlined text-slate-500">close</span>
+</button>
+</div>
+<div class="grid grid-cols-2 gap-4 h-48">
+<div class="flex flex-col gap-2 overflow-y-auto no-scrollbar snap-y snap-mandatory py-2" id="year-picker-list">
+</div>
+<div class="flex flex-col gap-2 overflow-y-auto no-scrollbar" id="month-picker-list">
+</div>
+</div>
+<button class="w-full mt-4 py-3 bg-primary text-white font-bold rounded-xl shadow-lg shadow-primary/20 active:scale-95 transition-transform" onclick="confirmDateSelection()">
+                        확인
+                    </button>
+</div>
+</div>
+<script>
+                // Calendar & Date Logic
+                (function() {
+                    const grid = document.getElementById('calendar-grid');
+                    const monthDisplay = document.getElementById('current-month-year');
+                    // State
+                    let currentDate = new Date(); // Today
+                    try {
+                        const presetDate = localStorage.getItem('todoAddPresetDate');
+                        if (presetDate && /^\d{4}-\d{2}-\d{2}$/.test(presetDate)) {
+                            const d = new Date(presetDate + 'T00:00:00');
+                            if (!Number.isNaN(d.getTime())) currentDate = d;
+                        }
+                    } catch (_) {}
+                    let displayedDate = new Date(currentDate.getFullYear(), currentDate.getMonth(), 1); // The month being viewed
+                    let selectedStartDate = currentDate.getDate();
+                    let selectedStartMonth = currentDate.getMonth();
+                    let selectedStartYear = currentDate.getFullYear();
+                    let selectedEndDate = null;
+                    let selectedEndMonth = null;
+                    let selectedEndYear = null;
+                    // State for Picker
+                    let pickerYear = displayedDate.getFullYear();
+                    let pickerMonth = displayedDate.getMonth();
+                    function updateMonthDisplay() {
+                        const year = displayedDate.getFullYear();
+                        const month = displayedDate.getMonth() + 1;
+                        monthDisplay.innerText = `${year}년 ${month}월`;
+                    }
+                    window.changeMonth = function(delta) {
+                        displayedDate.setMonth(displayedDate.getMonth() + delta);
+                        updateMonthDisplay();
+                        renderCalendar();
+                    }
+                    window.renderCalendar = function() {
+                        grid.innerHTML = '';
+                        const year = displayedDate.getFullYear();
+                        const month = displayedDate.getMonth();
+                        const firstDay = new Date(year, month, 1).getDay();
+                        const daysInMonth = new Date(year, month + 1, 0).getDate();
+                        const daysInPrevMonth = new Date(year, month, 0).getDate();
+                        for (let i = 0; i < firstDay; i++) {
+                            const dayNum = daysInPrevMonth - firstDay + i + 1;
+                            const div = document.createElement('div');
+                            div.className = "h-9 w-full flex items-center justify-center text-sm text-slate-300 dark:text-slate-600 select-none";
+                            div.innerText = dayNum;
+                            grid.appendChild(div);
+                        }
+                        for (let day = 1; day <= daysInMonth; day++) {
+                            const dayContainer = document.createElement('div');
+                            dayContainer.className = "h-9 w-full flex items-center justify-center relative cursor-pointer group select-none";
+                            dayContainer.onclick = () => handleDateClick(day);
+                            const currentTimestamp = new Date(year, month, day).getTime();
+                            let startTimestamp = new Date(selectedStartYear, selectedStartMonth, selectedStartDate).getTime();
+                            let endTimestamp = selectedEndDate ? new Date(selectedEndYear, selectedEndMonth, selectedEndDate).getTime() : null;
+                            if (startTimestamp && endTimestamp && startTimestamp > endTimestamp) {
+                                [startTimestamp, endTimestamp] = [endTimestamp, startTimestamp];
+                            }
+                            if (startTimestamp && endTimestamp) {
+                                if (currentTimestamp > startTimestamp && currentTimestamp < endTimestamp) {
+                                    const bg = document.createElement('div');
+                                    bg.className = "absolute inset-y-0 inset-x-0 bg-primary/20 z-0";
+                                    dayContainer.appendChild(bg);
+                                } else if (currentTimestamp === startTimestamp && currentTimestamp !== endTimestamp) {
+                                    const bg = document.createElement('div');
+                                    bg.className = "absolute inset-y-0 right-0 left-1/2 bg-primary/20 z-0";
+                                    dayContainer.appendChild(bg);
+                                } else if (currentTimestamp === endTimestamp && currentTimestamp !== startTimestamp) {
+                                    const bg = document.createElement('div');
+                                    bg.className = "absolute inset-y-0 left-0 right-1/2 bg-primary/20 z-0";
+                                    dayContainer.appendChild(bg);
+                                }
+                            }
+                            const circle = document.createElement('div');
+                            let circleClass = "relative z-10 size-8 rounded-full flex items-center justify-center text-sm transition-all ";
+                            const isStart = currentTimestamp === startTimestamp;
+                            const isEnd = endTimestamp && currentTimestamp === endTimestamp;
+                            const isBetween = startTimestamp && endTimestamp && currentTimestamp > startTimestamp && currentTimestamp < endTimestamp;
+                            if (isStart || isEnd) {
+                                circleClass += "bg-primary text-white font-bold shadow-md shadow-primary/30 transform active:scale-95";
+                            } else if (isBetween) {
+                                circleClass += "text-primary font-bold";
+                            } else {
+                                circleClass += "font-medium text-slate-600 dark:text-slate-400 group-hover:bg-slate-100 dark:group-hover:bg-slate-800";
+                                const today = new Date();
+                                if(year === today.getFullYear() && month === today.getMonth() && day === today.getDate() && !isStart && !isEnd) {
+                                    circleClass += " ring-1 ring-primary/30 text-primary";
+                                }
+                            }
+                            circle.className = circleClass;
+                            circle.innerText = day;
+                            dayContainer.appendChild(circle);
+                            grid.appendChild(dayContainer);
+                        }
+                    }
+                    function handleDateClick(day) {
+                        const clickedTimestamp = new Date(displayedDate.getFullYear(), displayedDate.getMonth(), day).getTime();
+                        let startTimestamp = new Date(selectedStartYear, selectedStartMonth, selectedStartDate).getTime();
+                        if (selectedEndDate) {
+                            selectedStartDate = day;
+                            selectedStartMonth = displayedDate.getMonth();
+                            selectedStartYear = displayedDate.getFullYear();
+                            selectedEndDate = null;
+                            selectedEndMonth = null;
+                            selectedEndYear = null;
+                        } else {
+                            if (clickedTimestamp < startTimestamp) {
+                                selectedEndDate = selectedStartDate;
+                                selectedEndMonth = selectedStartMonth;
+                                selectedEndYear = selectedStartYear;
+                                selectedStartDate = day;
+                                selectedStartMonth = displayedDate.getMonth();
+                                selectedStartYear = displayedDate.getFullYear();
+                            } else if (clickedTimestamp === startTimestamp) {
+                                selectedEndDate = null;
+                            } else {
+                                selectedEndDate = day;
+                                selectedEndMonth = displayedDate.getMonth();
+                                selectedEndYear = displayedDate.getFullYear();
+                            }
+                        }
+                        renderCalendar();
+                    }
+                    const yearList = document.getElementById('year-picker-list');
+                    const monthList = document.getElementById('month-picker-list');
+                    function renderPicker() {
+                        yearList.innerHTML = '';
+                        monthList.innerHTML = '';
+                        const currentYear = new Date().getFullYear();
+                        for(let y = currentYear - 3; y <= currentYear + 3; y++) {
+                            const div = document.createElement('div');
+                            let cls = "text-center py-2 cursor-pointer rounded transition-colors ";
+                            if (y === pickerYear) {
+                                cls += "bg-primary/10 text-primary font-bold sticky top-0";
+                            } else {
+                                cls += "text-slate-400 hover:text-slate-600 hover:bg-slate-50 dark:hover:bg-slate-700";
+                            }
+                            div.className = cls;
+                            div.innerText = y;
+                            div.onclick = () => { pickerYear = y; renderPicker(); };
+                            yearList.appendChild(div);
+                        }
+                        const monthGrid = document.createElement('div');
+                        monthGrid.className = "grid grid-cols-2 gap-2";
+                        for(let m = 0; m < 12; m++) {
+                            const btn = document.createElement('button');
+                            let cls = "p-2 rounded text-sm transition-colors ";
+                            if (m === pickerMonth) {
+                                cls += "bg-primary text-white font-bold shadow-md shadow-primary/30";
+                            } else {
+                                cls += "hover:bg-slate-50 dark:hover:bg-slate-700 text-slate-600 dark:text-slate-300";
+                            }
+                            btn.className = cls;
+                            btn.innerText = (m + 1) + "월";
+                            btn.onclick = () => { pickerMonth = m; renderPicker(); };
+                            monthGrid.appendChild(btn);
+                        }
+                        monthList.appendChild(monthGrid);
+                    }
+                    window.toggleDatePicker = function() {
+                        const overlay = document.getElementById('date-picker-overlay');
+                        if (overlay.classList.contains('hidden')) {
+                            pickerYear = displayedDate.getFullYear();
+                            pickerMonth = displayedDate.getMonth();
+                            renderPicker();
+                            overlay.classList.remove('hidden');
+                        } else {
+                            overlay.classList.add('hidden');
+                        }
+                    }
+                    window.confirmDateSelection = function() {
+                        displayedDate.setFullYear(pickerYear);
+                        displayedDate.setMonth(pickerMonth);
+                        displayedDate.setDate(1); 
+                        updateMonthDisplay();
+                        renderCalendar();
+                        toggleDatePicker();
+                    }
+                    updateMonthDisplay();
+                    renderCalendar();
+                })();
+</script>
+<div class="px-4 py-2">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] pb-3">요일 설정</h3>
+<div class="flex justify-between gap-2" id="weekday-selector">
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all" data-active="true">일</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">월</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all" data-active="true">화</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">수</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all" data-active="true">목</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">금</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">토</button>
+</div>
+</div>
+<script>
+                (function() {
+                    const dayButtons = document.querySelectorAll('#weekday-selector .day-btn');
+                    dayButtons.forEach(btn => {
+                        btn.addEventListener('click', () => {
+                            const nextActive = btn.getAttribute('data-active') !== 'true';
+                            btn.setAttribute('data-active', nextActive ? 'true' : 'false');
+                            if (nextActive) {
+                                btn.className = 'day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all';
+                            } else {
+                                btn.className = 'day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all';
+                            }
+                        });
+                    });
+                })();
+            </script>
+<div class="px-4 py-4 relative z-50">
+<div class="flex items-center justify-between pb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">시간 설정</h3>
+<div class="relative inline-block w-12 h-7">
+<input checked="" class="toggle-checkbox" id="time-setting-toggle" onchange="toggleTimeSettings(this)" type="checkbox"/>
+<label class="toggle-label flex items-center shadow-inner" for="time-setting-toggle">
+<span class="toggle-handle shadow-sm"></span>
+</label>
+</div>
+</div>
+<div class="flex items-start gap-4 transition-all duration-300 origin-top" id="time-selection-area">
+<div class="flex-1 flex flex-col gap-1 relative group">
+<span class="text-xs text-slate-500 dark:text-slate-400 ml-1 font-medium">시작</span>
+<button class="w-full h-14 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex items-center px-4 justify-between transition-all hover:border-primary/30 cursor-pointer outline-none focus:outline-none relative z-50" id="start-time-btn" onclick="toggleTimePicker(event, this, 'start-dropdown')">
+<span class="text-primary font-bold text-lg time-display">14:30</span>
+<span class="material-symbols-outlined text-slate-400 pointer-events-none transition-transform duration-200 icon">expand_more</span>
+</button>
+<div class="hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 mt-1 h-40 flex overflow-hidden time-picker-dropdown" id="start-dropdown" onclick="event.stopPropagation()">
+<div class="flex-1 overflow-y-auto no-scrollbar border-r border-slate-100 dark:border-slate-800 py-1 bg-white dark:bg-slate-900 scroll-smooth snap-y snap-mandatory" id="start-hour-list"></div>
+<div class="flex-1 overflow-y-auto no-scrollbar py-1 bg-white dark:bg-slate-900 scroll-smooth snap-y snap-mandatory" id="start-minute-list"></div>
+</div>
+</div>
+<div class="flex-1 flex flex-col gap-1 relative group">
+<span class="text-xs text-slate-500 dark:text-slate-400 ml-1 font-medium">종료</span>
+<button class="w-full h-14 rounded-xl border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-900 flex items-center px-4 justify-between transition-all hover:border-primary/30 cursor-pointer outline-none focus:outline-none relative z-50" id="end-time-btn" onclick="toggleTimePicker(event, this, 'end-dropdown')">
+<span class="text-primary font-bold text-lg time-display">15:30</span>
+<span class="material-symbols-outlined text-slate-400 pointer-events-none transition-transform duration-200 icon">expand_more</span>
+</button>
+<div class="hidden absolute top-full left-0 w-full bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl shadow-xl z-50 mt-1 h-40 flex overflow-hidden time-picker-dropdown" id="end-dropdown" onclick="event.stopPropagation()">
+<div class="flex-1 overflow-y-auto no-scrollbar border-r border-slate-100 dark:border-slate-800 py-1 bg-white dark:bg-slate-900 scroll-smooth snap-y snap-mandatory" id="end-hour-list"></div>
+<div class="flex-1 overflow-y-auto no-scrollbar py-1 bg-white dark:bg-slate-900 scroll-smooth snap-y snap-mandatory" id="end-minute-list"></div>
+</div>
+</div>
+</div>
+<div class="hidden flex items-center gap-2 mt-3 px-3 py-2 bg-primary/10 rounded-lg animate-pulse" id="time-warning">
+<span class="material-symbols-outlined text-primary text-sm">error</span>
+<p class="text-xs text-primary font-bold">시작 시간은 종료 시간보다 빨라야 합니다.</p>
+</div>
+<script>
+        function generateTimeOptions(containerId, count, step = 1, selectedVal = -1) {
+            const container = document.getElementById(containerId);
+            if (!container) return;
+            let html = '';
+            const type = containerId.includes('hour') ? 'hour' : 'minute';
+            for (let i = 0; i < count; i += step) {
+                let val = i.toString().padStart(2, '0');
+                let isSelected = i === selectedVal;
+                let cls = isSelected 
+                    ? 'text-base font-bold text-primary bg-primary/5 shadow-sm' 
+                    : 'text-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800';
+                html += `<div class="h-10 flex items-center justify-center cursor-pointer snap-center transition-colors duration-200 ${cls}" onclick="selectTime(this, '${type}')">${val}</div>`;
+            }
+            container.innerHTML = html;
+        }
+        generateTimeOptions('start-hour-list', 24, 1, 14);
+        generateTimeOptions('start-minute-list', 60, 5, 30);
+        generateTimeOptions('end-hour-list', 24, 1, 15);
+        generateTimeOptions('end-minute-list', 60, 5, 30);
+        function toggleTimeSettings(checkbox) {
+            const timeArea = document.getElementById('time-selection-area');
+            const warning = document.getElementById('time-warning');
+            closeAllTimePickers();
+            if (checkbox.checked) {
+                timeArea.classList.remove('hidden');
+                timeArea.classList.add('flex');
+            } else {
+                timeArea.classList.remove('flex');
+                timeArea.classList.add('hidden');
+                if (warning) warning.classList.add('hidden');
+            }
+        }
+        function checkClickOutside(event) {
+            const target = event.target;
+            if (!target.closest('.time-picker-dropdown') && !target.closest('button[onclick^="toggleTimePicker"]')) {
+                closeAllTimePickers();
+            }
+        }
+        function toggleTimePicker(event, btn, dropdownId) {
+            event.stopPropagation();
+            const dropdown = document.getElementById(dropdownId);
+            const overlay = document.getElementById('dismiss-overlay');
+            const isOpening = dropdown.classList.contains('hidden');
+            closeAllTimePickers();
+            if (isOpening) {
+                dropdown.classList.remove('hidden');
+                btn.classList.remove('border-slate-200', 'dark:border-slate-700');
+                btn.classList.add('border-primary');
+                btn.querySelector('.icon').classList.add('rotate-180', 'text-primary');
+                overlay.classList.remove('hidden');
+            }
+        }
+        function closeAllTimePickers() {
+            const allDropdowns = document.querySelectorAll('.time-picker-dropdown');
+            const allBtns = document.querySelectorAll('button[onclick^="toggleTimePicker"]');
+            const overlay = document.getElementById('dismiss-overlay');
+            allDropdowns.forEach(d => d.classList.add('hidden'));
+            allBtns.forEach(b => {
+                b.classList.remove('border-primary');
+                b.classList.add('border-slate-200', 'dark:border-slate-700');
+                const i = b.querySelector('.icon');
+                if(i) { i.classList.remove('rotate-180', 'text-primary'); }
+            });
+            overlay.classList.add('hidden');
+        }
+        function selectTime(option, type) {
+            const dropdown = option.closest('.time-picker-dropdown');
+            const btn = dropdown.previousElementSibling; 
+            const display = btn.querySelector('.time-display');
+            let currentText = display.innerText;
+            let [h, m] = currentText.split(':');
+            if (type === 'hour') {
+                h = option.innerText;
+            } else {
+                m = option.innerText;
+            }
+            display.innerText = `${h}:${m}`;
+            // Highlight selected
+            const siblings = option.parentElement.children;
+            for (let sib of siblings) {
+                sib.className = "h-10 flex items-center justify-center text-sm text-slate-400 hover:bg-slate-50 dark:hover:bg-slate-800 cursor-pointer snap-center transition-colors duration-200";
+            }
+            option.className = "h-10 flex items-center justify-center text-base font-bold text-primary bg-primary/5 shadow-sm cursor-pointer snap-center transition-colors duration-200";
+        }
+    </script>
+</div>
+<div class="px-4 py-4">
+<div class="flex items-center justify-between pb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">세부 할 일</h3>
+<button class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-xl">add</span>
+</button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="flex items-center gap-3 p-4 rounded-xl bg-slate-50 dark:bg-slate-900/50 border border-transparent hover:border-slate-200 dark:hover:border-slate-700 transition-colors border-dashed border-2 border-slate-200 dark:border-slate-700">
+<span class="material-symbols-outlined text-slate-300">add_task</span>
+<span class="flex-1 text-slate-400 dark:text-slate-500 text-sm font-medium">세부 할 일을 추가해보세요</span>
+</div>
+</div>
+</div>
+<div class="px-4 py-4 pb-20">
+<div class="flex items-center justify-between pb-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em]">참고 URL</h3>
+<button class="px-3 py-1.5 rounded-lg bg-primary/10 text-primary text-sm font-bold flex items-center gap-1 hover:bg-primary/20 transition-colors">
+<span class="material-symbols-outlined text-sm">link</span>
+                        링크 추가
+                    </button>
+</div>
+<div class="flex flex-col gap-2">
+<div class="py-4 text-center text-slate-400 dark:text-slate-600 text-sm">
+                        등록된 링크가 없습니다.
+                    </div>
+</div>
+</div>
+</div>
+<div id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[28px]">check_circle</span><span class="text-xs font-medium">할일</span></button>
+<button class="flex flex-1 flex-col items-center justify-center gap-1 text-primary"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">calendar_month</span><span class="text-xs font-bold">캘린더</span></button>
+<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[28px]">groups</span><span class="text-xs font-medium">팀</span></button>
+<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[28px]">flag</span><span class="text-xs font-medium">목표</span></button>
+<button class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary"><span class="material-symbols-outlined text-[28px]">settings</span><span class="text-xs font-medium">설정</span></button>
+</div>
+</div>
+
+<script>
+  (function () {
+    function go(screen) {
+      if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+        TeamTodo.navigate(screen);
+      }
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+      try {
+        const editMode = localStorage.getItem('todoEditMode') === '1';
+        const rawTask = localStorage.getItem('todoEditTask');
+        const task = rawTask ? JSON.parse(rawTask) : null;
+        const presetDate = localStorage.getItem('todoAddPresetDate');
+        const titleInput = document.getElementById('todoTitleInput');
+        const pointRange = document.getElementById('pointRange');
+        const pointDisplay = document.getElementById('point-display');
+        if (editMode && task) {
+          if (titleInput) titleInput.value = task.title || '';
+          const p = Math.max(0, Math.min(100, parseInt(task.points || 50, 10) || 50));
+          if (pointRange) pointRange.value = String(p);
+          if (pointDisplay) pointDisplay.textContent = String(p);
+        }
+        if (presetDate && /^\d{4}-\d{2}-\d{2}$/.test(presetDate)) {
+          const d = new Date(presetDate + 'T00:00:00');
+          if (!Number.isNaN(d.getTime())) {
+            const targetDay = d.getDay(); // 0(일)~6(토)
+            const dayButtons = Array.from(document.querySelectorAll('#weekday-selector .day-btn'));
+            dayButtons.forEach((btn, idx) => {
+              const active = idx === targetDay;
+              btn.setAttribute('data-active', active ? 'true' : 'false');
+              btn.className = active
+                ? 'day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all'
+                : 'day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all';
+            });
+          }
+        }
+      } catch (_) {}
+
+      const topBar = document.querySelector('.sticky.top-0');
+      if (topBar) {
+        const leftBtn = topBar.children[0];
+        const saveBtn = topBar.children[2];
+        if (leftBtn) leftBtn.addEventListener('click', function () {
+          localStorage.removeItem('todoEditMode');
+          localStorage.removeItem('todoEditTask');
+          localStorage.removeItem('todoAddPresetDate');
+          go('calendar');
+        });
+        if (saveBtn) saveBtn.addEventListener('click', function () {
+          const profileId = localStorage.getItem('currentProfileId') || '';
+          if (!profileId) {
+            go('profile_select');
+            return;
+          }
+
+          const title = (document.getElementById('todoTitleInput')?.value || '').trim();
+          if (!title) return;
+
+          const point = parseInt(document.getElementById('pointRange')?.value || '0', 10) || 0;
+          const dayButtons = Array.from(document.querySelectorAll('#weekday-selector .day-btn'));
+          const daysOfWeek = [];
+          dayButtons.forEach((btn, idx) => {
+            if (btn.getAttribute('data-active') === 'true') daysOfWeek.push(idx);
+          });
+
+          const selectedDate = localStorage.getItem('todoAddPresetDate') || new Date().toISOString().slice(0, 10);
+          const startTime = (document.querySelector('#start-time-btn .time-display')?.textContent || '').trim();
+          const endTime = (document.querySelector('#end-time-btn .time-display')?.textContent || '').trim();
+          const useTime = !!document.getElementById('time-setting-toggle')?.checked;
+          let editTask = null;
+          try { editTask = JSON.parse(localStorage.getItem('todoEditTask') || 'null'); } catch (_) { editTask = null; }
+
+          const payload = {
+            profileId: profileId,
+            title: title,
+            startDate: selectedDate,
+            endDate: selectedDate,
+            startTime: useTime ? startTime : '',
+            endTime: useTime ? endTime : '',
+            points: point,
+            isCompleted: false,
+            parentTodoId: ''
+          };
+          if (daysOfWeek.length > 0) payload.daysOfWeek = daysOfWeek;
+          if (editTask && editTask.id) payload.id = String(editTask.id);
+
+          if (window.TeamTodo && typeof TeamTodo.saveTodo === 'function') {
+            TeamTodo.saveTodo(payload, function (res) {
+              const savedId = (res && (res.id || res.todoId)) || payload.id || '';
+              if (useTime && startTime && savedId && window.TeamTodo && typeof TeamTodo.setAlarm === 'function') {
+                try {
+                  const ts = new Date(selectedDate + 'T' + startTime + ':00').getTime();
+                  if (!Number.isNaN(ts)) TeamTodo.setAlarm(String(savedId), title, ts, false);
+                } catch (_) {}
+              }
+              localStorage.removeItem('todoEditMode');
+              localStorage.removeItem('todoEditTask');
+              localStorage.removeItem('todoAddPresetDate');
+              go('calendar');
+            });
+            return;
+          }
+          go('calendar');
+        });
+      }
+
+      const subtaskAddBtn = document.querySelector('.px-4.py-4 button.size-8');
+      if (subtaskAddBtn) subtaskAddBtn.addEventListener('click', function () { go('subtodo_add'); });
+
+      const navItems = document.querySelectorAll('#bottomNav button');
+      if (navItems.length >= 5) {
+        navItems[0].addEventListener('click', function () { go('todo_main'); });
+        navItems[1].addEventListener('click', function () { go('calendar'); });
+        navItems[2].addEventListener('click', function () { go('team_list'); });
+        navItems[3].addEventListener('click', function () { go('goal_list'); });
+        navItems[4].addEventListener('click', function () { go('settings'); });
+      }
+    });
+  })();
+</script>
+</body></html>
+

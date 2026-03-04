@@ -1,0 +1,247 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link rel="stylesheet" href="../vendor/plus-jakarta.css" />
+  <link rel="stylesheet" href="../vendor/material-symbols.css" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#eb4770",
+            "background-light": "#f8f6f6",
+            "background-dark": "#211115"
+          },
+          fontFamily: {
+            display: ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+          },
+          borderRadius: { DEFAULT: "0.5rem", lg: "1rem", xl: "1.5rem", full: "9999px" }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { min-height: max(884px, 100dvh); }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      width: 1em; height: 1em; display: inline-block; overflow: hidden; font-size: 24px;
+    }
+    html:not(.fonts-ready) .material-symbols-outlined { visibility: hidden; }
+  </style>
+  <script src="app.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+  <div class="relative flex h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-hidden">
+    <header class="flex items-center bg-white dark:bg-background-dark p-4 border-b border-primary/10 justify-between sticky top-0 z-10">
+      <div class="flex items-center gap-2">
+        <button id="btnBack" class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors" aria-label="뒤로가기">
+          <span class="material-symbols-outlined">arrow_back</span>
+        </button>
+        <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">프로필 관리</h2>
+      </div>
+      <div class="flex items-center">
+        <button id="btnMenu" class="flex items-center justify-center rounded-xl h-10 w-10 bg-transparent text-slate-600 dark:text-slate-400 hover:bg-primary/5" aria-label="硫붾돱">
+          <span class="material-symbols-outlined">more_vert</span>
+        </button>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+      <p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 px-1">사용 중인 프로필</p>
+      <div id="profileList"></div>
+      <button id="btnAddProfile" class="w-full flex items-center justify-center gap-2 rounded-xl h-14 bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all font-bold mt-4">
+        <span class="material-symbols-outlined">person_add</span>
+        <span>새 프로필 추가</span>
+      </button>
+    </main>
+
+        <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+      <a id="navTodo" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-[28px]">check_circle</span><p class="text-xs font-medium">할일</p></a>
+      <a id="navCalendar" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><p class="text-xs font-medium">캘린더</p></a>
+      <a id="navTeam" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><p class="text-xs font-medium">팀</p></a>
+      <a id="navGoal" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><p class="text-xs font-medium">목표</p></a>
+      <a id="navSettings" class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings: 'FILL' 1">settings</span><p class="text-xs font-bold">설정</p></a>
+    </nav>
+  </div>
+
+  <script>
+    (function () {
+      const PROFILE_CACHE_MY = 'profileSelectCacheMy';
+      const MALE = ["face", "sentiment_satisfied", "mood", "emoji_people"];
+      const FEMALE = ["face_3", "sentiment_satisfied", "mood", "emoji_people"];
+
+      function clearEditing() {
+        localStorage.removeItem("editingProfileId");
+        localStorage.removeItem("editingProfileName");
+        localStorage.removeItem("editingAvatarType");
+        localStorage.removeItem("editingAvatarIndex");
+        localStorage.removeItem("editingIsMyAccount");
+        localStorage.removeItem("editingPhotoUrl");
+        localStorage.removeItem("selectedAvatarType");
+        localStorage.removeItem("selectedAvatarIndex");
+        localStorage.removeItem("selectedAvatarUrl");
+      }
+
+      function esc(s) {
+        return String(s || "").replace(/[&<>"']/g, function (c) {
+          return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" }[c];
+        });
+      }
+
+      function avatarHtml(profile) {
+        if (profile && profile.photoUrl) {
+          return '<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-primary/20" style="background-image:url(\'' + String(profile.photoUrl).replace(/'/g, "\\'") + '\')"></div>';
+        }
+        const list = profile && profile.avatarType === "female" ? FEMALE : MALE;
+        const idx = (parseInt(profile && profile.avatarIndex, 10) || 0) % list.length;
+        return '<div class="h-14 w-14 rounded-full border-2 border-primary/20 flex items-center justify-center bg-white text-primary"><span class="material-symbols-outlined text-3xl">' + list[idx] + '</span></div>';
+      }
+
+      function openEdit(p) {
+        localStorage.setItem("editingProfileId", p.id || "");
+        localStorage.setItem("editingProfileName", p.name || "");
+        localStorage.setItem("editingAvatarType", p.avatarType || "female");
+        localStorage.setItem("editingAvatarIndex", String(parseInt(p.avatarIndex, 10) || 0));
+        localStorage.setItem("editingIsMyAccount", p.isMyAccount ? "true" : "false");
+        localStorage.setItem("editingPhotoUrl", p.photoUrl || "");
+        localStorage.setItem("selectedAvatarType", p.avatarType || "female");
+        localStorage.setItem("selectedAvatarIndex", String(parseInt(p.avatarIndex, 10) || 0));
+        localStorage.setItem("selectedAvatarUrl", p.photoUrl || "");
+        TeamTodo.navigate("avatar_select");
+      }
+
+      function renderProfiles(list) {
+        const root = document.getElementById("profileList");
+        root.innerHTML = "";
+
+        if (!Array.isArray(list) || list.length === 0) {
+          const empty = document.createElement("div");
+          empty.className = "rounded-xl border border-dashed border-slate-200 bg-slate-50 p-6 text-center text-slate-400 text-sm";
+          empty.textContent = "아직 프로필이 없습니다. 새 프로필을 추가해 주세요.";
+          root.appendChild(empty);
+          return;
+        }
+
+        list.forEach(function (p) {
+          const row = document.createElement("div");
+          row.className = "flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm mb-3";
+          row.innerHTML =
+            '<div class="relative">' +
+            avatarHtml(p) +
+            (p && p.isMyAccount ? '<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-white rounded-full"></div>' : "") +
+            '</div>' +
+            '<div class="flex flex-col flex-1 justify-center"><p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal">' + esc(p && p.name || "프로필") + '</p></div>' +
+            '<div class="shrink-0"><button class="flex items-center justify-center rounded-lg h-9 px-4 bg-primary/10 text-primary hover:bg-primary/20 text-sm font-semibold transition-colors"><span>수정</span></button></div>';
+          row.querySelector("button").addEventListener("click", function () { openEdit(p || {}); });
+          root.appendChild(row);
+        });
+      }
+
+      function requestProfiles() {
+        if (window.TeamTodo && typeof TeamTodo.call === "function") {
+          TeamTodo.call("getProfilesForSelection", {});
+          return;
+        }
+        if (window.AndroidBridge && typeof AndroidBridge.call === "function") {
+          AndroidBridge.call("getProfilesForSelection", "{}");
+        }
+      }
+
+      function renderProfilesFromCache() {
+        try {
+          const my = JSON.parse(localStorage.getItem(PROFILE_CACHE_MY) || 'null');
+          if (Array.isArray(my) && my.length > 0) {
+            renderProfiles(my);
+            return;
+          }
+          const localProfiles = JSON.parse(localStorage.getItem('localSampleProfiles') || 'null');
+          if (Array.isArray(localProfiles) && localProfiles.length > 0) {
+            renderProfiles(localProfiles);
+          }
+        } catch (_) {}
+      }
+
+      function bindNavigation() {
+        function nav(id, screen) {
+          const el = document.getElementById(id);
+          if (!el) return;
+          el.addEventListener("click", function (e) {
+            e.preventDefault();
+            TeamTodo.navigate(screen);
+          });
+        }
+        nav("navTodo", "todo_main");
+        nav("navCalendar", "calendar");
+        nav("navTeam", "team_list");
+        nav("navGoal", "goal_list");
+        nav("navSettings", "settings");
+      }
+
+      const prevOnNative = window.onNativeEvent;
+      window.onNativeEvent = function (event, data) {
+        if (typeof prevOnNative === "function") {
+          try { prevOnNative(event, data); } catch (_) { }
+        }
+        if (event === "onMyProfiles") {
+          const rows = Array.isArray(data) ? data : [];
+          if (rows.length > 0) {
+            renderProfiles(rows);
+          } else {
+            renderProfilesFromCache();
+          }
+        }
+      };
+
+      document.addEventListener("DOMContentLoaded", function () {
+        const timeoutReady = setTimeout(function () { document.documentElement.classList.add("fonts-ready"); }, 200);
+        if (document.fonts && document.fonts.ready) {
+          document.fonts.ready.then(function () {
+            clearTimeout(timeoutReady);
+            document.documentElement.classList.add("fonts-ready");
+          });
+        }
+
+        document.getElementById("btnBack").addEventListener("click", function () { TeamTodo.navigate("settings"); });
+        document.getElementById("btnMenu").addEventListener("click", function () { TeamTodo.navigate("profile_select"); });
+        document.getElementById("btnAddProfile").addEventListener("click", function () {
+          clearEditing();
+          TeamTodo.navigate("avatar_select");
+        });
+
+        bindNavigation();
+        renderProfilesFromCache();
+        if (!document.getElementById("profileList").children.length) {
+          renderProfiles([]);
+        }
+        requestProfiles();
+      });
+    })();
+  </script>
+</body>
+</html>
+
+
+

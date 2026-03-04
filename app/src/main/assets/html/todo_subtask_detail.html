@@ -1,0 +1,209 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>하위 할일 상세</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: { primary: '#eb4770', 'background-light': '#f8f6f6', 'background-dark': '#211115' },
+          fontFamily: { display: ['Plus Jakarta Sans', 'sans-serif'] }
+        }
+      }
+    };
+  </script>
+  <style>
+    body{font-family:'Plus Jakarta Sans',sans-serif;min-height:max(884px,100dvh);} 
+    .fly-heart{position:fixed;pointer-events:none;z-index:100;color:var(--primary-color);font-size:24px;}
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100">
+  <div class="relative flex h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-hidden">
+    <header class="flex items-center bg-white dark:bg-background-dark p-4 justify-between border-b border-primary/10">
+      <button id="btnBack" class="text-primary flex size-10 items-center justify-center rounded-full hover:bg-primary/10"><span class="material-symbols-outlined">arrow_back</span></button>
+      <h2 class="text-lg font-bold flex-1 text-center">하위 할일 상세</h2>
+      <div class="w-10"></div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto pb-24 px-5">
+      <section class="pt-6">
+        <p id="parentTitle" class="text-xs text-slate-500 mb-2">상위 할일</p>
+        <div class="flex items-start justify-between gap-3 mb-2">
+          <h1 id="subTitle" class="text-2xl font-extrabold">하위 할일</h1>
+          <button id="cheerOpenBtn" class="flex items-center gap-1 px-2.5 py-1.5 rounded-full border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 hover:bg-primary/5">
+            <span class="material-symbols-outlined text-primary text-lg">thumb_up</span>
+            <span id="cheerCount" class="text-xs font-bold text-slate-600 dark:text-slate-300">0</span>
+          </button>
+        </div>
+        <p class="text-sm text-slate-500 mb-4">완료 시 포인트가 반영됩니다.</p>
+        <div class="flex items-center gap-2">
+          <span id="subPoints" class="inline-flex items-center rounded-full bg-primary/10 px-2.5 py-1 text-xs font-bold text-primary">+0p</span>
+          <span id="doneState" class="text-xs text-slate-500">미완료</span>
+        </div>
+      </section>
+
+      <section class="mt-3 p-4 rounded-2xl bg-primary/5 border border-primary/15">
+        <div class="space-y-2">
+          <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-sm">
+            <span class="material-symbols-outlined text-primary text-lg">calendar_today</span>
+            <span id="subDateText" class="font-medium">2023.10.05</span>
+          </div>
+          <div class="flex items-center gap-2 text-slate-600 dark:text-slate-300 text-sm">
+            <span class="material-symbols-outlined text-primary text-lg">schedule</span>
+            <span id="subTimeText" class="font-medium">09:00</span>
+          </div>
+        </div>
+        <div id="subWeekdayRow" class="flex -space-x-1.5 mt-4"></div>
+      </section>
+
+      <section class="mt-8 p-4 rounded-xl border border-primary/15 bg-white dark:bg-slate-800">
+        <label class="flex items-center gap-3 cursor-pointer">
+          <input id="doneCheck" type="checkbox" class="h-6 w-6 accent-[var(--primary-color)]" />
+          <span class="font-semibold">완료 처리</span>
+        </label>
+      </section>
+
+      <section class="mt-6 mb-2">
+        <h3 class="text-sm font-bold uppercase tracking-widest mb-3">참고 URL</h3>
+        <div class="flex items-center gap-3 p-3 rounded-xl bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700">
+          <div class="w-8 h-8 rounded-full bg-slate-50 dark:bg-slate-700 flex items-center justify-center text-slate-400">
+            <span class="material-symbols-outlined text-lg">link</span>
+          </div>
+          <div class="flex-1 min-w-0">
+            <p class="text-sm font-semibold text-slate-800 dark:text-slate-200 truncate">등록된 링크가 없습니다</p>
+          </div>
+        </div>
+      </section>
+    </main>
+
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">check_circle</span><p class="text-xs font-bold">할일</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><p class="text-xs font-medium">캘린더</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><p class="text-xs font-medium">팀</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><p class="text-xs font-medium">목표</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">settings</span><p class="text-xs font-medium">설정</p></a>
+    </nav>
+  </div>
+  <div id="cheerModal" class="hidden fixed inset-0 z-[95]">
+    <div class="absolute inset-0 bg-black/40 backdrop-blur-sm" id="cheerBackdrop"></div>
+    <div class="absolute bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl p-6 shadow-2xl">
+      <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mx-auto mb-5"></div>
+      <div class="flex items-center justify-between mb-4">
+        <h3 class="text-lg font-bold">응원한 친구들</h3>
+        <button id="cheerCloseBtn" class="p-1 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800"><span class="material-symbols-outlined">close</span></button>
+      </div>
+      <div id="cheerList" class="space-y-3 max-h-56 overflow-y-auto no-scrollbar"></div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      let sub = null;
+      try { sub = JSON.parse(localStorage.getItem('selectedTodoSubTask') || 'null'); } catch (_) { sub = null; }
+      if (!sub) sub = { label: '하위 할일', points: 0, checked: false };
+
+      document.getElementById('parentTitle').textContent = localStorage.getItem('selectedTodoParentTitle') || '상위 할일';
+      document.getElementById('subTitle').textContent = sub.label || '하위 할일';
+      document.getElementById('subPoints').textContent = `+${sub.points || 0}p`;
+      const likes = Number(sub.likes || 0);
+      document.getElementById('cheerCount').textContent = String(likes);
+
+      const weekdays = ['일', '월', '화', '수', '목', '금', '토'];
+      const activeWeekdays = Array.isArray(sub.weekdays) && sub.weekdays.length > 0
+        ? sub.weekdays
+        : ['수'];
+      const weekdayRow = document.getElementById('subWeekdayRow');
+      weekdayRow.innerHTML = weekdays.map((d) => {
+        const active = activeWeekdays.includes(d);
+        return `<div class="w-8 h-8 rounded-full border-2 border-white flex items-center justify-center text-[10px] font-bold ${active ? 'bg-primary text-white' : 'bg-primary/30 text-primary'}">${d}</div>`;
+      }).join('');
+      document.getElementById('subDateText').textContent = sub.dateText || '2023.10.05';
+      document.getElementById('subTimeText').textContent = sub.timeText || '09:00';
+
+      const cheerModal = document.getElementById('cheerModal');
+      const cheerList = document.getElementById('cheerList');
+      function openCheerModal() {
+        cheerList.innerHTML = '';
+        const count = Math.max(1, likes);
+        for (let i = 0; i < count; i += 1) {
+          const row = document.createElement('div');
+          row.className = 'flex items-center gap-3';
+          row.innerHTML = `
+            <div class="w-9 h-9 rounded-full bg-primary/10 text-primary flex items-center justify-center">
+              <span class="material-symbols-outlined text-base">person</span>
+            </div>
+            <div>
+              <p class="font-semibold text-sm">친구 ${i + 1}</p>
+              <p class="text-xs text-slate-500">응원했어요</p>
+            </div>`;
+          cheerList.appendChild(row);
+        }
+        cheerModal.classList.remove('hidden');
+      }
+      function closeCheerModal() {
+        cheerModal.classList.add('hidden');
+      }
+      document.getElementById('cheerOpenBtn').addEventListener('click', openCheerModal);
+      document.getElementById('cheerCloseBtn').addEventListener('click', closeCheerModal);
+      document.getElementById('cheerBackdrop').addEventListener('click', closeCheerModal);
+
+      const doneCheck = document.getElementById('doneCheck');
+      const doneState = document.getElementById('doneState');
+      doneCheck.checked = !!sub.checked;
+      doneState.textContent = doneCheck.checked ? '완료' : '미완료';
+
+      doneCheck.addEventListener('change', (e) => {
+        doneState.textContent = e.target.checked ? '완료' : '미완료';
+        if (e.target.checked) {
+          const rect = doneCheck.getBoundingClientRect();
+          const heart = document.createElement('span');
+          heart.className = 'material-symbols-outlined fly-heart';
+          heart.textContent = 'favorite';
+          heart.style.left = `${rect.left + rect.width / 2}px`;
+          heart.style.top = `${rect.top + rect.height / 2}px`;
+          heart.style.transform = 'translate(-50%, -50%)';
+          document.body.appendChild(heart);
+          heart.animate([{ transform: 'translate(-50%, -50%) scale(1)', opacity: 1 }, { transform: 'translate(-50%, -110px) scale(1.2)', opacity: 0 }], { duration: 700, easing: 'ease-out' });
+          setTimeout(() => heart.remove(), 720);
+        }
+      });
+
+      document.getElementById('btnBack').addEventListener('click', () => TeamTodo.navigate('todo_detail'));
+      const links = document.querySelectorAll('#bottomNav a');
+      const screens = ['todo_main', 'calendar', 'team_list', 'goal_list', 'settings'];
+      links.forEach((el, idx) => {
+        el.addEventListener('click', (e) => { e.preventDefault(); TeamTodo.navigate(screens[idx]); });
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+

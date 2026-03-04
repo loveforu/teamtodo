@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+      tailwind.config = {
+        darkMode: "class",
+        theme: {
+          extend: {
+            colors: {
+              "primary": "#eb4770",
+              "background-light": "#f8f6f6",
+              "background-dark": "#211115",
+            },
+            fontFamily: {
+              "display": ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+            },
+            borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+          },
+        },
+      }
+    </script>
+<title>프로필 관리</title>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 antialiased">
+<div class="relative flex h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-hidden">
+<header class="flex items-center bg-white dark:bg-background-dark p-4 border-b border-primary/10 justify-between sticky top-0 z-10">
+<div class="flex items-center gap-2">
+<button class="text-primary hover:bg-primary/10 p-2 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">프로필 관리</h2>
+</div>
+<div class="flex items-center">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 bg-transparent text-slate-600 dark:text-slate-400 hover:bg-primary/5">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</header>
+<main class="flex-1 overflow-y-auto px-4 py-6 space-y-4">
+<p class="text-sm font-medium text-slate-500 dark:text-slate-400 mb-2 px-1">사용 중인 프로필</p>
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm">
+<div class="relative">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-primary/20" data-alt="Cute semi-realistic female avatar with soft features" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDx3SY1N3hKppJnUMlmux7i72mKKn1_HSCn2uQDnaH0Tfwj4IhgaMiQV6bgced8l-l_KywvYrLmCOXv02a89A7bwzHrFv1MQLqJ4ZuWGCMRo5CooEVmZG_xcJ8DLcH49ut8-lyS8KDZAywC1h8y4vzslLYFBd-tW8ZOLYsfB6plncI69_AlFlDGrLHVKVfiu1gPPTjjOAqVz-Mokgh6_EIPot6lTTfTLMvAqkWZ7rQj80P9EcCJkz9Kdnivennm2LTt1sK777jnZW0");'></div>
+<div class="absolute bottom-0 right-0 h-4 w-4 bg-green-500 border-2 border-white rounded-full"></div>
+</div>
+<div class="flex flex-col flex-1 justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal">김미소</p>
+</div>
+<div class="shrink-0">
+<button class="flex items-center justify-center rounded-lg h-9 px-4 bg-primary/10 text-primary hover:bg-primary/20 text-sm font-semibold transition-colors">
+<span>수정</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-primary/20" data-alt="Stylized semi-realistic male avatar with clean lines" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuDA0sfX_2hT1gDAffLsLHbV7qwygf1WVt2OVlfxlm_61KMzK6usYT_1TLtarucd3yQqDdVzGhdsiTkI7XhZCBhFlbYsNSbcbctnrcS1iAHb33-ZyNDTV60bMdErBJGZ8oWTMoqlnAqp03llM9Bl7pH40DNRv15kTIN7fDkkwiDWfJFUyZOfM5Iks89uhqYVCa3PQbMB8raACwCpNX7LtXgrk0N7qaNYG5Ib-pQz3FGHEljPboGQGmy1Vx5o35zvXJZWEjYonOVXulY");'></div>
+<div class="flex flex-col flex-1 justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal">이준호</p>
+</div>
+<div class="shrink-0">
+<button class="flex items-center justify-center rounded-lg h-9 px-4 bg-primary/10 text-primary hover:bg-primary/20 text-sm font-semibold transition-colors">
+<span>수정</span>
+</button>
+</div>
+</div>
+<div class="flex items-center gap-4 bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-primary/5 shadow-sm opacity-80">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full h-14 w-14 border-2 border-primary/20" data-alt="Sophisticated female avatar illustration" style='background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuCRWDnAI3D7gSfwGw7aSFciMRoAxM1GHtxeCH1Xzb5lqUvtUuZhatSbhONX1QK0xLmvbhKBRi9_udI7yrMOM74xecYCi0u15-uVzWrBfZsldSm6AUgxxeL74ykRWFpXGne3VlJLaXp-d9MRrhaHdNRbfh-EV5Rv3Hwd1t_ZaQJyd1LsdRzrftmTMcxoDgsPNLrXzN04ILSr8M8RzOZK15l8OzvVTwvCXvEArSZeonCxzpbY4uig8a1Z-CkY08DGbCsIIK1BDbhXvnA");'></div>
+<div class="flex flex-col flex-1 justify-center">
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold leading-normal">박서연</p>
+</div>
+<div class="shrink-0">
+<button class="flex items-center justify-center rounded-lg h-9 px-4 bg-primary/10 text-primary hover:bg-primary/20 text-sm font-semibold transition-colors">
+<span>수정</span>
+</button>
+</div>
+</div>
+<button class="w-full flex items-center justify-center gap-2 rounded-xl h-14 bg-primary text-white shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all font-bold mt-4">
+<span class="material-symbols-outlined">person_add</span>
+<span>새 프로필 추가</span>
+</button>
+</main>
+<nav class="flex justify-between items-center border-t border-primary/10 bg-white dark:bg-background-dark px-2 pb-6 pt-2">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">할일</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">calendar_today</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">캘린더</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">group</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">팀</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined">flag</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">목표</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">settings</span>
+<p class="text-[10px] font-medium leading-normal tracking-wide">설정</p>
+</a>
+</nav>
+</div>
+</body></html>

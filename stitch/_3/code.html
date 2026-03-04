@@ -1,0 +1,589 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>친구 응원 및 실시간 포인트 반영</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script>
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "sans": ["Plus Jakarta Sans", "sans-serif"],
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    animation: {
+                        'fly-heart': 'flyHeart 1s ease-in-out forwards',
+                        'pulse-glow': 'pulseGlow 2s infinite',
+                        'float-up': 'floatUp 0.8s ease-out forwards',
+                    },
+                    keyframes: {
+                        flyHeart: {
+                            '0%': { transform: 'translate(0, 0) scale(1)', opacity: '1' },
+                            '100%': { transform: 'translate(var(--tx), var(--ty)) scale(0.5)', opacity: '0' }
+                        },
+                        pulseGlow: {
+                            '0%, 100%': { filter: 'drop-shadow(0 0 0px rgba(235, 71, 112, 0))' },
+                            '50%': { filter: 'drop-shadow(0 0 8px rgba(235, 71, 112, 0.8))' }
+                        },
+                        floatUp: {
+                            '0%': { transform: 'translateY(0) scale(1)', opacity: '1' },
+                            '100%': { transform: 'translateY(-20px) scale(1.2)', opacity: '0' }
+                        }
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            min-height: max(884px, 100dvh);
+            -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased; 
+        }
+        .material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;color: inherit; 
+        }
+        .fly-heart-element {
+            position: fixed;
+            pointer-events: none;
+            z-index: 100;
+            color: #eb4770;
+            font-size: 24px;
+        }
+        .plus-one-float {
+            position: fixed;
+            pointer-events: none;
+            z-index: 101;
+            color: #eb4770;
+            font-weight: 800;
+            font-size: 14px;
+            text-shadow: 0 2px 4px rgba(255, 255, 255, 0.8);
+            animation: floatUp 0.8s ease-out forwards;
+        }
+        .modal-backdrop {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.3s ease;
+        }
+        .modal-backdrop.active {
+            opacity: 1;
+            pointer-events: auto;
+        }
+        .modal-content {
+            transform: scale(0.95);
+            opacity: 0;
+            transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s ease;
+        }
+        .modal-backdrop.active .modal-content {
+            transform: scale(1);
+            opacity: 1;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+    </style>
+<style>
+        body {
+          min-height: max(884px, 100dvh);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+<div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden">
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-30 border-b border-primary/10">
+<button class="text-slate-500 hover:text-primary transition-colors flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800">
+<span class="material-symbols-outlined text-2xl">arrow_back_ios_new</span>
+</button>
+<div class="flex items-center gap-2 flex-1 justify-center">
+<div class="size-8 rounded-full bg-blue-100 text-blue-500 flex items-center justify-center overflow-hidden border border-blue-200">
+<span class="material-symbols-outlined text-xl">face</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight">민수의 할 일</h2>
+</div>
+<div class="flex w-10 items-center justify-end">
+<button class="flex items-center justify-center rounded-xl h-10 w-10 text-slate-400 transition-colors hover:text-primary">
+<span class="material-symbols-outlined">more_vert</span>
+</button>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto pb-24 z-10 no-scrollbar">
+<div class="flex flex-col gap-3 p-6 mx-4 my-4 bg-primary/5 rounded-xl border border-primary/10 relative overflow-hidden z-10">
+<div class="flex gap-6 justify-between items-end relative z-10">
+<div>
+<p class="text-slate-500 dark:text-slate-400 text-xs font-medium uppercase tracking-wider">오늘의 응원 점수</p>
+<div class="flex items-center gap-1.5 mt-0.5 relative">
+<div class="relative" id="target-heart-container">
+<span class="material-symbols-outlined text-primary text-xl transition-all duration-300" id="header-heart" style="font-variation-settings: 'FILL' 0">favorite</span>
+</div>
+<p class="text-slate-900 dark:text-slate-100 text-base font-bold">민수의 포인트</p>
+</div>
+</div>
+<p class="text-sm font-bold leading-normal text-[#d13a5e] transition-all duration-300" id="points-text">140 / 200 p</p>
+</div>
+<div class="relative h-3 w-full rounded-full bg-primary/20 overflow-hidden">
+<div class="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-500 ease-out" id="progress-fill" style="width: 70%;"></div>
+</div>
+<div class="flex justify-between items-center mt-2">
+<p class="text-primary text-sm font-semibold flex items-center gap-1" id="growth-text">
+<span class="material-symbols-outlined text-sm">trending_up</span>
+                    친구를 응원해주세요!
+                </p>
+<p class="text-slate-400 text-xs italic" id="points-remaining">목표 달성까지 60p</p>
+</div>
+</div>
+<div class="mx-4 mb-2">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight pb-3">진행 중인 목표</h3>
+<div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4 snap-x snap-mandatory">
+<div class="snap-start shrink-0 w-[160px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex justify-between items-start mb-3">
+<div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">fitness_center</span>
+</div>
+<span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">75%</span>
+</div>
+<div class="flex flex-col gap-1 mb-3">
+<h4 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">건강 챙기기</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">주 3회 운동</p>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+<div class="bg-green-500 h-full rounded-full w-3/4"></div>
+</div>
+</div>
+<div class="snap-start shrink-0 w-[160px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex justify-between items-start mb-3">
+<div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">verified</span>
+</div>
+<span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">50%</span>
+</div>
+<div class="flex flex-col gap-1 mb-3">
+<h4 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">자격증 취득</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">SQLD 준비</p>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+<div class="bg-blue-500 h-full rounded-full w-1/2"></div>
+</div>
+</div>
+<div class="snap-start shrink-0 w-[160px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4 flex flex-col justify-between relative overflow-hidden group">
+<div class="flex justify-between items-start mb-3">
+<div class="w-10 h-10 rounded-full bg-amber-100 text-amber-600 flex items-center justify-center">
+<span class="material-symbols-outlined text-xl">savings</span>
+</div>
+<span class="text-xs font-bold text-amber-600 bg-amber-50 px-2 py-1 rounded-full">25%</span>
+</div>
+<div class="flex flex-col gap-1 mb-3">
+<h4 class="text-base font-bold text-slate-900 dark:text-slate-100 leading-tight">저축하기</h4>
+<p class="text-xs text-slate-500 dark:text-slate-400">매월 50만원</p>
+</div>
+<div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden">
+<div class="bg-amber-500 h-full rounded-full w-1/4"></div>
+</div>
+</div>
+</div>
+</div>
+<div class="mx-4 mt-2 mb-2 p-4 bg-blue-50/50 dark:bg-blue-900/10 rounded-xl border border-blue-100 dark:border-blue-800 flex items-start gap-3">
+<div class="text-blue-400 shrink-0">
+<span class="material-symbols-outlined text-xl">campaign</span>
+</div>
+<div class="flex-1">
+<p class="dark:text-slate-300 text-sm font-medium leading-relaxed text-slate-800">
+                    "오늘도 열심히 달리는 중! 응원 부탁해요 👋"
+                </p>
+</div>
+</div>
+<div class="px-4 mb-4 mt-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight pb-4 pt-2">할 일 목록</h3>
+<div class="flex flex-col gap-3" id="task-list">
+<div class="relative flex items-center gap-4 bg-primary/[0.04] dark:bg-slate-800/60 border-primary/30 p-4 rounded-xl border shadow-sm transition-all duration-300 task-card" data-task-id="1">
+<div class="flex size-10 items-center justify-center shrink-0 relative">
+<button class="like-btn group flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-700 border border-primary shadow-sm transition-all text-primary hover:scale-110 active:scale-95 cursor-pointer is-liked">
+<span class="material-symbols-outlined text-2xl" style="font-variation-settings: 'FILL' 1">favorite</span>
+</button>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold transition-all duration-300 text-slate-700 task-text-main line-through decoration-primary/30 decoration-2">오전 9:00 - 아침 명상</p>
+<p class="text-sm transition-all duration-300 text-slate-400 task-text-sub">10분간 호흡에 집중하기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="comment-btn flex items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors p-1">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+</button>
+<div class="flex items-center gap-1 text-primary like-count-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold like-count">6</span>
+</div>
+</div>
+</div>
+<div class="relative flex items-center gap-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4 rounded-xl border shadow-sm transition-all duration-300 task-card" data-task-id="2">
+<div class="flex size-10 items-center justify-center shrink-0">
+<button class="like-btn group flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm transition-all text-slate-300 hover:text-primary hover:border-primary hover:scale-110 active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined text-2xl transition-transform" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold transition-all duration-300 text-slate-900 dark:text-white task-text-main">오전 10:30 - 영양제 복용</p>
+<p class="text-sm transition-all duration-300 text-slate-500 task-text-sub">멀티비타민 및 유산균</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="comment-btn flex items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors p-1">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+</button>
+<div class="flex items-center gap-1 text-slate-400 like-count-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold like-count">2</span>
+</div>
+</div>
+</div>
+<div class="relative flex items-center gap-4 bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 p-4 rounded-xl border shadow-sm transition-all duration-300 task-card" data-task-id="3">
+<div class="flex size-10 items-center justify-center shrink-0">
+<button class="like-btn group flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm transition-all text-slate-300 hover:text-primary hover:border-primary hover:scale-110 active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined text-2xl transition-transform" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold transition-all duration-300 text-slate-900 dark:text-white task-text-main">오후 2:00 - 스트레칭</p>
+<p class="text-sm transition-all duration-300 text-slate-500 task-text-sub">목과 어깨 긴장 풀기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="comment-btn flex items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors p-1">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+</button>
+<div class="flex items-center gap-1 text-slate-400 like-count-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold like-count">12</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 rounded-xl border shadow-sm transition-all duration-300 overflow-hidden parent-card" data-task-id="4">
+<div class="flex items-center gap-4 p-4 pb-2">
+<div class="flex size-10 items-center justify-center shrink-0">
+<button class="like-btn group flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 shadow-sm transition-all text-slate-300 hover:text-primary hover:border-primary hover:scale-110 active:scale-95 cursor-pointer">
+<span class="material-symbols-outlined text-2xl transition-transform" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+</div>
+<div class="flex flex-col flex-1">
+<p class="text-base font-semibold text-slate-900 dark:text-white">물 2L 마시기</p>
+<p class="text-sm text-slate-500">수분 충전으로 건강 챙기기</p>
+</div>
+<div class="flex items-center gap-2 shrink-0">
+<button class="comment-btn flex items-center gap-1 text-slate-400 hover:text-blue-500 transition-colors p-1">
+<span class="material-symbols-outlined text-lg">chat_bubble</span>
+</button>
+<div class="flex items-center gap-1 text-slate-400 like-count-container">
+<span class="material-symbols-outlined text-sm" style="font-variation-settings: 'FILL' 1">thumb_up</span>
+<span class="text-xs font-bold like-count">8</span>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-0 border-t border-slate-100 dark:border-slate-700 bg-slate-50/50 dark:bg-black/20">
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors sub-task-row">
+<button class="like-btn-sub shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:scale-110 active:scale-95 transition-all text-slate-300 hover:text-primary hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+<span class="text-sm text-slate-600 dark:text-slate-400 flex-1">500ml (1회차)</span>
+<div class="flex items-center gap-1 text-slate-300 text-xs pr-2 like-count-container">
+<span class="material-symbols-outlined text-xs">thumb_up</span>
+<span class="like-count">1</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors sub-task-row">
+<button class="like-btn-sub shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:scale-110 active:scale-95 transition-all text-slate-300 hover:text-primary hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+<span class="text-sm text-slate-600 dark:text-slate-400 flex-1">500ml (2회차)</span>
+<div class="flex items-center gap-1 text-slate-300 text-xs pr-2 like-count-container">
+<span class="material-symbols-outlined text-xs">thumb_up</span>
+<span class="like-count">0</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 border-b border-slate-100 dark:border-slate-700 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors sub-task-row">
+<button class="like-btn-sub shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:scale-110 active:scale-95 transition-all text-slate-300 hover:text-primary hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+<span class="text-sm text-slate-600 dark:text-slate-400 flex-1">500ml (3회차)</span>
+<div class="flex items-center gap-1 text-slate-300 text-xs pr-2 like-count-container">
+<span class="material-symbols-outlined text-xs">thumb_up</span>
+<span class="like-count">0</span>
+</div>
+</div>
+<div class="flex items-center gap-3 p-3 pl-4 hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors sub-task-row">
+<button class="like-btn-sub shrink-0 flex items-center justify-center w-8 h-8 rounded-full bg-white dark:bg-slate-700 border border-slate-200 dark:border-slate-600 hover:scale-110 active:scale-95 transition-all text-slate-300 hover:text-primary hover:border-primary cursor-pointer">
+<span class="material-symbols-outlined text-lg" style="font-variation-settings: 'FILL' 0">favorite</span>
+</button>
+<span class="text-sm text-slate-600 dark:text-slate-400 flex-1">500ml (4회차)</span>
+<div class="flex items-center gap-1 text-slate-300 text-xs pr-2 like-count-container">
+<span class="material-symbols-outlined text-xs">thumb_up</span>
+<span class="like-count">0</span>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex justify-around items-end border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-2 pb-6 pt-2 z-[70]">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px] font-bold" style="font-variation-settings: 'FILL' 1">task_alt</span>
+</div>
+<p class="text-xs font-bold leading-normal tracking-[0.015em]">할일</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">calendar_month</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">캘린더</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">group</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">팀</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">flag</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">목표</p>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary transition-colors cursor-pointer" href="#">
+<div class="flex h-8 items-center justify-center">
+<span class="material-symbols-outlined text-[28px]">settings</span>
+</div>
+<p class="text-xs font-medium leading-normal tracking-[0.015em]">설정</p>
+</a>
+</div>
+<div class="modal-backdrop fixed inset-0 z-[100] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm" id="comment-modal">
+<div class="modal-content w-full max-w-xs bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 border border-primary/20">
+<h3 class="text-lg font-bold text-slate-900 dark:text-white mb-4 flex items-center gap-2">
+<span class="material-symbols-outlined text-primary">chat</span>
+                코멘트 남기기
+            </h3>
+<textarea class="w-full h-24 rounded-xl border-primary/20 bg-primary/5 focus:border-primary focus:ring-primary/50 resize-none p-3 text-sm text-slate-800 placeholder:text-slate-400 dark:text-white dark:bg-slate-700/50 mb-4 outline-none transition-all" id="comment-input" placeholder="코멘트를 입력하세요"></textarea>
+<div class="flex gap-3">
+<button class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 font-semibold text-sm hover:bg-slate-50 transition-colors" id="close-modal">취소</button>
+<button class="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-sm shadow-md shadow-primary/30 hover:bg-primary/90 active:scale-95 transition-all" id="send-comment">전송</button>
+</div>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const likeButtons = document.querySelectorAll('.like-btn, .like-btn-sub');
+            const commentButtons = document.querySelectorAll('.comment-btn');
+            const commentModal = document.getElementById('comment-modal');
+            const closeModal = document.getElementById('close-modal');
+            const sendComment = document.getElementById('send-comment');
+            const commentInput = document.getElementById('comment-input');
+            const totalPointsEl = document.getElementById('points-text');
+            const progressFill = document.getElementById('progress-fill');
+            const pointsRemaining = document.getElementById('points-remaining');
+            const headerHeart = document.getElementById('header-heart');
+            // --- Points Config ---
+            const STARTING_CURRENT = 140; 
+            let currentTotalPoints = 200; // This is the second number
+            const POINT_INCREMENT = 2; 
+            // --- Helper: UI Update for Points ---
+            function updateFriendUI() {
+                // Display: 140 / [dynamic] p
+                totalPointsEl.textContent = `${STARTING_CURRENT} / ${currentTotalPoints} p`;
+                let percentage = 0;
+                if (currentTotalPoints > 0) {
+                    percentage = Math.min((STARTING_CURRENT / currentTotalPoints) * 100, 100);
+                }
+                progressFill.style.width = `${percentage}%`;
+                // Update remaining text
+                const remaining = Math.max(0, currentTotalPoints - STARTING_CURRENT);
+                pointsRemaining.textContent = `목표 달성까지 ${remaining}p`;
+            }
+            // --- Comment Modal Logic ---
+            function openModal() {
+                commentModal.classList.add('active');
+                commentInput.value = '';
+                setTimeout(() => commentInput.focus(), 100);
+            }
+            function closeCommentModal() {
+                commentModal.classList.remove('active');
+            }
+            commentButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    openModal();
+                });
+            });
+            closeModal.addEventListener('click', closeCommentModal);
+            sendComment.addEventListener('click', () => {
+                closeCommentModal();
+            });
+            commentModal.addEventListener('click', (e) => {
+                if (e.target === commentModal) closeCommentModal();
+            });
+            // --- Spiral Animation Logic ---
+            function animateFlyingHeart(startX, startY) {
+                const heart = document.createElement('span');
+                heart.classList.add('material-symbols-outlined', 'fly-heart-element');
+                heart.textContent = 'favorite'; // Text content for icon
+                heart.style.fontVariationSettings = "'FILL' 1";
+                document.body.appendChild(heart);
+                const headerRect = headerHeart.getBoundingClientRect();
+                const targetX = headerRect.left + headerRect.width / 2;
+                const targetY = headerRect.top + headerRect.height / 2;
+                const deltaX = targetX - startX;
+                const deltaY = targetY - startY;
+                heart.style.left = `${startX}px`;
+                heart.style.top = `${startY}px`;
+                heart.style.setProperty('--tx', `${deltaX}px`);
+                heart.style.setProperty('--ty', `${deltaY}px`);
+                const duration = 1000;
+                const startTime = performance.now();
+                function animate(currentTime) {
+                    const elapsed = currentTime - startTime;
+                    const progress = Math.min(elapsed / duration, 1);
+                    const ease = 1 - Math.pow(1 - progress, 3);
+                    const currentX = startX + deltaX * ease;
+                    const currentY = startY + deltaY * ease;
+                    const loops = 1.5; 
+                    const angle = progress * Math.PI * 2 * loops;
+                    const maxAmp = 60; 
+                    const amplitude = maxAmp * Math.sin(progress * Math.PI); 
+                    const spiralX = Math.cos(angle) * amplitude * (1 - ease); 
+                    const spiralY = Math.sin(angle) * amplitude * (1 - ease);
+                    heart.style.left = `${currentX + spiralX}px`;
+                    heart.style.top = `${currentY + spiralY}px`;
+                    heart.style.transform = `translate(-50%, -50%) scale(${1 - progress * 0.5}) rotate(${progress * 720}deg)`;
+                    heart.style.opacity = progress > 0.8 ? (1 - progress) * 5 : 1; 
+                    if (progress < 1) {
+                        requestAnimationFrame(animate);
+                    } else {
+                        heart.remove();
+                        headerHeart.animate([
+                            { transform: 'scale(1)', color: '#eb4770' },
+                            { transform: 'scale(1.4)', color: '#d13a5e', offset: 0.5 },
+                            { transform: 'scale(1)', color: '#eb4770' }
+                        ], {
+                            duration: 300,
+                            easing: 'cubic-bezier(0.175, 0.885, 0.32, 1.275)'
+                        });
+                    }
+                }
+                requestAnimationFrame(animate);
+            }
+            function showFloatingPoints(x, y) {
+                const el = document.createElement('div');
+                el.classList.add('plus-one-float');
+                el.textContent = '+2p'; 
+                el.style.left = `${x}px`;
+                el.style.top = `${y}px`;
+                document.body.appendChild(el);
+                setTimeout(() => el.remove(), 800);
+            }
+            // --- Click Handler for Likes ---
+            likeButtons.forEach(btn => {
+                btn.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    e.stopPropagation();
+                    const isLiked = btn.classList.contains('is-liked');
+                    const icon = btn.querySelector('.material-symbols-outlined');
+                    const parentCard = btn.closest('.task-card, .parent-card, .sub-task-row');
+                    let countContainer = null;
+                    let countEl = null;
+                    if (parentCard) {
+                        countContainer = parentCard.querySelector('.like-count-container');
+                        if (countContainer) {
+                            countEl = countContainer.querySelector('.like-count');
+                        }
+                    }
+                    if (!isLiked) {
+                        // LIKE
+                        btn.classList.add('is-liked');
+                        icon.style.fontVariationSettings = "'FILL' 1";
+                        icon.classList.add('text-primary');
+                        icon.classList.remove('text-slate-300');
+                        btn.classList.add('border-primary');
+                        btn.classList.remove('border-slate-200', 'dark:border-slate-600');
+                        // Update local count
+                        if (countEl) {
+                            let currentCount = parseInt(countEl.textContent, 10) || 0;
+                            countEl.textContent = currentCount + 1;
+                            countContainer.classList.add('text-primary');
+                            countContainer.classList.remove('text-slate-400', 'text-slate-300');
+                        }
+                        // Update Global Points (Target increases)
+                        currentTotalPoints += POINT_INCREMENT;
+                        updateFriendUI();
+                        // Animations
+                        const rect = btn.getBoundingClientRect();
+                        const startX = rect.left + rect.width / 2;
+                        const startY = rect.top + rect.height / 2;
+                        animateFlyingHeart(startX, startY);
+                        showFloatingPoints(startX + 10, startY - 20);
+                    } else {
+                        // UNLIKE
+                        btn.classList.remove('is-liked');
+                        icon.style.fontVariationSettings = "'FILL' 0";
+                        icon.classList.remove('text-primary');
+                        icon.classList.add('text-slate-300');
+                        btn.classList.remove('border-primary');
+                        btn.classList.add('border-slate-200', 'dark:border-slate-600');
+                        // Update local count
+                        if (countEl) {
+                            let currentCount = parseInt(countEl.textContent, 10) || 0;
+                            countEl.textContent = Math.max(0, currentCount - 1);
+                            // Revert style if unliked
+                            countContainer.classList.remove('text-primary');
+                            countContainer.classList.add('text-slate-300'); 
+                        }
+                        // Update Global Points (Target decreases)
+                        currentTotalPoints -= POINT_INCREMENT;
+                        updateFriendUI();
+                    }
+                });
+            });
+            // Initial UI Sync
+            updateFriendUI();
+        });
+    </script>
+</div>
+</body></html>

@@ -1,0 +1,28 @@
+# Gradle / Android build artifacts
+.gradle/
+.gradle-home/
+**/build/
+captures/
+
+# Local Android/IDE state
+.android-home/
+.idea/
+*.iml
+local.properties
+
+# Logs / temp
+*.log
+*.tmp
+*.swp
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Keystores / secrets
+*.jks
+*.keystore
+google-services.json
+
+# Generated APKs copied to root
+TeamTodo-debug.apk

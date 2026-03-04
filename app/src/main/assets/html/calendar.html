@@ -1,0 +1,609 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css"
+    rel="stylesheet" />
+  <link
+    href="../vendor/material-symbols.css"
+    rel="stylesheet" />
+  <script src="app.js"></script>
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            "primary": "#eb4770",
+            "background-light": "#f8f6f6",
+            "background-dark": "#211115",
+          },
+          fontFamily: {
+            "display": ["Plus Jakarta Sans", "sans-serif"]
+          },
+          borderRadius: { "DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px" },
+          keyframes: {
+            scaleIn: {
+              '0%': { transform: 'scale(0.8)', opacity: '0' },
+              '100%': { transform: 'scale(1)', opacity: '1' },
+            },
+            fadeIn: {
+              '0%': { opacity: '0' },
+              '100%': { opacity: '1' }
+            },
+            slideUp: {
+              '0%': { transform: 'translateY(100%)' },
+              '100%': { transform: 'translateY(0)' }
+            }
+          },
+          animation: {
+            scaleIn: 'scaleIn 0.2s ease-out',
+            fadeIn: 'fadeIn 0.2s ease-out',
+            slideUp: 'slideUp 0.3s ease-out',
+          }
+        },
+      },
+    }
+  </script>
+  <style>
+    body {
+      font-family: 'Plus Jakarta Sans', 'Noto Sans KR', sans-serif;
+      -webkit-tap-highlight-color: transparent;
+      min-height: max(884px, 100dvh);
+    }
+
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+    }
+
+    .no-scrollbar::-webkit-scrollbar {
+      display: none;
+    }
+
+    .no-scrollbar {
+      -ms-overflow-style: none;
+      scrollbar-width: none;
+    }
+
+    .view-hidden {
+      display: none !important;
+    }
+  </style>
+  <script>
+    let currentYear;
+    let currentMonth;
+    let selectedDay;
+    let currentTotalPoints = 2410;
+    let targetTotalPoints = 5000;
+    const taskPointValue = 50;
+    const tasksStore = {};
+    const CALENDAR_PROGRESS_KEY = 'calendarWeeklyProgress';
+
+    const today = new Date();
+    const openedFromTodo = localStorage.getItem('calendarReturnToTodo') === '1';
+    currentYear = today.getFullYear();
+    currentMonth = today.getMonth() + 1;
+    selectedDay = today.getDate();
+
+    function formatDateKey(year, month, day) {
+      return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function getTasksForDate(year, month, day) {
+      const key = `${year}-${month}-${day}`;
+      if (!tasksStore[key]) tasksStore[key] = [];
+      return tasksStore[key];
+    }
+
+    function loadTasksForDate(year, month, day, done) {
+      const profileId = localStorage.getItem('currentProfileId') || '';
+      let resolvedProfileId = profileId;
+      if (!resolvedProfileId) {
+        try {
+          const samplePid = localStorage.getItem('localSamplePrimaryProfileId') || '';
+          if (samplePid) {
+            resolvedProfileId = samplePid;
+            localStorage.setItem('currentProfileId', resolvedProfileId);
+          }
+        } catch (_) {}
+      }
+      if (!resolvedProfileId) {
+        try {
+          const localProfiles = JSON.parse(localStorage.getItem('localSampleProfiles') || '[]');
+          if (Array.isArray(localProfiles) && localProfiles.length > 0) {
+            resolvedProfileId = String(localProfiles[0].id || '');
+            if (resolvedProfileId) localStorage.setItem('currentProfileId', resolvedProfileId);
+          }
+        } catch (_) {}
+      }
+      const date = formatDateKey(year, month, day);
+      const key = `${year}-${month}-${day}`;
+      if (!resolvedProfileId || !window.TeamTodo || typeof TeamTodo.getTodos !== 'function') {
+        try {
+          const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+          tasksStore[key] = local
+            .filter((t) => String(t.profileId || '') === String(resolvedProfileId))
+            .filter((t) => String(t.startDate || '') === date && !t.parentTodoId)
+            .map((t) => ({ id: t.id, title: String(t.title || ''), checked: !!t.isCompleted, points: parseInt(t.points || 0, 10) || 0 }));
+        } catch (_) { tasksStore[key] = []; }
+        if (typeof done === 'function') done([]);
+        return;
+      }
+      TeamTodo.getTodos(resolvedProfileId, date, function (rows) {
+        const arr = Array.isArray(rows) ? rows : [];
+        let list = arr
+          .filter((t) => !t.parentTodoId)
+          .map((t) => ({
+            id: t.id,
+            title: String(t.title || ''),
+            checked: !!t.isCompleted,
+            points: parseInt(t.points || 0, 10) || 0
+          }));
+        if (list.length === 0) {
+          try {
+            const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+            list = local
+              .filter((t) => String(t.profileId || '') === String(resolvedProfileId))
+              .filter((t) => String(t.startDate || '') === date && !t.parentTodoId)
+              .map((t) => ({ id: t.id, title: String(t.title || ''), checked: !!t.isCompleted, points: parseInt(t.points || 0, 10) || 0 }));
+          } catch (_) {}
+        }
+        tasksStore[key] = list;
+        if (typeof done === 'function') done(list);
+      });
+    }
+
+    function toggleMonthPicker() {
+      const picker = document.getElementById('monthPicker');
+      const overlay = document.getElementById('pickerOverlay');
+      if (!picker || !overlay) return;
+
+      if (picker.classList.contains('translate-y-full')) {
+        picker.classList.remove('hidden');
+        overlay.classList.remove('hidden');
+        requestAnimationFrame(() => {
+          picker.classList.remove('translate-y-full');
+          overlay.classList.remove('opacity-0');
+        });
+      } else {
+        picker.classList.add('translate-y-full');
+        overlay.classList.add('opacity-0');
+        setTimeout(() => {
+          picker.classList.add('hidden');
+          overlay.classList.add('hidden');
+        }, 300);
+      }
+    }
+
+    function renderCalendar(year, month) {
+      document.querySelectorAll('.month-title').forEach((el) => {
+        el.textContent = `${year}년 ${month}월`;
+      });
+
+      const firstDay = new Date(year, month - 1, 1).getDay();
+      const daysInMonth = new Date(year, month, 0).getDate();
+      const calendarGrid = document.getElementById('calendarGrid');
+      if (!calendarGrid) return;
+
+      calendarGrid.innerHTML = '';
+      const dayNames = ['일', '월', '화', '수', '목', '금', '토'];
+      dayNames.forEach((name, idx) => {
+        const dayHeader = document.createElement('p');
+        dayHeader.className = `${idx === 0 ? 'text-primary' : 'text-slate-500'} text-[13px] font-bold h-10 flex items-center justify-center`;
+        dayHeader.textContent = name;
+        calendarGrid.appendChild(dayHeader);
+      });
+
+      if (firstDay > 0) {
+        const empty = document.createElement('div');
+        empty.className = 'h-12 w-full';
+        empty.style.gridColumn = `span ${firstDay}`;
+        calendarGrid.appendChild(empty);
+      }
+
+      for (let day = 1; day <= daysInMonth; day += 1) {
+        const btn = document.createElement('button');
+        btn.className = 'calendar-day-btn h-12 w-full text-sm hover:bg-primary/5 rounded-full transition-colors relative flex items-center justify-center text-slate-900 dark:text-slate-100';
+        btn.dataset.day = String(day);
+        btn.textContent = String(day);
+        btn.addEventListener('click', () => selectDate(day, btn));
+        calendarGrid.appendChild(btn);
+      }
+
+      if (selectedDay > daysInMonth) selectedDay = daysInMonth;
+      const selected = calendarGrid.querySelector(`button[data-day="${selectedDay}"]`) || calendarGrid.querySelector('button[data-day="1"]');
+      if (selected) selectDate(parseInt(selected.dataset.day, 10), selected, false);
+    }
+
+    function selectDate(day, element, animate = true) {
+      selectedDay = day;
+      document.querySelectorAll('.calendar-day-btn').forEach((btn) => {
+        btn.className = 'calendar-day-btn h-12 w-full text-sm hover:bg-primary/5 rounded-full transition-colors relative flex items-center justify-center text-slate-900 dark:text-slate-100';
+        btn.textContent = btn.dataset.day;
+      });
+
+      const target = element || document.querySelector(`.calendar-day-btn[data-day="${day}"]`);
+      if (target) {
+        target.classList.remove('text-slate-900', 'dark:text-slate-100', 'hover:bg-primary/5');
+        target.classList.add('text-white', 'font-bold', 'relative', 'group');
+        const animClass = animate ? 'animate-scaleIn' : '';
+        target.innerHTML = `<div class="active-indicator flex size-10 mx-auto items-center justify-center rounded-full bg-primary shadow-lg shadow-primary/30 transition-transform group-active:scale-95 ${animClass}">${day}</div>`;
+      }
+
+      const title = document.getElementById('taskDateTitle');
+      if (title) title.textContent = `${currentMonth}월 ${day}일 할일 목록`;
+      loadTasksForDate(currentYear, currentMonth, selectedDay, function () {
+        renderTasks();
+      });
+
+      // todo_main에서 달력 아이콘으로 진입한 경우, 날짜 선택 즉시 되돌아간다.
+      if (animate && openedFromTodo) {
+        localStorage.setItem('todoSelectedDate', formatDateKey(currentYear, currentMonth, selectedDay));
+        localStorage.setItem('todoDateFromCalendar', '1');
+        localStorage.removeItem('calendarReturnToTodo');
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          TeamTodo.navigate('todo_main');
+        }
+      }
+    }
+
+    function renderTasks() {
+      const container = document.getElementById('taskListContainer');
+      const badge = document.getElementById('remainingCountBadge');
+      if (!container) return;
+
+      const tasks = getTasksForDate(currentYear, currentMonth, selectedDay);
+      if (badge) badge.textContent = `${tasks.length}개`;
+
+      if (tasks.length === 0) {
+        container.innerHTML = '<div class="p-8 text-center text-slate-400 text-sm">등록된 할일이 없습니다.<br>아래 버튼으로 추가해보세요.</div>';
+      } else {
+        container.innerHTML = tasks.map((task) => {
+          const checkClass = task.checked ? 'border-primary bg-primary text-white' : 'border-slate-300 dark:border-slate-500 text-transparent';
+          const textClass = task.checked ? 'text-slate-400 line-through decoration-slate-400' : 'text-slate-700 dark:text-slate-200';
+          const opacityClass = task.checked ? 'opacity-60' : '';
+          return `
+            <div class="group flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl transition-colors border border-transparent ${opacityClass}">
+              <div class="flex items-center gap-3 flex-1 cursor-default">
+                <div class="size-5 rounded-full border-2 ${checkClass} flex items-center justify-center shrink-0 transition-colors">
+                  <span class="material-symbols-outlined text-[16px] ${task.checked ? '' : 'opacity-0'}">check</span>
+                </div>
+                <span class="text-sm font-medium ${textClass} transition-colors">${task.title}</span>
+              </div>
+              <div class="flex items-center gap-1">
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95" data-edit-id="${task.id}">
+                  <span class="material-symbols-outlined text-[18px]">edit</span>
+                </button>
+                <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95" data-delete-id="${task.id}">
+                  <span class="material-symbols-outlined text-[18px]">delete</span>
+                </button>
+              </div>
+            </div>
+          `;
+        }).join('');
+      }
+
+      const addBtn = document.createElement('button');
+      addBtn.className = 'mt-3 w-full flex items-center justify-center gap-2 py-3 rounded-xl border border-dashed border-primary/40 bg-primary/5 hover:bg-primary/10 text-primary font-bold text-sm transition-all active:scale-[0.98]';
+      addBtn.innerHTML = '<span class="material-symbols-outlined text-[20px]">add_circle</span>할일 추가하기';
+      addBtn.addEventListener('click', (e) => {
+        e.preventDefault();
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          TeamTodo.navigate('todo_add');
+        }
+      });
+      container.appendChild(addBtn);
+
+      container.querySelectorAll('[data-edit-id]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          const id = parseInt(btn.dataset.editId, 10);
+          const task = tasks.find((t) => t.id === id);
+          if (!task) return;
+          localStorage.setItem('todoEditMode', '1');
+          localStorage.setItem('todoEditTask', JSON.stringify(task));
+          localStorage.setItem('todoAddPresetDate', formatDateKey(currentYear, currentMonth, selectedDay));
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate('todo_add');
+          }
+        });
+      });
+      container.querySelectorAll('[data-delete-id]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          deleteTask(parseInt(btn.dataset.deleteId, 10));
+        });
+      });
+    }
+
+    function deleteTask(id) {
+      const key = `${currentYear}-${currentMonth}-${selectedDay}`;
+      const list = tasksStore[key] || [];
+      const idx = list.findIndex((t) => t.id === id);
+      if (idx < 0) return;
+
+      const task = list[idx];
+      const finish = () => {
+        targetTotalPoints = Math.max(0, targetTotalPoints - taskPointValue);
+        if (task.checked) currentTotalPoints = Math.max(0, currentTotalPoints - taskPointValue);
+        list.splice(idx, 1);
+        saveProgressState();
+        updateProgress();
+        renderTasks();
+      };
+      if (window.TeamTodo && typeof TeamTodo.deleteTodo === 'function') {
+        TeamTodo.deleteTodo(String(id), function () { finish(); });
+        return;
+      }
+      finish();
+    }
+
+    function saveProgressState() {
+      localStorage.setItem(CALENDAR_PROGRESS_KEY, JSON.stringify({
+        currentTotalPoints,
+        targetTotalPoints
+      }));
+    }
+
+    function restoreProgressState() {
+      try {
+        const raw = localStorage.getItem(CALENDAR_PROGRESS_KEY);
+        if (!raw) return;
+        const parsed = JSON.parse(raw);
+        if (typeof parsed.currentTotalPoints === 'number') {
+          currentTotalPoints = Math.max(0, parsed.currentTotalPoints);
+        }
+        if (typeof parsed.targetTotalPoints === 'number') {
+          targetTotalPoints = Math.max(0, parsed.targetTotalPoints);
+        }
+      } catch (_) {
+      }
+    }
+
+    function updateProgress() {
+      const pct = targetTotalPoints > 0 ? Math.min((currentTotalPoints / targetTotalPoints) * 100, 100) : 0;
+      const bar = document.getElementById('progressBarInner');
+      if (bar) bar.style.width = `${pct}%`;
+      const label = document.getElementById('currentPoints');
+      if (label) {
+        label.innerHTML = `+${currentTotalPoints.toLocaleString()} p <span class="text-slate-400 font-normal">/ ${targetTotalPoints.toLocaleString()} p</span>`;
+      }
+    }
+
+    function changeYear(delta) {
+      currentYear += delta;
+      const el = document.getElementById('pickerYearDisplay');
+      if (el) el.textContent = String(currentYear);
+    }
+
+    function selectMonth(year, month) {
+      currentYear = year;
+      currentMonth = month;
+      selectedDay = 1;
+      document.querySelectorAll('#monthPicker .month-btn').forEach((btn) => {
+        btn.className = 'month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors';
+        if (parseInt(btn.dataset.month, 10) === month) {
+          btn.className = 'month-btn py-3 rounded-xl bg-primary text-white shadow-lg shadow-primary/30 font-bold transition-colors';
+        }
+      });
+      toggleMonthPicker();
+      renderCalendar(currentYear, currentMonth);
+    }
+
+    document.addEventListener('DOMContentLoaded', () => {
+      restoreProgressState();
+      const yearEl = document.getElementById('pickerYearDisplay');
+      if (yearEl) yearEl.textContent = String(currentYear);
+      renderCalendar(currentYear, currentMonth);
+      loadTasksForDate(currentYear, currentMonth, selectedDay, function () {
+        renderTasks();
+        updateProgress();
+      });
+
+      const bottomNavLinks = document.querySelectorAll('#bottomNav a');
+      const bottomNavScreens = ['todo_main', 'calendar', 'team_list', 'goal_list', 'settings'];
+      bottomNavLinks.forEach((el, idx) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+            TeamTodo.navigate(bottomNavScreens[idx]);
+          }
+        });
+      });
+    });
+  </script>
+  <style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+</head>
+
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen">
+  <div
+    class="relative flex h-auto min-h-screen w-full max-w-[480px] mx-auto flex-col bg-white dark:bg-slate-900 overflow-x-hidden shadow-xl pb-24"
+    id="mainView">
+    <div
+      class="flex items-center p-4 pb-2 justify-center sticky top-0 bg-white/95 dark:bg-slate-900/95 backdrop-blur-sm z-30">
+      <button
+        class="flex items-center gap-1 px-4 py-2 rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+        onclick="toggleMonthPicker()">
+        <h2 class="month-title text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight"></h2>
+        <span class="material-symbols-outlined text-sm pt-0.5">expand_more</span>
+      </button>
+    </div>
+    <div class="px-4 pt-5 pb-2 text-center">
+      <h3 class="text-primary tracking-tight text-2xl font-bold leading-tight">성공은 계속된다</h3>
+    </div>
+    <div class="flex flex-wrap items-center justify-center gap-6 p-4 pb-0">
+      <div class="flex min-w-full flex-col gap-0.5 bg-primary/5 dark:bg-primary/10 p-4 rounded-xl">
+        <div class="grid grid-cols-7 text-center gap-y-1" id="calendarGrid">
+        </div>
+      </div>
+    </div>
+    <div class="px-4 mt-6">
+      <div class="bg-white dark:bg-slate-800 border border-slate-100 dark:border-slate-700 p-5 rounded-2xl shadow-sm">
+        <div class="flex items-center justify-between mb-4">
+          <div class="flex items-center gap-2">
+            <div class="bg-primary/10 p-1.5 rounded-lg text-primary">
+              <span class="material-symbols-outlined text-[20px]">event_available</span>
+            </div>
+            <p class="text-base font-bold text-slate-900 dark:text-slate-100" id="taskDateTitle">할일 목록</p>
+          </div>
+          <span class="text-xs font-medium text-slate-500 bg-slate-100 dark:bg-slate-700 px-2 py-1 rounded-md"
+            id="remainingCountBadge">0개</span>
+        </div>
+        <div class="space-y-3" id="taskListContainer">
+        </div>
+      </div>
+    </div>
+    <div class="px-4 pt-8">
+      <h3 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] pb-4">주간 진행률
+      </h3>
+      <div class="bg-primary/5 dark:bg-primary/20 rounded-xl p-4 mb-4">
+        <div class="flex justify-between items-center mb-2">
+          <span class="text-sm font-medium text-slate-600 dark:text-slate-400">현재 포인트</span>
+          <span class="text-sm font-bold text-primary" id="currentPoints">+2,410 p <span
+              class="text-slate-400 font-normal">/ 5,000 p</span></span>
+        </div>
+        <div class="w-full bg-slate-200 dark:bg-slate-700 h-2.5 rounded-full overflow-hidden">
+          <div class="bg-primary h-full rounded-full transition-all duration-500" id="progressBarInner"
+            style="width: 48%"></div>
+        </div>
+      </div>
+      <div class="flex flex-col gap-4">
+        <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl">
+          <div class="flex items-center gap-2 mb-3">
+            <span class="material-symbols-outlined text-amber-500">trending_down</span>
+            <p class="text-sm font-bold text-slate-900 dark:text-slate-100">달성률이 저조한 할일</p>
+          </div>
+          <div class="space-y-3">
+            <div class="flex flex-col gap-1">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-700 dark:text-slate-300">운동하기</span>
+                <span class="font-bold text-primary">20%</span>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-primary h-full rounded-full" style="width: 20%"></div>
+              </div>
+            </div>
+            <div class="flex flex-col gap-1">
+              <div class="flex justify-between text-xs mb-1">
+                <span class="text-slate-700 dark:text-slate-300">독서하기</span>
+                <span class="font-bold text-primary">35%</span>
+              </div>
+              <div class="w-full bg-slate-200 dark:bg-slate-700 h-1.5 rounded-full overflow-hidden">
+                <div class="bg-primary h-full rounded-full" style="width: 35%"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="bg-slate-50 dark:bg-slate-800 p-4 rounded-xl flex items-center justify-between">
+          <div class="flex items-center gap-3">
+            <div class="bg-primary/10 p-2 rounded-lg">
+              <span class="material-symbols-outlined text-primary">local_fire_department</span>
+            </div>
+            <div>
+              <p class="text-xs text-slate-500 font-medium">연속 달성 중</p>
+              <p class="text-xl font-extrabold text-slate-900 dark:text-slate-100">12일</p>
+            </div>
+          </div>
+          <span class="material-symbols-outlined text-slate-300">chevron_right</span>
+        </div>
+      </div>
+    </div>
+  </div>
+  <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">check_circle</span><p class="text-xs font-medium">할일</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">calendar_month</span><p class="text-xs font-bold">캘린더</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><p class="text-xs font-medium">팀</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><p class="text-xs font-medium">목표</p></a>
+    <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">settings</span><p class="text-xs font-medium">설정</p></a>
+  </nav>
+  <div class="hidden fixed inset-0 bg-black/40 z-[60] opacity-0 transition-opacity duration-300" id="pickerOverlay"
+    onclick="toggleMonthPicker()"></div>
+  <div
+    class="hidden fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-[480px] bg-white dark:bg-slate-800 rounded-t-3xl z-[70] translate-y-full transition-all duration-300 ease-in-out shadow-2xl pb-10"
+    id="monthPicker">
+    <div class="flex flex-col items-center p-6">
+      <div class="w-12 h-1.5 bg-slate-200 dark:bg-slate-700 rounded-full mb-6"></div>
+      <h3 class="text-xl font-bold text-slate-900 dark:text-slate-100 mb-6">월 선택</h3>
+      <div class="flex items-center justify-center gap-8 mb-6">
+        <button class="p-2 text-slate-400 hover:text-primary transition-colors" onclick="changeYear(-1)">
+          <span class="material-symbols-outlined">chevron_left</span>
+        </button>
+        <span class="text-xl font-bold text-primary" id="pickerYearDisplay"></span>
+        <button class="p-2 text-slate-400 hover:text-primary transition-colors" onclick="changeYear(1)">
+          <span class="material-symbols-outlined">chevron_right</span>
+        </button>
+      </div>
+      <div class="grid grid-cols-4 gap-3 w-full">
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="1" onclick="selectMonth(currentYear, 1)">1월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="2" onclick="selectMonth(currentYear, 2)">2월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="3" onclick="selectMonth(currentYear, 3)">3월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="4" onclick="selectMonth(currentYear, 4)">4월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="5" onclick="selectMonth(currentYear, 5)">5월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="6" onclick="selectMonth(currentYear, 6)">6월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="7" onclick="selectMonth(currentYear, 7)">7월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="8" onclick="selectMonth(currentYear, 8)">8월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="9" onclick="selectMonth(currentYear, 9)">9월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="10" onclick="selectMonth(currentYear, 10)">10월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="11" onclick="selectMonth(currentYear, 11)">11월</button>
+        <button
+          class="month-btn py-3 rounded-xl bg-slate-50 dark:bg-slate-700 text-slate-600 dark:text-slate-300 hover:bg-primary/10 hover:text-primary font-medium transition-colors"
+          data-month="12" onclick="selectMonth(currentYear, 12)">12월</button>
+      </div>
+    </div>
+  </div>
+
+</body>
+
+</html>
+
+

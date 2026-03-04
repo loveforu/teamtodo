@@ -1,0 +1,400 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>친구 할일</title>
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link href="../vendor/plus-jakarta.css" rel="stylesheet" />
+  <link href="../vendor/material-symbols.css" rel="stylesheet" />
+  <script src="app.js"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          colors: {
+            primary: '#eb4770',
+            'background-light': '#ffffff',
+            'background-dark': '#211115'
+          },
+          fontFamily: {
+            display: ['Plus Jakarta Sans', 'sans-serif']
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { font-family: 'Plus Jakarta Sans', sans-serif; min-height: max(884px, 100dvh); -webkit-font-smoothing: antialiased; }
+    .material-symbols-outlined { font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+    .fly-heart { position: fixed; pointer-events: none; z-index: 100; color: var(--primary-color); font-size: 24px; }
+    .plus-float { position: fixed; pointer-events: none; z-index: 101; color: var(--primary-color); font-weight: 800; font-size: 14px; animation: floatUp .8s ease-out forwards; }
+    @keyframes floatUp {
+      0% { transform: translateY(0) scale(1); opacity: 1; }
+      100% { transform: translateY(-20px) scale(1.15); opacity: 0; }
+    }
+    .modal-backdrop { opacity: 0; pointer-events: none; transition: opacity .25s ease; }
+    .modal-backdrop.active { opacity: 1; pointer-events: auto; }
+    .modal-panel { transform: scale(.96); opacity: 0; transition: transform .22s ease, opacity .22s ease; }
+    .modal-backdrop.active .modal-panel { transform: scale(1); opacity: 1; }
+  </style>
+</head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 font-display">
+  <div class="relative flex min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-2xl overflow-hidden">
+    <header class="sticky top-0 z-30 border-b border-primary/10 bg-white dark:bg-background-dark">
+      <div class="flex items-center p-4 pb-2 justify-between">
+        <button id="btnBack" class="text-primary flex size-10 items-center justify-center rounded-full hover:bg-primary/10">
+          <span class="material-symbols-outlined">arrow_back_ios_new</span>
+        </button>
+        <div class="flex items-center gap-2 flex-1 justify-center">
+          <div class="size-8 rounded-full bg-primary/10 text-primary flex items-center justify-center overflow-hidden border border-primary/20">
+            <span class="material-symbols-outlined text-xl">face</span>
+          </div>
+          <h2 id="friendName" class="text-lg font-bold">친구의 할일</h2>
+        </div>
+        <div class="w-10"></div>
+      </div>
+    </header>
+
+    <main class="flex-1 overflow-y-auto pb-24">
+      <section class="mx-4 mt-4 p-4 bg-primary/5 rounded-xl border border-primary/10">
+        <div class="flex justify-between items-end">
+          <div>
+            <p class="text-slate-500 text-xs font-medium uppercase tracking-wider">오늘의 응원 포인트</p>
+            <div class="flex items-center gap-1.5 mt-0.5">
+              <svg id="headerHeart" viewBox="0 0 24 24" class="text-primary w-5 h-5 shrink-0" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M12 21s-7-4.35-9.33-8.28C.89 9.78 2.24 6 5.73 5.28A5.3 5.3 0 0 1 12 8.09a5.3 5.3 0 0 1 6.27-2.81c3.49.72 4.84 4.5 3.06 7.44C19 16.65 12 21 12 21z"></path>
+              </svg>
+              <p class="text-base font-bold">친구 응원 포인트</p>
+            </div>
+          </div>
+          <p id="pointsText" class="text-sm font-bold text-primary">140 / 200 p</p>
+        </div>
+        <div class="relative h-3 w-full rounded-full bg-primary/20 overflow-hidden mt-3">
+          <div id="progressFill" class="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-500" style="width:70%"></div>
+        </div>
+        <div class="flex justify-between items-center mt-2">
+          <p id="growthText" class="text-primary text-sm font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span>친구를 응원해 주세요!</p>
+          <p id="pointsRemaining" class="text-slate-400 text-xs italic">목표까지 60p</p>
+        </div>
+      </section>
+
+      <section class="mx-4 mt-3 p-4 bg-primary/10 rounded-xl border border-primary/20 flex items-start gap-2">
+        <span class="material-symbols-outlined text-primary text-xl">campaign</span>
+        <p class="text-sm font-medium">오늘의 한마디: 작은 응원이 큰 힘이 됩니다.</p>
+      </section>
+
+      <section class="mx-4 mt-4">
+        <h3 class="text-lg font-bold pb-3">진행 중인 목표</h3>
+        <div class="flex gap-3 overflow-x-auto no-scrollbar pb-2 -mx-4 px-4">
+          <div class="shrink-0 w-[160px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4">
+            <div class="flex justify-between items-start mb-3">
+              <div class="w-10 h-10 rounded-full bg-green-100 text-green-600 flex items-center justify-center"><span class="material-symbols-outlined text-xl">fitness_center</span></div>
+              <span class="text-xs font-bold text-green-600 bg-green-50 px-2 py-1 rounded-full">75%</span>
+            </div>
+            <h4 class="text-base font-bold">건강 챙기기</h4>
+            <p class="text-xs text-slate-500 mb-3">주 3회 운동</p>
+            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden"><div class="bg-green-500 h-full rounded-full w-3/4"></div></div>
+          </div>
+          <div class="shrink-0 w-[160px] bg-white dark:bg-slate-800 rounded-2xl border border-slate-100 dark:border-slate-700 shadow-sm p-4">
+            <div class="flex justify-between items-start mb-3">
+              <div class="w-10 h-10 rounded-full bg-blue-100 text-blue-600 flex items-center justify-center"><span class="material-symbols-outlined text-xl">verified</span></div>
+              <span class="text-xs font-bold text-blue-600 bg-blue-50 px-2 py-1 rounded-full">50%</span>
+            </div>
+            <h4 class="text-base font-bold">자격증 취득</h4>
+            <p class="text-xs text-slate-500 mb-3">SQLD 준비</p>
+            <div class="w-full bg-slate-100 dark:bg-slate-700 h-2 rounded-full overflow-hidden"><div class="bg-blue-500 h-full rounded-full w-1/2"></div></div>
+          </div>
+        </div>
+      </section>
+
+      <section class="mx-4 mt-4 mb-4">
+        <h3 class="text-lg font-bold pb-3">할일 목록</h3>
+        <div id="taskList" class="space-y-3"></div>
+      </section>
+    </main>
+
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">check_circle</span><p class="text-xs font-bold">할일</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><p class="text-xs font-medium">캘린더</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><p class="text-xs font-medium">팀</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><p class="text-xs font-medium">목표</p></a>
+      <a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">settings</span><p class="text-xs font-medium">설정</p></a>
+    </nav>
+
+    <div id="cheerModal" class="modal-backdrop fixed inset-0 z-[90] flex items-center justify-center px-4 bg-black/40 backdrop-blur-sm">
+      <div class="modal-panel w-full max-w-xs bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 border border-primary/20">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">thumb_up</span>응원한 친구들</h3>
+        <div id="supporters" class="space-y-2 text-sm text-slate-600 dark:text-slate-300 mb-4"></div>
+        <button id="closeCheer" class="w-full py-2.5 rounded-xl bg-primary text-white font-bold text-sm">닫기</button>
+      </div>
+    </div>
+    <div id="commentModal" class="fixed inset-0 z-[91] bg-black/40 backdrop-blur-sm items-center justify-center px-4 hidden">
+      <div class="w-full max-w-xs bg-white dark:bg-slate-800 rounded-2xl shadow-2xl p-6 border border-primary/20">
+        <h3 class="text-lg font-bold mb-4 flex items-center gap-2"><span class="material-symbols-outlined text-primary">chat</span>코멘트 남기기</h3>
+        <textarea id="commentInput" class="w-full h-24 rounded-xl border-primary/20 bg-primary/5 focus:border-primary focus:ring-primary/50 resize-none p-3 text-sm mb-4 outline-none" placeholder="코멘트를 입력하세요"></textarea>
+        <div class="flex gap-3">
+          <button id="commentClose" class="flex-1 py-2.5 rounded-xl border border-slate-200 text-slate-500 font-semibold text-sm">취소</button>
+          <button id="commentSend" class="flex-1 py-2.5 rounded-xl bg-primary text-white font-bold text-sm">전송</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const friendName = localStorage.getItem('targetProfileName') || '친구';
+      document.getElementById('friendName').textContent = friendName + '의 할일';
+
+      const targetProfileId = localStorage.getItem('targetProfileId') || '';
+      const targetOwnerUid = localStorage.getItem('targetOwnerUid') || '';
+      const todayKey = new Date().toISOString().slice(0, 10);
+      const tasks = [];
+
+      const MAX_POINTS = 200;
+      let currentPoints = 140;
+      const POINT_STEP = 2;
+
+      const taskList = document.getElementById('taskList');
+      const pointsText = document.getElementById('pointsText');
+      const progressFill = document.getElementById('progressFill');
+      const pointsRemaining = document.getElementById('pointsRemaining');
+      const headerHeart = document.getElementById('headerHeart');
+      const commentModal = document.getElementById('commentModal');
+      const commentClose = document.getElementById('commentClose');
+      const commentSend = document.getElementById('commentSend');
+      const commentInput = document.getElementById('commentInput');
+      let pendingCommentTask = null;
+
+      function loadTasks(done) {
+        if (!targetProfileId || !window.TeamTodo || typeof TeamTodo.getTodos !== 'function') {
+          tasks.length = 0;
+          if (typeof done === 'function') done();
+          return;
+        }
+        TeamTodo.getTodos(targetProfileId, todayKey, function (rows) {
+          tasks.length = 0;
+          (Array.isArray(rows) ? rows : []).filter((x) => !x.parentTodoId).forEach((t) => {
+            tasks.push({
+              id: String(t.id),
+              title: [t.startTime ? (t.startTime + ' -') : '', String(t.title || '')].join(' ').trim(),
+              sub: t.endTime ? (String(t.startTime || '') + ' ~ ' + String(t.endTime || '')).trim() : '오늘 할일',
+              likes: 0,
+              liked: false
+            });
+          });
+          if (typeof done === 'function') done();
+        });
+      }
+
+      function setHeaderHeartFilled(filled) {
+        headerHeart.setAttribute('fill', filled ? 'currentColor' : 'none');
+        headerHeart.setAttribute('stroke', 'currentColor');
+      }
+
+      function updateHeader() {
+        pointsText.textContent = `${currentPoints} / ${MAX_POINTS} p`;
+        progressFill.style.width = `${Math.min(100, (currentPoints / MAX_POINTS) * 100)}%`;
+        pointsRemaining.textContent = `목표까지 ${Math.max(0, MAX_POINTS - currentPoints)}p`;
+        setHeaderHeartFilled(currentPoints >= MAX_POINTS);
+      }
+
+      function renderTasks() {
+        taskList.innerHTML = tasks.map((t) => `
+          <div class="task-card flex items-center gap-4 ${t.liked ? 'bg-primary/5 border-primary/30' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700'} p-4 rounded-xl border shadow-sm" data-id="${t.id}">
+            <button class="like-btn group flex items-center justify-center w-10 h-10 rounded-full bg-white dark:bg-slate-700 border ${t.liked ? 'border-primary text-primary' : 'border-slate-200 dark:border-slate-600 text-slate-300'} shadow-sm transition-all hover:scale-110 active:scale-95">
+              <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' ${t.liked ? 1 : 0}">favorite</span>
+            </button>
+            <div class="flex flex-col flex-1 min-w-0">
+              <p class="text-base font-semibold truncate ${t.liked ? 'text-slate-700 line-through decoration-primary/30 decoration-2' : 'text-slate-900 dark:text-white'}">${t.title}</p>
+              <p class="text-sm truncate ${t.liked ? 'text-slate-400' : 'text-slate-500'}">${t.sub}</p>
+            </div>
+            <button class="comment-btn flex items-center justify-center text-slate-400 hover:text-blue-500 p-1">
+              <span class="material-symbols-outlined text-lg">chat_bubble</span>
+            </button>
+            <button class="cheer-btn flex items-center gap-1 ${t.liked ? 'text-primary' : 'text-slate-400'}">
+              <span class="material-symbols-outlined text-sm" style="font-variation-settings:'FILL' 1">thumb_up</span>
+              <span class="text-xs font-bold like-count">${t.likes}</span>
+            </button>
+          </div>
+        `).join('');
+
+        taskList.querySelectorAll('.task-card').forEach((card) => {
+          const id = String(card.dataset.id || '');
+          const item = tasks.find((t) => String(t.id) === id);
+          if (!item) return;
+          const likeBtn = card.querySelector('.like-btn');
+          const cheerBtn = card.querySelector('.cheer-btn');
+          const commentBtn = card.querySelector('.comment-btn');
+
+          likeBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            const wasLiked = item.liked;
+            item.liked = !item.liked;
+            item.likes = Math.max(0, item.likes + (item.liked ? 1 : -1));
+            currentPoints = Math.max(0, Math.min(MAX_POINTS, currentPoints + (item.liked ? POINT_STEP : -POINT_STEP)));
+            if (window.TeamTodo) {
+              if (item.liked && typeof TeamTodo.addThumbsUp === 'function') {
+                TeamTodo.addThumbsUp(String(item.id), targetProfileId, '', function () {}, targetOwnerUid);
+              } else if (!item.liked && typeof TeamTodo.removeThumbsUp === 'function') {
+                TeamTodo.removeThumbsUp(String(item.id), function () {});
+              }
+            }
+            if (!wasLiked && item.liked) {
+              const rect = likeBtn.getBoundingClientRect();
+              animateHeart(rect.left + rect.width / 2, rect.top + rect.height / 2);
+              showPlus(rect.left + rect.width / 2 + 10, rect.top + rect.height / 2 - 20);
+            }
+            renderTasks();
+            updateHeader();
+          });
+
+          cheerBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openCheerModal(item.id, item.title, item.likes);
+          });
+          if (commentBtn) {
+            commentBtn.addEventListener('click', (e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              pendingCommentTask = item;
+              commentModal.classList.remove('hidden');
+              commentModal.classList.add('flex');
+            });
+          }
+        });
+      }
+
+      function animateHeart(sx, sy) {
+        const heart = document.createElement('span');
+        heart.className = 'material-symbols-outlined fly-heart';
+        heart.textContent = 'favorite';
+        heart.style.fontVariationSettings = "'FILL' 1";
+        document.body.appendChild(heart);
+
+        const target = headerHeart.getBoundingClientRect();
+        const tx = target.left + target.width / 2;
+        const ty = target.top + target.height / 2;
+
+        const start = performance.now();
+        const duration = 900;
+        function step(now) {
+          const p = Math.min((now - start) / duration, 1);
+          const ease = 1 - Math.pow(1 - p, 3);
+          const angle = p * Math.PI * 3;
+          const amp = 50 * Math.sin(Math.PI * p) * (1 - p);
+          const x = sx + (tx - sx) * ease + Math.cos(angle) * amp;
+          const y = sy + (ty - sy) * ease + Math.sin(angle) * amp;
+          heart.style.left = `${x}px`;
+          heart.style.top = `${y}px`;
+          heart.style.transform = `translate(-50%, -50%) scale(${1 - p * .35}) rotate(${p * 540}deg)`;
+          heart.style.opacity = p > .85 ? String((1 - p) * 6) : '1';
+          if (p < 1) requestAnimationFrame(step);
+          else {
+            heart.remove();
+            headerHeart.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.35)' }, { transform: 'scale(1)' }], { duration: 280 });
+          }
+        }
+        requestAnimationFrame(step);
+      }
+
+      function showPlus(x, y) {
+        const el = document.createElement('div');
+        el.className = 'plus-float';
+        el.textContent = '+2p';
+        el.style.left = `${x}px`;
+        el.style.top = `${y}px`;
+        document.body.appendChild(el);
+        setTimeout(() => el.remove(), 800);
+      }
+
+      const cheerModal = document.getElementById('cheerModal');
+      const supporters = document.getElementById('supporters');
+      const closeCheer = document.getElementById('closeCheer');
+      function openCheerModal(todoId, title, count) {
+        supporters.innerHTML = '';
+        if (window.TeamTodo && typeof TeamTodo.getThumbsUps === 'function') {
+          TeamTodo.getThumbsUps(String(todoId), function (rows) {
+            const list = Array.isArray(rows) ? rows : [];
+            if (list.length === 0) {
+              supporters.innerHTML = '<p class="text-xs text-slate-500">아직 응원 기록이 없습니다.</p>';
+            } else {
+              list.forEach((r) => {
+                const row = document.createElement('div');
+                row.className = 'flex items-center justify-between';
+                row.innerHTML = `<span>${String(r.giverUid || '팀원')}</span><span class="text-primary font-bold text-xs">${String(r.comment || '응원 +1')}</span>`;
+                supporters.appendChild(row);
+              });
+            }
+          });
+        } else {
+          const names = ['민수', '지유', '서준', '하늘', '도윤', '가은'];
+          for (let i = 0; i < count; i++) {
+            const row = document.createElement('div');
+            row.className = 'flex items-center justify-between';
+            row.innerHTML = `<span>${names[i % names.length]}</span><span class="text-primary font-bold text-xs">응원 +1</span>`;
+            supporters.appendChild(row);
+          }
+        }
+        cheerModal.classList.add('active');
+      }
+      closeCheer.addEventListener('click', () => cheerModal.classList.remove('active'));
+      cheerModal.addEventListener('click', (e) => { if (e.target === cheerModal) cheerModal.classList.remove('active'); });
+      commentClose.addEventListener('click', () => { commentModal.classList.add('hidden'); commentModal.classList.remove('flex'); });
+      commentSend.addEventListener('click', () => {
+        const txt = (commentInput.value || '').trim();
+        if (pendingCommentTask && txt && window.TeamTodo && typeof TeamTodo.addThumbsUp === 'function') {
+          TeamTodo.addThumbsUp(String(pendingCommentTask.id), targetProfileId, txt, function () {}, targetOwnerUid);
+        }
+        commentInput.value = '';
+        pendingCommentTask = null;
+        commentModal.classList.add('hidden');
+        commentModal.classList.remove('flex');
+      });
+      commentModal.addEventListener('click', (e) => { if (e.target === commentModal) { commentModal.classList.add('hidden'); commentModal.classList.remove('flex'); } });
+
+      document.getElementById('btnBack').addEventListener('click', () => TeamTodo.navigate('profile_select'));
+
+      const bottomNavLinks = document.querySelectorAll('#bottomNav a');
+      const bottomNavScreens = ['todo_main', 'calendar', 'team_list', 'goal_list', 'settings'];
+      bottomNavLinks.forEach((el, idx) => {
+        el.addEventListener('click', (e) => {
+          e.preventDefault();
+          TeamTodo.navigate(bottomNavScreens[idx]);
+        });
+      });
+
+      setHeaderHeartFilled(false);
+      loadTasks(function () {
+        renderTasks();
+        updateHeader();
+      });
+    });
+  </script>
+</body>
+</html>
+
+
+

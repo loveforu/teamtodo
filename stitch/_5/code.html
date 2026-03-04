@@ -1,0 +1,311 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                    keyframes: {
+                        "slide-up": {
+                            "0%": { transform: "translateY(100%)" },
+                            "100%": { transform: "translateY(0)" }
+                        }
+                    },
+                    animation: {
+                        "slide-up": "slide-up 0.3s ease-out forwards"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            overflow-y: scroll;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            overflow: hidden;
+            font-size: 24px;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .avatar-radio:checked + div {
+            box-shadow: 0 0 0 3px #eb4770;
+            transform: scale(0.95);
+        }
+        .avatar-img-container {
+            background-color: transparent;
+        }
+        input:checked ~ .toggle-path {
+            transform: translateX(100%);
+            border-color: #ffffff;
+        }
+        input:checked ~ .toggle-bg {
+            background-color: #eb4770;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-auto min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-x-hidden pb-24">
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-20">
+<div class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">프로필 추가/수정</h2>
+</div>
+<div class="flex p-6 @container">
+<div class="flex w-full flex-col gap-6 items-center">
+<div class="flex gap-4 flex-col items-center">
+<div class="relative group">
+<div class="bg-center bg-no-repeat aspect-square bg-cover rounded-full min-h-32 w-32 ring-4 ring-primary/10 transition-transform group-hover:scale-105" data-alt="Profile Avatar" id="main-profile-avatar" style='background-color: #ffe4e1; background-image: url("https://lh3.googleusercontent.com/aida-public/AB6AXuBp2458InGPSPeg5_KxpnNtIH2YoR4NsNgQe7E8HdYkMQv14b51_uvbIgImPUVtookEney6MaCpZSsR1h6uAUFxE46385vY1cShkBzQmlUEps7GdmLEJf8Jf1DVhK1NyffpKdACNWnKNsXDUoagLwQybw0xmgTaKeLUvex8CrLJD-8YIEhJkW6YGJVwP_jaxH_hMziIoG1fLBMAD3IMTM0XeWz88YFuR_zvO7J_1VkBzEG_JTwMn6poyANkbUWDAkAO-DhLBbLvs3s");'>
+</div>
+<label class="absolute bottom-0 right-0 bg-primary text-white p-2 rounded-full shadow-lg border-2 border-white cursor-pointer hover:bg-primary/90 transition-colors z-10" for="avatar-modal-toggle">
+<span class="material-symbols-outlined text-sm">edit</span>
+</label>
+</div>
+</div>
+</div>
+</div>
+<input class="peer hidden" id="avatar-modal-toggle" type="checkbox"/>
+<div class="fixed inset-0 z-50 hidden peer-checked:flex flex-col justify-end sm:justify-center items-center bg-black/40 backdrop-blur-sm transition-opacity duration-300">
+<label class="absolute inset-0 cursor-default" for="avatar-modal-toggle"></label>
+<div class="relative w-full max-w-md bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl overflow-hidden flex flex-col max-h-[85vh] h-[600px] animate-[slide-up_0.3s_ease-out_forwards] sm:animate-none">
+<div class="flex items-center justify-between p-5 border-b border-slate-100 dark:border-slate-800 bg-white dark:bg-slate-900 sticky top-0 z-10 shrink-0">
+<h3 class="font-bold text-xl text-slate-800 dark:text-slate-100">아바타 선택</h3>
+<label class="p-2 -mr-2 rounded-full hover:bg-black/5 dark:hover:bg-white/10 cursor-pointer transition-colors flex items-center justify-center" for="avatar-modal-toggle">
+<span class="material-symbols-outlined text-slate-400">close</span>
+</label>
+</div>
+<div class="flex-1 overflow-hidden flex flex-col">
+<div class="px-5 pt-4 pb-2 shrink-0">
+<div class="flex p-1.5 gap-2 bg-slate-100 dark:bg-slate-800 rounded-xl relative">
+<input checked="" class="peer/female hidden" id="tab-female" name="gender-tab" type="radio"/>
+<label class="flex-1 py-2.5 text-center rounded-lg text-sm font-bold cursor-pointer transition-all z-10 peer-checked/female:bg-white dark:peer-checked/female:bg-slate-700 peer-checked/female:text-primary peer-checked/female:shadow-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300" for="tab-female">여성</label>
+<input class="peer/male hidden" id="tab-male" name="gender-tab" type="radio"/>
+<label class="flex-1 py-2.5 text-center rounded-lg text-sm font-bold cursor-pointer transition-all z-10 peer-checked/male:bg-white dark:peer-checked/male:bg-slate-700 peer-checked/male:text-primary peer-checked/male:shadow-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300" for="tab-male">남성</label>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar bg-white dark:bg-slate-900 px-5 py-2">
+<div class="grid grid-cols-4 gap-4 hidden peer-checked/female:grid transition-all pb-4">
+<script>
+                            const femaleSeeds = [
+                                "Jihye", "Seoyeon", "Haeun", "Minseo", "Yunseo", "Sua",
+                                "Jiu", "Jiyu", "Jiyuu", "Subin", "Chaewon", "Yerin",
+                                "Sarang", "Chaewon2", "Yerin2", "Miso", "Sarang2", "Sol",
+                                "Sarang3", "Sol2", "Boreum", "Hayun", "Hayun2", "Ena",
+                                "Yena", "Dain", "Yuna", "Yuna2", "Soyun", "Daeun"
+                            ];
+                            const femaleNames = [
+                                "지혜", "서연", "하은", "민서", "윤서", "수아", 
+                                "지우", "지유", "채은", "수빈", "채원", "예린",
+                                "사랑", "하린", "예서", "미소", "아영", "솔",
+                                "소민", "유주", "보름", "하윤", "지안", "에나",
+                                "예나", "다인", "유나", "시아", "소윤", "다은"
+                            ];
+                            const warmBgs = ["ffe4e1", "fff0f5", "fff5ee", "fdf5e6", "faf0e6", "e6e6fa"];
+                            femaleSeeds.forEach((seed, i) => {
+                                const bg = warmBgs[i % warmBgs.length];
+                                const imgUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=${bg}&top=longHair,longHairBob,longHairStraight,longHairCurvy,longHairMiaWallace,longHairNotTooLong,longHairBun&clothing=blazerAndShirt,shirtScoopNeck,overall,dress,shirtVNeck,graphicShirt&eyes=happy,default,wink,hearts&mouth=smile,default,twinkle&eyebrows=default,defaultNatural&skinColor=f8d25c,ffdfbf`;
+                                document.write(`
+                                <div class="flex flex-col items-center gap-1">
+                                    <label class="relative cursor-pointer group avatar-img-container rounded-full w-full">
+                                        <input class="avatar-radio sr-only" name="avatar-selection" type="radio" value="${imgUrl}" ${i === 0 ? 'checked' : ''}/>
+                                        <div class="aspect-square rounded-full bg-slate-50 overflow-hidden ring-2 ring-transparent transition-all hover:ring-primary/30">
+                                            <img alt="${femaleNames[i]}" class="w-full h-full object-cover" src="${imgUrl}" loading="lazy"/>
+                                        </div>
+                                    </label>
+                                    <span class="text-[11px] text-slate-500 font-medium">${femaleNames[i]}</span>
+                                </div>
+                                `);
+                            });
+                        </script>
+</div>
+<div class="grid grid-cols-4 gap-4 hidden peer-checked/male:grid transition-all pb-4">
+<script>
+                            const maleSeeds = [
+                                "Minsu", "Seojun", "Doyun", "Junwoo", "Geonwoo", "Siwoo",
+                                "Jihun", "Jinwoo", "Hyunwoo", "Dongwoo", "Jaejun", "Taejun",
+                                "Jaejun2", "Taejun2", "Seungwoo", "Jungwoo", "Juwon", "Hajun",
+                                "Jungwoo2", "Juwon2", "Hajun2", "Eunwoo", "Yuchan", "Seongchan",
+                                "Seongchan2", "Seongchan3", "Seongchan4", "Jinwoo2", "Yongjun", "Yongjun2"
+                            ];
+                            const maleNames = [
+                                "민수", "서준", "도윤", "준우", "건우", "시우",
+                                "지훈", "진우", "현우", "동우", "재준", "태준",
+                                "민재", "예준", "승우", "정우", "주원", "하준",
+                                "은호", "도현", "서진", "은우", "유찬", "성찬",
+                                "지호", "우진", "시윤", "선우", "용준", "재현"
+                            ];
+                            const coolBgs = ["e3f2fd", "e0f7fa", "f3e5f5", "eeeeee", "f5f5f5", "e8eaf6"];
+                            maleSeeds.forEach((seed, i) => {
+                                const bg = coolBgs[i % coolBgs.length];
+                                const imgUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=${bg}&top=shortHair,shortHairDreads01,shortHairFrizzle,shortHairShaggyMullet,shortHairShortCurly,shortHairTheCaesar,shortHairSides&clothing=hoodie,shirtCrewNeck,blazerShirt,shirtVNeck,collarAndSweater&eyes=happy,default,wink&mouth=smile,default&facialHair=beardLight,none,stubble,none,none&eyebrows=default,defaultNatural&skinColor=f8d25c,ffdfbf`;
+                                document.write(`
+                                <div class="flex flex-col items-center gap-1">
+                                    <label class="relative cursor-pointer group avatar-img-container rounded-full w-full">
+                                        <input class="avatar-radio sr-only" name="avatar-selection" type="radio" value="${imgUrl}"/>
+                                        <div class="aspect-square rounded-full bg-slate-50 overflow-hidden ring-2 ring-transparent transition-all hover:ring-primary/30">
+                                            <img alt="${maleNames[i]}" class="w-full h-full object-cover" src="${imgUrl}" loading="lazy"/>
+                                        </div>
+                                    </label>
+                                    <span class="text-[11px] text-slate-500 font-medium">${maleNames[i]}</span>
+                                </div>
+                                `);
+                            });
+                        </script>
+</div>
+</div>
+</div>
+<div class="p-5 border-t border-slate-100 dark:border-slate-800 flex justify-end gap-3 bg-white dark:bg-slate-900 z-10 shrink-0">
+<label class="px-5 py-3 text-slate-500 font-bold text-sm cursor-pointer hover:text-slate-800 transition-colors" for="avatar-modal-toggle">취소</label>
+<label class="px-6 py-3 bg-primary text-white font-bold text-sm rounded-xl shadow-lg shadow-primary/30 cursor-pointer hover:bg-primary/90 transition-transform active:scale-95" for="avatar-modal-toggle" onclick="
+                            const selected = document.querySelector('input[name=avatar-selection]:checked');
+                            if(selected) {
+                                const newSrc = selected.value;
+                                const avatarEl = document.querySelector('#main-profile-avatar');
+                                // Preload image to avoid flicker on main screen
+                                const img = new Image();
+                                img.onload = function() {
+                                    avatarEl.style.backgroundImage = 'url(' + newSrc + ')';
+                                    avatarEl.style.backgroundColor = 'transparent';
+                                }
+                                img.src = newSrc;
+                                setTimeout(() =&gt; {
+                                    document.getElementById('avatar-modal-toggle').checked = false;
+                                }, 100);
+                            }
+                        ">선택 완료</label>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4 px-6 pb-6">
+<div class="flex flex-col gap-2">
+<label class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal px-1" for="nickname">닉네임</label>
+<div class="relative">
+<input class="flex w-full h-14 items-center justify-start rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-4 text-slate-900 dark:text-slate-100 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" id="nickname" placeholder="닉네임을 입력해주세요" type="text" value="지혜"/>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-4 px-6 pb-6">
+<div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex flex-col gap-1">
+<label class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal" for="is_primary_account">내 계정으로 설정</label>
+<p class="text-slate-500 dark:text-slate-400 text-xs">본인의 주 계정인 경우 활성화해주세요.</p>
+</div>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="is_primary_account" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer dark:bg-slate-700 peer-checked:bg-primary toggle-bg transition-colors duration-200"></div>
+<div class="absolute left-[2px] top-[2px] bg-white border border-gray-300 rounded-full h-5 w-5 transition-all duration-200 toggle-path dark:border-gray-600"></div>
+</label>
+</div>
+</div>
+<div class="flex flex-col gap-4 px-6">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal pb-2">연동된 계정</p>
+<div class="flex flex-col gap-3">
+<div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 px-4 h-16 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-center shrink-0 size-10 rounded-lg bg-white border border-slate-100 overflow-hidden p-2">
+<svg class="w-full h-full block" version="1.1" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg">
+<path d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" fill="#EA4335"></path>
+<path d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" fill="#4285F4"></path>
+<path d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" fill="#FBBC05"></path>
+<path d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" fill="#34A853"></path>
+</svg>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold truncate">Google</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs truncate">hello@todoapp.com</p>
+</div>
+<button class="px-3 py-1.5 bg-slate-200 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs font-bold rounded-lg hover:bg-slate-300 dark:hover:bg-slate-700 transition-colors shrink-0">
+                    연동 해제
+                </button>
+</div>
+<div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 px-4 h-16 rounded-xl border border-slate-200 dark:border-slate-800">
+<div class="flex items-center justify-center shrink-0 size-10 rounded-lg bg-[#FEE500] p-2">
+<svg class="w-full h-full" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+<path clip-rule="evenodd" d="M12 3C7.58172 3 4 5.79086 4 9.2375C4 11.2215 5.2125 12.9806 7.0875 14.125L6.375 16.7344C6.31594 16.9584 6.57094 17.1525 6.78281 17.0147L10.9781 14.2322C11.3109 14.2725 11.6531 14.2931 12 14.2931C16.4183 14.2931 20 11.5022 20 8.05547C20 5.79086 16.4183 3 12 3Z" fill="#3C1E1E" fill-rule="evenodd"></path>
+</svg>
+</div>
+<div class="flex flex-col flex-1 min-w-0">
+<p class="text-slate-900 dark:text-slate-100 text-sm font-bold truncate">Kakao</p>
+<p class="text-slate-400 dark:text-slate-500 text-xs truncate">연동된 계정이 없습니다</p>
+</div>
+<button class="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-lg hover:bg-primary/20 transition-colors shrink-0">
+                    연동하기
+                </button>
+</div>
+</div>
+</div>
+<div class="flex-grow"></div>
+<div class="px-6 py-4 pb-8">
+<button class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2">
+<span>변경사항 저장</span>
+</button>
+</div>
+<div class="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 pb-safe z-30">
+<div class="flex items-center justify-between px-2 pt-2 pb-5 h-[80px]">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">check_circle</span>
+<span class="text-[10px] font-medium">할일</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">calendar_month</span>
+<span class="text-[10px] font-medium">캘린더</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">group</span>
+<span class="text-[10px] font-medium">팀</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">flag</span>
+<span class="text-[10px] font-medium">목표</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary dark:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined fill">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</a>
+</div>
+</div>
+</div>
+
+</body></html>

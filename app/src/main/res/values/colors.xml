@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <!-- 핑크 파스텔 팔레트 -->
+    <color name="pink_primary">#FF6B9D</color>
+    <color name="pink_secondary">#FFB3C6</color>
+    <color name="pink_light">#FFF0F5</color>
+    <color name="pink_dark">#E91E8C</color>
+    <color name="pink_pastel">#FFD6E7</color>
+
+    <!-- UI 색상 -->
+    <color name="white">#FFFFFF</color>
+    <color name="black">#1A1A2E</color>
+    <color name="gray_light">#F8F9FA</color>
+    <color name="gray_medium">#6C757D</color>
+    <color name="splash_bg">#FFFFFF</color>
+
+    <!-- 포인트 색상 -->
+    <color name="point_gold">#FFD700</color>
+    <color name="point_heart">#FF4757</color>
+
+    <!-- Status bar -->
+    <color name="status_bar">#FF6B9D</color>
+</resources>

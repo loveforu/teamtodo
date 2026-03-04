@@ -1,0 +1,11 @@
+- requirements.txt를 기반으로 stitch에 'Remix of 오늘의 할 일' 이라는 앱 화면을 디자인 했음.
+- 아바타 선택 팝업은 사진이 안나와서 화면에 다 안보임.
+- 각 메뉴별 화면은 현재 stitch 구성된 기반으로 구현할 예정
+- android 앱을 구현할 것이며, stitch 의 화면을 그대로 가져다가 수정해서 쓰기 쉽게 하이브리드 웹앱 스타일로 구성할 예정
+- requirements.txt 에 있는 것처럼 DB를 구현할 예정
+- 빌드 완료 시 apk 파일을 테스트 하기 쉽게 루트 디렉토리에 저장할 예정
+- 순서대로 해야할 일을 테이블로 만들어서 별도 파일에 쓰고 진행상태를 관리할 수 있게 할 예정
+- android studio에서 폴더 한번 열었다 닫았음.
+- 개발 JDK는 android studio 꺼를 쓰면 됨.
+- 디자인은 stitch 폴더 안에 다운되어 있으며 원본 소스 디자인 컨셉을 절대 벗어나게 변경하지 않는다. 데이터 변경이나 네비게이션 추가 등 기능에 필요한 부분은 당연히 수정 가능하지만 이때도 디자인 자체를 변경하지는 않는다. 디자인 변경이 어쩔수 없이 필요할 때는 물어보고 확인을 받는다.
+- 아바타 이미지는 다음과 같은 프롬프트로 생성했다. 아바타 생성시 참조한다. /imagine prompt: A bust-up illustration of a beautiful young Asian woman, clean lineart, cel-shading vector art style, long wavy brown hair parted down the middle, slight smile, warm eyes, natural expression, wearing a dark blue split-neck shirt, coral red lipstick, subtle winged eyeliner, dynamic pose, soft pastel beige background --ar 3:4

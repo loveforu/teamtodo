@@ -1,0 +1,228 @@
+﻿<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function(){
+      var d=document.documentElement;
+      if(!d)return;
+      d.classList.add('tt-preparing','tt-no-transitions');
+      var id='tt-inline-boot';
+      if(!document.getElementById(id)){
+        var s=document.createElement('style');
+        s.id=id;
+        s.textContent="html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}html:not(.fonts-ready) .material-symbols-outlined,html:not(.fonts-ready) .material-icons{visibility:hidden}";
+        (document.head||document.documentElement).appendChild(s);
+      }
+      setTimeout(function(){
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        d.classList.add('fonts-ready');
+      },250);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <script src="../vendor/tailwind.cdn.js"></script>
+  <link rel="stylesheet" href="../vendor/plus-jakarta.css" />
+  <link rel="stylesheet" href="../vendor/material-symbols.css" />
+  <script id="tailwind-config">
+    tailwind.config = {
+      darkMode: "class",
+      theme: {
+        extend: {
+          colors: {
+            primary: "#eb4770",
+            "primary-dark": "#d4365d",
+            "background-light": "#f8f6f6",
+            "background-dark": "#211115"
+          },
+          fontFamily: {
+            display: ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+          }
+        }
+      }
+    };
+  </script>
+  <style>
+    body { min-height: max(884px, 100dvh); overflow-y: scroll; }
+    .material-symbols-outlined {
+      font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+      width: 1em; height: 1em; display: inline-block; overflow: hidden; font-size: 24px;
+    }
+    .material-symbols-outlined.fill { font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24; }
+  </style>
+  <script src="app.js"></script>
+</head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+  <div class="relative flex h-full min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-hidden">
+    <div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-20 border-b border-slate-100 dark:border-slate-800">
+      <button id="btnBack" class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center rounded-full hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
+        <span class="material-symbols-outlined">arrow_back</span>
+      </button>
+      <h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">프로필 추가/수정</h2>
+    </div>
+
+    <div class="px-6 pt-6 pb-4 flex flex-col items-center">
+      <div class="relative group">
+        <div id="avatarPreview" class="bg-center bg-no-repeat bg-cover rounded-full h-40 w-40 border-4 border-primary/15 shadow-sm" style="background-image:url(''); background-color:#f1f5f9;"></div>
+        <button id="btnEditAvatar" class="absolute bottom-1 right-1 bg-primary text-white p-3 rounded-full shadow-lg border-2 border-white hover:bg-primary-dark transition-colors">
+          <span class="material-symbols-outlined text-sm">edit</span>
+        </button>
+      </div>
+      <p class="text-xs text-slate-500 mt-3">아바타 편집 버튼을 눌러 선택해 주세요</p>
+    </div>
+
+    <div class="flex flex-col gap-4 px-6 pb-44">
+      <div class="flex flex-col gap-2">
+        <label class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal px-1" for="nickname">닉네임</label>
+        <div class="relative">
+          <input id="nickname" class="flex w-full h-14 items-center justify-start rounded-xl border border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-900 px-4 text-slate-900 dark:text-slate-100 text-sm font-medium focus:border-primary focus:ring-1 focus:ring-primary outline-none transition-all placeholder:text-slate-400 dark:placeholder:text-slate-500" placeholder="닉네임을 입력해 주세요" type="text" />
+        </div>
+      </div>
+
+      <div class="flex items-center justify-between bg-slate-50 dark:bg-slate-900 p-4 rounded-xl border border-slate-200 dark:border-slate-800">
+        <div class="flex flex-col gap-1">
+          <label class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal" for="is_primary_account">내 계정으로 설정</label>
+          <p class="text-slate-500 dark:text-slate-400 text-xs">본인 계정일 경우 활성화해 주세요</p>
+        </div>
+        <label class="relative inline-flex items-center cursor-pointer">
+          <input class="sr-only peer" id="is_primary_account" type="checkbox" />
+          <div class="w-11 h-6 bg-slate-200 rounded-full dark:bg-slate-700 peer-checked:bg-primary transition-colors"></div>
+          <div class="absolute left-[2px] top-[2px] h-5 w-5 bg-white border border-gray-300 rounded-full transition-all peer-checked:translate-x-5"></div>
+        </label>
+      </div>
+
+      <div class="flex flex-col gap-3">
+        <p class="text-slate-900 dark:text-slate-100 text-sm font-semibold leading-normal">연동된 계정</p>
+        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 px-4 h-16 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-center shrink-0 size-10 rounded-lg bg-white border border-slate-100 overflow-hidden p-2">
+            <svg class="w-full h-full block" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg"><path d="M24 9.5c3.54 0 6.71 1.22 9.21 3.6l6.85-6.85C35.9 2.38 30.47 0 24 0 14.62 0 6.51 5.38 2.56 13.22l7.98 6.19C12.43 13.72 17.74 9.5 24 9.5z" fill="#EA4335"/><path d="M46.98 24.55c0-1.57-.15-3.09-.38-4.55H24v9.02h12.94c-.58 2.96-2.26 5.48-4.78 7.18l7.73 6c4.51-4.18 7.09-10.36 7.09-17.65z" fill="#4285F4"/><path d="M10.53 28.59c-.48-1.45-.76-2.99-.76-4.59s.27-3.14.76-4.59l-7.98-6.19C.92 16.46 0 20.12 0 24c0 3.88.92 7.54 2.56 10.78l7.97-6.19z" fill="#FBBC05"/><path d="M24 48c6.48 0 11.93-2.13 15.89-5.81l-7.73-6c-2.15 1.45-4.92 2.3-8.16 2.3-6.26 0-11.57-4.22-13.47-9.91l-7.98 6.19C6.51 42.62 14.62 48 24 48z" fill="#34A853"/></svg>
+          </div>
+          <div class="flex flex-col flex-1 min-w-0"><p class="text-sm font-bold">Google</p><p class="text-xs text-slate-400">연동된 계정 없음</p></div>
+          <button id="btnGoogleLink" class="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-lg">연동하기</button>
+        </div>
+        <div class="flex items-center gap-4 bg-slate-50 dark:bg-slate-900 px-4 h-16 rounded-xl border border-slate-200 dark:border-slate-800">
+          <div class="flex items-center justify-center shrink-0 size-10 rounded-lg bg-[#FEE500] p-2">
+            <svg class="w-full h-full" fill="none" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg"><path clip-rule="evenodd" d="M12 3C7.58172 3 4 5.79086 4 9.2375C4 11.2215 5.2125 12.9806 7.0875 14.125L6.375 16.7344C6.31594 16.9584 6.57094 17.1525 6.78281 17.0147L10.9781 14.2322C11.3109 14.2725 11.6531 14.2931 12 14.2931C16.4183 14.2931 20 11.5022 20 8.05547C20 5.79086 16.4183 3 12 3Z" fill="#3C1E1E" fill-rule="evenodd"/></svg>
+          </div>
+          <div class="flex flex-col flex-1 min-w-0"><p class="text-sm font-bold">Kakao</p><p class="text-xs text-slate-400">연동된 계정 없음</p></div>
+          <button id="btnKakaoLink" class="px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-lg">연동하기</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="fixed bottom-[80px] left-0 right-0 w-full max-w-md mx-auto px-6 py-3 bg-gradient-to-t from-white via-white to-transparent z-20">
+      <button id="btnSave" class="w-full bg-primary text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30">변경사항 저장</button>
+    </div>
+
+    <nav id="bottomNav" class="fixed bottom-0 left-1/2 -translate-x-1/2 w-full max-w-md flex gap-2 border-t border-slate-100 dark:border-slate-800 bg-white/90 dark:bg-background-dark/90 backdrop-blur-md px-4 pb-6 pt-2 z-[70]">
+      <a id="navTodo" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">check_circle</span><span class="text-xs font-medium">할일</span></a>
+      <a id="navCalendar" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">calendar_month</span><span class="text-xs font-medium">캘린더</span></a>
+      <a id="navTeam" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">groups</span><span class="text-xs font-medium">팀</span></a>
+      <a id="navGoal" class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 hover:text-primary" href="#"><span class="material-symbols-outlined text-[28px]">flag</span><span class="text-xs font-medium">목표</span></a>
+      <a id="navSettings" class="flex flex-1 flex-col items-center justify-center gap-1 text-primary" href="#"><span class="material-symbols-outlined text-[28px]" style="font-variation-settings:'FILL' 1">settings</span><span class="text-xs font-bold">설정</span></a>
+    </nav>
+  </div>
+
+<script>
+(function(){
+  function nav(id, screen){
+    const el = document.getElementById(id);
+    if (!el) return;
+    el.addEventListener('click', function(e){ e.preventDefault(); TeamTodo.navigate(screen); });
+  }
+
+  function setLinkButton(btn, connected){
+    if(!btn) return;
+    btn.dataset.connected = connected ? '1' : '0';
+    if(connected){ btn.textContent='연동 해제'; btn.className='px-3 py-1.5 bg-slate-200 text-slate-600 text-xs font-bold rounded-lg'; }
+    else{ btn.textContent='연동하기'; btn.className='px-3 py-1.5 bg-primary/10 text-primary text-xs font-bold rounded-lg'; }
+  }
+
+  function defaultAvatar(type, idx){
+    const seed = (type === 'male' ? 'TeamTodoMale' : 'TeamTodoFemale') + '_' + idx;
+    const bg = type === 'male' ? 'e3f2fd' : 'ffe4e1';
+    return 'https://api.dicebear.com/9.x/avataaars/png?seed=' + encodeURIComponent(seed) + '&backgroundColor=' + bg + '&size=256';
+  }
+
+  function getCurrentAvatarState(){
+    const type = localStorage.getItem('selectedAvatarType') || localStorage.getItem('editingAvatarType') || 'female';
+    const idx = parseInt(localStorage.getItem('selectedAvatarIndex') || localStorage.getItem('editingAvatarIndex') || '0', 10) || 0;
+    const url = localStorage.getItem('selectedAvatarUrl') || localStorage.getItem('editingPhotoUrl') || defaultAvatar(type, idx);
+    return { type:type, idx:idx, url:url };
+  }
+
+  function applyAvatar(){
+    const state = getCurrentAvatarState();
+    const el = document.getElementById('avatarPreview');
+    el.style.backgroundImage = 'url(' + state.url + ')';
+    el.style.backgroundColor = 'transparent';
+  }
+
+  function saveProfile(){
+    const nickname = (document.getElementById('nickname').value || '').trim();
+    if(!nickname){ alert('닉네임을 입력해 주세요.'); document.getElementById('nickname').focus(); return; }
+
+    const editingId = localStorage.getItem('editingProfileId') || '';
+    const isMy = document.getElementById('is_primary_account').checked;
+    const avatar = getCurrentAvatarState();
+
+    const payload = {
+      id: editingId,
+      name: nickname,
+      avatarType: avatar.type,
+      avatarIndex: avatar.idx,
+      photoUrl: avatar.url,
+      isMyAccount: isMy,
+      themeColor: localStorage.getItem('themeColor') || '#FFB3C6'
+    };
+    TeamTodo.call('saveProfile', payload);
+  }
+
+  const prev = window.onNativeEvent;
+  window.onNativeEvent = function(event, data){
+    if(typeof prev === 'function'){ try { prev(event, data); } catch(_){} }
+    if(event === 'onProfileSaved'){
+      localStorage.removeItem('editingProfileId');
+      localStorage.removeItem('editingProfileName');
+      localStorage.removeItem('editingAvatarType');
+      localStorage.removeItem('editingAvatarIndex');
+      localStorage.removeItem('editingIsMyAccount');
+      localStorage.removeItem('editingPhotoUrl');
+      localStorage.removeItem('selectedAvatarType');
+      localStorage.removeItem('selectedAvatarIndex');
+      localStorage.removeItem('selectedAvatarUrl');
+      TeamTodo.navigate('profile_manage');
+    }
+  };
+
+  document.addEventListener('DOMContentLoaded', function(){
+    const name = localStorage.getItem('editingProfileName') || '';
+    document.getElementById('nickname').value = name;
+    document.getElementById('is_primary_account').checked = localStorage.getItem('editingIsMyAccount') === 'true';
+
+    applyAvatar();
+
+    document.getElementById('btnBack').addEventListener('click', function(){ TeamTodo.navigate('profile_manage'); });
+    document.getElementById('btnEditAvatar').addEventListener('click', function(){ TeamTodo.navigate('avatar_select2'); });
+    document.getElementById('btnSave').addEventListener('click', saveProfile);
+
+    const g = document.getElementById('btnGoogleLink');
+    const k = document.getElementById('btnKakaoLink');
+    setLinkButton(g, false); setLinkButton(k, false);
+    g.addEventListener('click', function(){ setLinkButton(g, g.dataset.connected !== '1'); });
+    k.addEventListener('click', function(){ setLinkButton(k, k.dataset.connected !== '1'); });
+
+    nav('navTodo','todo_main');
+    nav('navCalendar','calendar');
+    nav('navTeam','team_list');
+    nav('navGoal','goal_list');
+    nav('navSettings','settings');
+  });
+})();
+</script>
+</body>
+</html>
+
+
+

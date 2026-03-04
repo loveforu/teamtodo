@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    },
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            font-family: 'Plus Jakarta Sans', 'Noto Sans KR', sans-serif;
+            min-height: max(884px, 100dvh);
+            -webkit-tap-highlight-color: transparent;
+        }.material-symbols-outlined {
+            font-family: 'Material Symbols Outlined';
+            font-weight: normal;
+            font-style: normal;
+            font-size: 24px;
+            line-height: 1;
+            letter-spacing: normal;
+            text-transform: none;
+            display: inline-block;
+            white-space: nowrap;
+            word-wrap: normal;
+            direction: ltr;
+            -webkit-font-feature-settings: 'liga';
+            -webkit-font-smoothing: antialiased;
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            width: 1em;
+            height: 1em;
+            overflow: hidden;
+        }
+        .material-symbols-outlined.filled {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        input[type=range]::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            height: 28px;
+            width: 28px;
+            border-radius: 50%;
+            background: #ffffff;
+            border: 2px solid #eb4770;
+            cursor: pointer;
+            margin-top: -12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+        }
+        input[type=range]::-webkit-slider-runnable-track {
+            width: 100%;
+            height: 6px;
+            cursor: pointer;
+            background: rgba(0,0,0,0.1);
+            border-radius: 10px;
+        }
+        .date-cell.selected-start {
+            background-color: #eb4770;
+            color: white;
+            border-top-left-radius: 9999px;
+            border-bottom-left-radius: 9999px;
+            z-index: 10;
+        }
+        .date-cell.selected-end {
+            background-color: #eb4770;
+            color: white;
+            border-top-right-radius: 9999px;
+            border-bottom-right-radius: 9999px;
+            z-index: 10;
+        }
+        .date-cell.selected-mid {
+            background-color: rgba(235, 71, 112, 0.2);
+            color: #eb4770;
+            z-index: 5;
+        }
+        .date-cell.selected-start.has-next {
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        .date-cell.selected-end.has-prev {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        .toast-enter {
+            transform: translateY(100%);
+            opacity: 0;
+        }
+        .toast-enter-active {
+            transform: translateY(0);
+            opacity: 1;
+            transition: all 300ms ease-out;
+        }
+        .toast-exit {
+            transform: translateY(0);
+            opacity: 1;
+        }
+        .toast-exit-active {
+            transform: translateY(100%);
+            opacity: 0;
+            transition: all 300ms ease-in;
+        }
+        .snap-y {
+            scroll-snap-type: y mandatory;
+        }
+        .snap-center {
+            scroll-snap-align: center;
+        }
+        .time-picker-wheel {
+            scroll-behavior: smooth;
+        }
+        .picker-item {
+            opacity: 0.3;
+            transform: scale(0.9);
+            transition: all 0.2s ease-out;
+            height: 48px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .picker-item.active {
+            opacity: 1;
+            transform: scale(1.1);
+            color: #eb4770;
+            font-weight: 700;
+        }.wheel-container {
+             mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+             -webkit-mask-image: linear-gradient(to bottom, transparent, black 20%, black 80%, transparent);
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark text-slate-900 dark:text-slate-100 min-h-screen flex flex-col items-center">
+<div class="relative flex h-full min-h-screen w-full max-w-[480px] flex-col bg-white dark:bg-background-dark shadow-xl overflow-x-hidden pb-[80px]">
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between border-b border-primary/10 sticky top-0 z-20">
+<button class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800 rounded-full transition-colors" onclick="history.back()">
+<span class="material-symbols-outlined text-2xl">close</span>
+</button>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-tight flex-1 text-center pr-12 truncate">하위 할 일 추가/수정</h2>
+</div>
+<div class="flex flex-col gap-6 p-4 pt-6">
+<div class="flex flex-col gap-2">
+<p class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-normal pb-0">하위 할 일 제목</p>
+<div class="relative flex items-center">
+<input class="form-input flex w-full rounded-xl text-slate-900 dark:text-slate-100 border border-primary/20 bg-primary/5 focus:border-primary focus:ring-2 focus:ring-primary/20 h-14 placeholder:text-slate-400 pl-4 pr-4 text-base font-normal leading-normal transition-all" placeholder="무엇을 해야 하나요?" type="text" value="주방 정리하기"/>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<div class="flex items-center justify-between">
+<div class="flex flex-col">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">날짜 선택</h3>
+<p class="text-xs text-primary/80 mt-1 font-medium">상위 기간: 10월 1일 - 10월 15일</p>
+</div>
+<div class="flex gap-2 text-sm font-medium text-primary bg-primary/5 px-3 py-1 rounded-full" id="date-range-display">
+<span>10월 5일</span>
+<span>-</span>
+<span>10월 7일</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 border border-primary/10 rounded-2xl p-4 shadow-sm">
+<div class="flex items-center justify-between mb-4 px-2">
+<button class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full"><span class="material-symbols-outlined text-slate-400">chevron_left</span></button>
+<span class="font-bold text-slate-800 dark:text-slate-200">2023년 10월</span>
+<button class="p-1 hover:bg-slate-100 dark:hover:bg-slate-700 rounded-full"><span class="material-symbols-outlined text-slate-400">chevron_right</span></button>
+</div>
+<div class="grid grid-cols-7 text-center mb-2">
+<span class="text-xs font-semibold text-slate-400">일</span>
+<span class="text-xs font-semibold text-slate-400">월</span>
+<span class="text-xs font-semibold text-slate-400">화</span>
+<span class="text-xs font-semibold text-slate-400">수</span>
+<span class="text-xs font-semibold text-slate-400">목</span>
+<span class="text-xs font-semibold text-slate-400">금</span>
+<span class="text-xs font-semibold text-slate-400">토</span>
+</div>
+<div class="grid grid-cols-7 gap-y-2 text-sm font-medium" id="calendar-grid">
+<span class="p-2"></span>
+<span class="p-2"></span>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="1">1</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="2">2</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="3">3</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="4">4</button>
+<button class="date-cell flex items-center justify-center aspect-square relative z-10 font-bold selected-start has-next" data-date="5">5</button>
+<button class="date-cell flex items-center justify-center aspect-square relative z-0 selected-mid" data-date="6">6</button>
+<button class="date-cell flex items-center justify-center aspect-square relative z-10 font-bold selected-end has-prev" data-date="7">7</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="8">8</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="9">9</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="10">10</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="11">11</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="12">12</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="13">13</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="14">14</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors" data-date="15">15</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="16">16</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="17">17</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="18">18</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="19">19</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="20">20</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="21">21</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="22">22</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="23">23</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="24">24</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="25">25</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="26">26</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="27">27</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="28">28</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="29">29</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="30">30</button>
+<button class="date-cell flex items-center justify-center aspect-square rounded-full hover:bg-slate-100 transition-colors text-slate-300" data-date="31">31</button>
+</div>
+</div>
+</div>
+<div class="flex flex-col gap-3">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">요일 설정</h3>
+<div class="flex justify-between gap-2" id="weekday-selector">
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all" data-active="true">월</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">화</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all" data-active="true">수</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">목</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all" data-active="true">금</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">토</button>
+<button class="day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all" data-active="false">일</button>
+</div>
+</div>
+<div class="flex flex-col gap-4 pt-2">
+<div class="flex items-center justify-between">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">시간 설정</h3>
+<label class="relative inline-flex items-center cursor-pointer">
+<input checked="" class="sr-only peer" id="time-toggle" type="checkbox"/>
+<div class="w-11 h-6 bg-slate-200 peer-focus:outline-none rounded-full peer peer-checked:after:translate-x-full rtl:peer-checked:after:-translate-x-full peer-checked:after:border-white after:content-[''] after:absolute after:top-[2px] after:start-[2px] after:bg-white after:border-gray-300 after:border after:rounded-full after:h-5 after:w-5 after:transition-all peer-checked:bg-primary"></div>
+</label>
+</div>
+<div class="transition-all duration-300 overflow-hidden block opacity-100" id="time-inputs">
+<div class="grid grid-cols-2 gap-3 mb-2">
+<div class="bg-white dark:bg-slate-800 border border-primary/10 rounded-2xl p-3 flex flex-col gap-1 cursor-pointer active:bg-slate-50 dark:active:bg-slate-700 transition-colors" onclick="window.openTimePicker('start')">
+<span class="text-xs text-slate-500 font-medium">시작</span>
+<div class="flex items-center justify-between">
+<span class="text-lg font-bold text-slate-800 dark:text-slate-200" id="start-time-display">09:00</span>
+<span class="material-symbols-outlined text-primary/50 text-xl">schedule</span>
+</div>
+</div>
+<div class="bg-white dark:bg-slate-800 border border-primary/10 rounded-2xl p-3 flex flex-col gap-1 cursor-pointer active:bg-slate-50 dark:active:bg-slate-700 transition-colors" onclick="window.openTimePicker('end')">
+<span class="text-xs text-slate-500 font-medium">종료</span>
+<div class="flex items-center justify-between">
+<span class="text-lg font-bold text-slate-800 dark:text-slate-200" id="end-time-display">11:30</span>
+<span class="material-symbols-outlined text-primary/50 text-xl">schedule</span>
+</div>
+</div>
+</div>
+<p class="text-xs text-primary font-medium hidden mt-1" id="time-error-msg">
+<span class="flex items-center gap-1">
+<span class="material-symbols-outlined text-[14px]">error</span>
+                            시작 시간은 종료 시간보다 빨라야 합니다.
+                        </span>
+</p>
+</div>
+</div>
+<div class="flex flex-col gap-4 pt-2">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">포인트 설정</h3>
+<div class="bg-gradient-to-br from-primary to-[#ff8fab] rounded-2xl p-6 text-white shadow-lg shadow-primary/20">
+<div class="flex justify-between items-start mb-6">
+<div class="flex flex-col gap-1">
+<span class="text-white/90 text-sm font-medium">완료 시 지급 포인트</span>
+<div class="flex items-baseline gap-1">
+<span class="text-4xl font-bold" id="point-value">5</span>
+<span class="text-lg font-medium opacity-80">p</span>
+</div>
+</div>
+<div class="bg-white/20 p-2 rounded-xl backdrop-blur-sm">
+<span class="material-symbols-outlined text-white text-2xl">stars</span>
+</div>
+</div>
+<div class="relative w-full h-8 flex items-center">
+<input class="absolute w-full h-full opacity-0 z-20 cursor-pointer" id="point-slider" max="20" min="0" step="1" type="range" value="5"/>
+<div class="w-full h-2 bg-black/20 rounded-full relative z-10 pointer-events-none">
+<div class="absolute h-2 bg-white rounded-full left-0 pointer-events-none" id="slider-fill" style="width: 25%"></div>
+</div>
+<div class="absolute size-7 bg-white rounded-full shadow-md z-10 pointer-events-none border-2 border-primary flex items-center justify-center transition-transform" id="slider-thumb" style="left: 25%; transform: translateX(-50%)">
+<div class="size-2 bg-primary rounded-full"></div>
+</div>
+</div>
+<div class="flex justify-between text-xs font-medium text-white/70 mt-2 px-1">
+<span>0p</span>
+<span>10p</span>
+<span>20p</span>
+</div>
+</div>
+<div class="bg-primary/5 rounded-xl p-4 border border-primary/10 flex gap-3 items-start">
+<span class="material-symbols-outlined text-primary text-xl shrink-0 mt-0.5">info</span>
+<p class="text-xs text-slate-600 dark:text-slate-400 leading-relaxed">
+                        하위 할 일 완료 시 배정된 포인트가 지급됩니다. 하위 할 일 포인트의 총합은 상위 할 일의 전체 포인트가 됩니다.
+                    </p>
+</div>
+</div>
+<div class="flex flex-col gap-4">
+<h3 class="text-slate-900 dark:text-slate-100 text-base font-semibold leading-tight">참고 URL</h3>
+<div class="flex flex-col gap-3">
+<div class="flex gap-2">
+<div class="relative flex-1">
+<input class="form-input flex w-full rounded-xl text-slate-900 dark:text-slate-100 border border-primary/20 bg-primary/5 focus:border-primary focus:ring-2 focus:ring-primary/20 h-12 placeholder:text-slate-400 p-4 text-sm font-normal leading-normal transition-all" placeholder="https://example.com" type="text"/>
+</div>
+<button class="flex items-center justify-center size-12 rounded-xl bg-primary text-white shadow-md active:scale-95 transition-transform shrink-0">
+<span class="material-symbols-outlined">add</span>
+</button>
+</div>
+<p class="text-slate-500 text-[11px] leading-relaxed px-1">
+                        브라우저에서 공유 기능을 통해 이 할 일에 링크를 바로 추가할 수 있습니다.
+                    </p>
+<div class="flex flex-col gap-2 mt-1">
+<div class="flex items-center justify-between p-3 bg-white dark:bg-slate-800 border border-primary/10 rounded-xl shadow-sm">
+<div class="flex items-center gap-3 overflow-hidden">
+<div class="bg-primary/10 p-1.5 rounded-lg shrink-0">
+<span class="material-symbols-outlined text-primary text-base">link</span>
+</div>
+<span class="text-sm text-slate-700 dark:text-slate-300 truncate font-medium">https://blog.naver.com/kitchen_tips</span>
+</div>
+<button class="text-slate-400 hover:text-red-500 transition-colors shrink-0 p-1">
+<span class="material-symbols-outlined text-lg">close</span>
+</button>
+</div>
+</div>
+</div>
+</div>
+</div>
+<div class="mt-auto p-4 pb-8 flex flex-col gap-3">
+<button class="w-full h-14 bg-primary text-white rounded-xl font-bold text-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform flex items-center justify-center gap-2">
+<span>저장하기</span>
+</button>
+<button class="w-full h-14 bg-transparent text-slate-500 dark:text-slate-400 rounded-xl font-medium text-base active:bg-slate-100 dark:active:bg-slate-800 transition-colors">
+                취소
+            </button>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 max-w-[480px] mx-auto bg-white dark:bg-background-dark border-t border-primary/10 px-6 py-2 flex justify-between items-center h-[72px] z-50">
+<button class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="text-[10px] font-medium">할일</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-14 text-primary">
+<span class="material-symbols-outlined filled">calendar_month</span>
+<span class="text-[10px] font-medium">캘린더</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">group</span>
+<span class="text-[10px] font-medium">팀</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">flag</span>
+<span class="text-[10px] font-medium">목표</span>
+</button>
+<button class="flex flex-col items-center justify-center gap-1 w-14 text-slate-400 hover:text-primary transition-colors">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</button>
+</div>
+<div class="fixed bottom-[90px] left-0 right-0 max-w-[480px] mx-auto px-6 z-[60] pointer-events-none flex justify-center" id="toast-container"></div>
+<div class="fixed top-0 w-full max-w-[480px] h-1 bg-primary/10 z-50"></div>
+<div class="fixed inset-0 z-[100] hidden items-end justify-center sm:items-center" id="time-picker-modal">
+<div class="absolute inset-0 bg-black/40 backdrop-blur-[2px] transition-opacity opacity-0" id="modal-backdrop"></div>
+<div class="relative w-full max-w-[480px] bg-white dark:bg-slate-900 rounded-t-3xl sm:rounded-3xl shadow-2xl transform translate-y-full transition-transform duration-300 ease-out z-10" id="modal-content">
+<div class="flex justify-between items-center p-5 border-b border-slate-100 dark:border-slate-800">
+<h3 class="text-lg font-bold text-slate-800 dark:text-slate-100">시간 선택</h3>
+<button class="p-2 text-slate-400 hover:text-slate-600 dark:hover:text-slate-200" onclick="window.closeTimePicker()">
+<span class="material-symbols-outlined">close</span>
+</button>
+</div>
+<div class="p-6 flex justify-center items-center gap-4 h-[240px]">
+<div class="relative h-60 w-24 overflow-hidden text-center group wheel-container">
+<div class="absolute inset-x-0 top-[96px] h-12 border-y-2 border-primary/20 bg-primary/5 pointer-events-none z-10 rounded-lg"></div>
+<div class="time-picker-wheel h-full overflow-y-scroll snap-y snap-mandatory py-0 no-scrollbar relative" id="hour-wheel">
+</div>
+</div>
+<span class="text-2xl font-bold text-slate-300 pb-2 mb-1">:</span>
+<div class="relative h-60 w-24 overflow-hidden text-center group wheel-container">
+<div class="absolute inset-x-0 top-[96px] h-12 border-y-2 border-primary/20 bg-primary/5 pointer-events-none z-10 rounded-lg"></div>
+<div class="time-picker-wheel h-full overflow-y-scroll snap-y snap-mandatory py-0 no-scrollbar relative" id="minute-wheel">
+</div>
+</div>
+</div>
+<div class="p-4 pt-0">
+<button class="w-full bg-primary text-white py-3.5 rounded-xl font-bold text-lg shadow-lg shadow-primary/20 active:scale-[0.98] transition-transform" onclick="window.confirmTime()">
+                    확인
+                </button>
+</div>
+</div>
+</div>
+<script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // --- 1. Date Selection Logic (Preserved) ---
+            const dateCells = document.querySelectorAll('.date-cell');
+            let startDate = 5;
+            let endDate = 7;
+            const parentStart = 1;
+            const parentEnd = 15;
+            function showToast(message) {
+                const container = document.getElementById('toast-container');
+                const toast = document.createElement('div');
+                toast.className = 'bg-primary text-white px-4 py-3 rounded-xl shadow-xl shadow-primary/30 flex items-center gap-2 text-sm font-medium toast-enter';
+                toast.innerHTML = `
+                    <span class="material-symbols-outlined text-lg">error</span>
+                    <span>${message}</span>
+                `;
+                container.appendChild(toast);
+                requestAnimationFrame(() => {
+                    toast.classList.remove('toast-enter');
+                    toast.classList.add('toast-enter-active');
+                });
+                setTimeout(() => {
+                    toast.classList.remove('toast-enter-active');
+                    toast.classList.add('toast-exit-active');
+                    setTimeout(() => {
+                        if (container.contains(toast)) {
+                            container.removeChild(toast);
+                        }
+                    }, 300);
+                }, 3000);
+            }
+            function updateCalendar() {
+                dateCells.forEach(cell => {
+                    const date = parseInt(cell.getAttribute('data-date'));
+                    let baseClass = 'date-cell flex items-center justify-center aspect-square rounded-full transition-colors cursor-pointer ';
+                    if (date < parentStart || date > parentEnd) {
+                        cell.className = baseClass + 'text-slate-300 cursor-not-allowed hover:bg-transparent';
+                        cell.innerHTML = date;
+                        return;
+                    } else {
+                        baseClass += 'hover:bg-slate-100 ';
+                    }
+                    cell.className = baseClass; 
+                    cell.innerHTML = date;
+                    if (startDate && endDate) {
+                        const start = Math.min(startDate, endDate);
+                        const end = Math.max(startDate, endDate);
+                        if (date === start) {
+                            cell.className = 'date-cell flex items-center justify-center aspect-square relative z-10 font-bold selected-start cursor-pointer';
+                            if (start !== end) cell.classList.add('has-next');
+                        } else if (date === end) {
+                            cell.className = 'date-cell flex items-center justify-center aspect-square relative z-10 font-bold selected-end cursor-pointer';
+                            if (start !== end) cell.classList.add('has-prev');
+                        } else if (date > start && date < end) {
+                            cell.className = 'date-cell flex items-center justify-center aspect-square relative z-0 selected-mid cursor-pointer';
+                        }
+                    } else if (startDate && date === startDate) {
+                        cell.className = 'date-cell flex items-center justify-center aspect-square bg-primary text-white font-bold rounded-full relative z-10 cursor-pointer';
+                    }
+                });
+                const display = document.getElementById('date-range-display');
+                if (startDate && endDate) {
+                    const start = Math.min(startDate, endDate);
+                    const end = Math.max(startDate, endDate);
+                    display.innerHTML = `<span>10월 ${start}일</span><span>-</span><span>10월 ${end}일</span>`;
+                } else if (startDate) {
+                    display.innerHTML = `<span>10월 ${startDate}일</span>`;
+                }
+            }
+            dateCells.forEach(cell => {
+                cell.addEventListener('click', () => {
+                    const clickedDate = parseInt(cell.getAttribute('data-date'));
+                    if (clickedDate < parentStart || clickedDate > parentEnd) {
+                        showToast('상위 할 일의 기간 내에서만 선택 가능합니다.');
+                        return;
+                    }
+                    if (startDate && endDate) {
+                        startDate = clickedDate;
+                        endDate = null;
+                    } else if (!startDate) {
+                        startDate = clickedDate;
+                    } else {
+                        if (clickedDate < startDate) {
+                             endDate = startDate;
+                             startDate = clickedDate;
+                        } else {
+                            endDate = clickedDate;
+                        }
+                    }
+                    updateCalendar();
+                });
+            });
+            // --- 2. Day Selection Logic (Preserved) ---
+            const dayButtons = document.querySelectorAll('.day-btn');
+            dayButtons.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    const isActive = btn.getAttribute('data-active') === 'true';
+                    const newState = !isActive;
+                    btn.setAttribute('data-active', newState);
+                    if (newState) {
+                        btn.className = 'day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-primary text-white shadow-md shadow-primary/20 transition-all';
+                    } else {
+                        btn.className = 'day-btn flex-1 aspect-square rounded-xl flex items-center justify-center text-sm font-bold bg-white dark:bg-slate-800 text-slate-400 border border-slate-100 dark:border-slate-700 hover:border-primary/50 transition-all';
+                    }
+                });
+            });
+            // --- 3. Time Toggle Logic (Refined for no-flicker) ---
+            const timeToggle = document.getElementById('time-toggle');
+            const timeInputs = document.getElementById('time-inputs');
+            // Set initial state based on checkbox without transition for instant load
+            if (!timeToggle.checked) {
+                timeInputs.style.display = 'none';
+                timeInputs.style.opacity = '0';
+            } else {
+                timeInputs.style.display = 'block';
+                timeInputs.style.opacity = '1';
+            }
+            timeToggle.addEventListener('change', (e) => {
+                if(e.target.checked) {
+                    timeInputs.style.display = 'block'; 
+                    // Small delay to allow display:block to apply before opacity transition
+                    requestAnimationFrame(() => {
+                        timeInputs.style.opacity = '1';
+                    });
+                } else {
+                    timeInputs.style.opacity = '0';
+                    setTimeout(() => { timeInputs.style.display = 'none'; }, 300);
+                }
+            });
+            // --- 4. Point Slider Logic (Preserved) ---
+            const slider = document.getElementById('point-slider');
+            const pointValue = document.getElementById('point-value');
+            const sliderFill = document.getElementById('slider-fill');
+            const sliderThumb = document.getElementById('slider-thumb');
+            function updateSlider(val) {
+                pointValue.textContent = val;
+                const percent = (val / slider.max) * 100;
+                sliderFill.style.width = `${percent}%`;
+                sliderThumb.style.left = `${percent}%`;
+            }
+            slider.addEventListener('input', (e) => {
+                updateSlider(e.target.value);
+            });
+            updateSlider(slider.value); // Init
+            // --- 5. Time Picker Logic (Refined & Stabilized) ---
+            const modal = document.getElementById('time-picker-modal');
+            const backdrop = document.getElementById('modal-backdrop');
+            const content = document.getElementById('modal-content');
+            const hourWheel = document.getElementById('hour-wheel');
+            const minuteWheel = document.getElementById('minute-wheel');
+            const timeErrorMsg = document.getElementById('time-error-msg');
+            const startDisplay = document.getElementById('start-time-display');
+            const endDisplay = document.getElementById('end-time-display');
+            let currentTargetId = null;
+            const itemHeight = 48; // h-12 = 48px
+            const visibleItems = 5; // Height 240px approx, wheel h-60 (240px)
+            // Center is at index 2 (0, 1, 2, 3, 4). 
+            // 240px height container. Middle is 96px top.
+            // Spacer top needs to push first item to middle. 96px spacer.
+            function populateWheels() {
+                // Clear existing
+                hourWheel.innerHTML = '';
+                minuteWheel.innerHTML = '';
+                // Spacer logic for perfect centering
+                // Container height: 240px (h-60). 
+                // Selection box: top 96px, height 48px.
+                // To align item 0 at center: Spacer height = 96px.
+                const spacerHeight = 96; 
+                const createSpacer = () => {
+                    const spacer = document.createElement('div');
+                    spacer.className = "snap-center shrink-0 w-full"; 
+                    spacer.style.height = `${spacerHeight}px`; 
+                    return spacer;
+                }
+                // Hours: 00-23
+                hourWheel.appendChild(createSpacer());
+                for (let i = 0; i < 24; i++) {
+                    const div = document.createElement('div');
+                    div.className = 'picker-item snap-center h-12 flex items-center justify-center text-xl font-medium text-slate-400 cursor-pointer select-none shrink-0 w-full';
+                    div.textContent = i.toString().padStart(2, '0');
+                    div.dataset.value = i;
+                    div.onclick = () => {
+                         hourWheel.scrollTo({
+                            top: i * itemHeight,
+                            behavior: 'smooth'
+                        });
+                    }
+                    hourWheel.appendChild(div);
+                }
+                hourWheel.appendChild(createSpacer());
+                // Minutes: 00-55 (step 5)
+                minuteWheel.appendChild(createSpacer());
+                for (let i = 0; i < 60; i+=5) {
+                    const div = document.createElement('div');
+                    div.className = 'picker-item snap-center h-12 flex items-center justify-center text-xl font-medium text-slate-400 cursor-pointer select-none shrink-0 w-full';
+                    div.textContent = i.toString().padStart(2, '0');
+                    div.dataset.value = i;
+                    div.onclick = () => {
+                        minuteWheel.scrollTo({
+                            top: (i / 5) * itemHeight,
+                            behavior: 'smooth'
+                        });
+                    }
+                    minuteWheel.appendChild(div);
+                }
+                minuteWheel.appendChild(createSpacer());
+            }
+            populateWheels();
+            function updateActiveItem(container) {
+                const scrollPos = container.scrollTop;
+                const index = Math.round(scrollPos / itemHeight);
+                const items = container.querySelectorAll('.picker-item');
+                items.forEach((item, idx) => {
+                    if (idx === index) {
+                        item.classList.add('active');
+                    } else {
+                        item.classList.remove('active');
+                    }
+                });
+            }
+            let isScrollingHour, isScrollingMinute;
+            hourWheel.addEventListener('scroll', () => {
+                updateActiveItem(hourWheel);
+                clearTimeout(isScrollingHour);
+                isScrollingHour = setTimeout(() => {
+                    // Snap correction if needed (optional with snap-type css)
+                    const index = Math.round(hourWheel.scrollTop / itemHeight);
+                    hourWheel.scrollTo({ top: index * itemHeight, behavior: 'smooth' });
+                }, 150);
+            });
+            minuteWheel.addEventListener('scroll', () => {
+                updateActiveItem(minuteWheel);
+                clearTimeout(isScrollingMinute);
+                isScrollingMinute = setTimeout(() => {
+                    const index = Math.round(minuteWheel.scrollTop / itemHeight);
+                    minuteWheel.scrollTo({ top: index * itemHeight, behavior: 'smooth' });
+                }, 150);
+            });
+            window.openTimePicker = (targetId) => {
+                currentTargetId = targetId === 'start' ? 'start-time-display' : 'end-time-display';
+                const currentText = document.getElementById(currentTargetId).textContent;
+                const [hStr, mStr] = currentText.split(':');
+                let h = parseInt(hStr);
+                let m = parseInt(mStr);
+                // Align to 5 min steps
+                m = Math.round(m / 5) * 5;
+                if (m === 60) { m = 0; h = (h + 1) % 24; }
+                modal.classList.remove('hidden');
+                modal.classList.add('flex');
+                // Reset scroll first instantly to avoid jumping visual
+                hourWheel.scrollTop = h * itemHeight;
+                minuteWheel.scrollTop = (m / 5) * itemHeight;
+                updateActiveItem(hourWheel);
+                updateActiveItem(minuteWheel);
+                // Animate entrance
+                setTimeout(() => {
+                    backdrop.classList.remove('opacity-0');
+                    content.classList.remove('translate-y-full');
+                }, 10);
+            };
+            window.closeTimePicker = () => {
+                backdrop.classList.add('opacity-0');
+                content.classList.add('translate-y-full');
+                setTimeout(() => {
+                    modal.classList.add('hidden');
+                    modal.classList.remove('flex');
+                }, 300);
+            };
+            backdrop.addEventListener('click', window.closeTimePicker);
+            window.confirmTime = () => {
+                if (!currentTargetId) return;
+                const hIndex = Math.round(hourWheel.scrollTop / itemHeight);
+                const mIndex = Math.round(minuteWheel.scrollTop / itemHeight);
+                const selectedHour = Math.min(Math.max(hIndex, 0), 23);
+                const selectedMinute = Math.min(Math.max(mIndex, 0), 11) * 5;
+                const timeStr = `${selectedHour.toString().padStart(2, '0')}:${selectedMinute.toString().padStart(2, '0')}`;
+                document.getElementById(currentTargetId).textContent = timeStr;
+                validateTimes();
+                window.closeTimePicker();
+            };
+            function validateTimes() {
+                const startStr = startDisplay.textContent;
+                const endStr = endDisplay.textContent;
+                const [startH, startM] = startStr.split(':').map(Number);
+                const [endH, endM] = endStr.split(':').map(Number);
+                const startTotal = startH * 60 + startM;
+                const endTotal = endH * 60 + endM;
+                if (startTotal >= endTotal) {
+                    timeErrorMsg.classList.remove('hidden');
+                    timeErrorMsg.classList.add('block');
+                } else {
+                    timeErrorMsg.classList.add('hidden');
+                    timeErrorMsg.classList.remove('block');
+                }
+            }
+            // Init state
+            validateTimes();
+        });
+    </script>
+
+</body></html>

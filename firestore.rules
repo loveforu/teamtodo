@@ -1,0 +1,135 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+
+    // ============================================================
+    // ?ы띁 ?⑥닔
+    // ============================================================
+
+    // 濡쒓렇???щ? ?뺤씤
+    function isLoggedIn() {
+      return request.auth != null;
+    }
+
+    // 蹂몄씤 ?뺤씤
+    function isOwner(uid) {
+      return request.auth.uid == uid;
+    }
+
+    // ? 硫ㅻ쾭 ?뺤씤 (teams 臾몄꽌?먯꽌 members 諛곗뿴濡?泥댄겕)
+    function isTeamMember(teamId) {
+      return request.auth.uid in get(/databases/$(database)/documents/teams/$(teamId)).data.members;
+    }
+
+    // ============================================================
+    // users 而щ젆??
+    // - 蹂몄씤: 紐⑤뱺 ?쎄린/?곌린
+    // - ??? thumbsupPoints ?꾨뱶 利앷?留??덉슜 (?곕큺 諛쏆쓣 ??
+    // ============================================================
+    match /users/{userId} {
+      // 蹂몄씤? ?꾩껜 ?쎄린/?곌린
+      allow read, write: if isLoggedIn() && isOwner(userId);
+
+      // ??몄씠 ?곕큺 ?ъ씤?몃쭔 ?щ┫ ???덉쓬 (?ㅻⅨ ?꾨뱶 ?섏젙? 遺덇?)
+      allow update: if isLoggedIn()
+        && !isOwner(userId)
+        // ?ㅼ쭅 thumbsupPoints ?꾨뱶留?蹂寃?媛??
+        && request.resource.data.diff(resource.data).affectedKeys().hasOnly(['thumbsupPoints'])
+        // ?ъ씤?몃뒗 諛섎뱶??利앷?留?媛??(媛먯냼 遺덇?)
+        && request.resource.data.thumbsupPoints > resource.data.thumbsupPoints;
+    }
+
+
+    // ============================================================
+    // profiles 而щ젆??
+    // - ?쎄린: 濡쒓렇?명븳 紐⑤뱺 ?ъ슜??(? 湲곕뒫?먯꽌 ?ㅻⅨ ?щ엺 ?꾨줈??議고쉶 ?꾩슂)
+    // - ?곌린: 蹂몄씤???꾨줈?꾨쭔
+    // ============================================================
+    match /profiles/{profileId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isLoggedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // ============================================================
+    // todos 而щ젆??
+    // - ?쎄린: 蹂몄씤 ????+ 媛숈? ??먯쓽 ????(移쒓뎄 ????蹂닿린 湲곕뒫)
+    // - ?곌린: 蹂몄씤 ???쇰쭔
+    // ============================================================
+    match /todos/{todoId} {
+      // 蹂몄씤 寃??먮뒗 怨듦컻???꾨줈?꾩쓽 ???쇱? ?쎄린 媛??
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isLoggedIn() && (
+        // 蹂몄씤 ?????섏젙
+        resource.data.ownerUid == request.auth.uid ||
+        // ?ㅻⅨ ?щ엺??isCompleted留?蹂寃쏀븯??寃껋? 留됯린 (蹂몄씤留??꾨즺 泥섎━)
+        false
+      );
+      allow delete: if isLoggedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // ============================================================
+    // thumbsup (?곕큺) 而щ젆??
+    // - ?쎄린: 濡쒓렇?명븳 ?ъ슜???꾩껜 (?대뼡 ?좎씪???곕큺???덈뒗吏 ?뺤씤)
+    // - ?앹꽦: 濡쒓렇?명븳 ?ъ슜??(蹂몄씤 寃??쒖쇅)
+    // - ??젣: ?곕큺??以 蹂몄씤留?
+    // ============================================================
+    match /thumbsup/{thumbsupId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn()
+        && request.resource.data.giverUid == request.auth.uid;
+      allow delete: if isLoggedIn() && resource.data.giverUid == request.auth.uid;
+      allow update: if false; // ?곕큺? ?섏젙 遺덇?
+    }
+
+    // ============================================================
+    // teams 而щ젆??
+    // - ?쎄린: 濡쒓렇?명븳 ?ъ슜???꾩껜 (? 紐⑸줉 議고쉶)
+    // - ?앹꽦: 濡쒓렇?명븳 ?ъ슜??
+    // - ?섏젙: ? ?앹꽦???먮뒗 ? 硫ㅻ쾭 (?먯떊??媛???덊눜)
+    // - ??젣: ? ?앹꽦?먮쭔
+    // ============================================================
+    match /teams/{teamId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn()
+        && request.resource.data.ownerUid == request.auth.uid;
+      allow update: if isLoggedIn() && (
+        // ??? 紐⑤뱺 ?섏젙 媛??
+        resource.data.ownerUid == request.auth.uid ||
+        // ?쇰컲 硫ㅻ쾭: members 諛곗뿴???먯떊??異붽?/?쒓굅留?媛??
+        (request.resource.data.diff(resource.data).affectedKeys().hasOnly(['members']))
+      );
+      allow delete: if isLoggedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // ============================================================
+    // goals 而щ젆??
+    // - ?쎄린: 蹂몄씤 + 怨듦컻??紐⑺몴
+    // - ?곌린: 蹂몄씤留?
+    // ============================================================
+    match /goals/{goalId} {
+      allow read: if isLoggedIn();
+      allow create: if isLoggedIn() && request.resource.data.ownerUid == request.auth.uid;
+      allow update, delete: if isLoggedIn() && resource.data.ownerUid == request.auth.uid;
+    }
+
+    // ============================================================
+    // quotes (?ㅻ뒛??紐낆뼵) 而щ젆??
+    // - ?쎄린: 濡쒓렇?명븳 紐⑤뱺 ?ъ슜??
+    // - ?곌린: 遺덇? (Firebase 肄섏넄 ?대뱶誘쇰쭔 異붽?)
+    // ============================================================
+    match /quotes/{quoteId} {
+      allow read: if isLoggedIn();
+      allow write: if false;
+    }
+
+    // ============================================================
+    // 湲고? 紐⑤뱺 寃쎈줈: 李⑤떒
+    // ============================================================
+    match /{document=**} {
+      allow read, write: if false;
+    }
+  }
+}
+

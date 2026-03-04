@@ -1,0 +1,235 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+  <script>
+    (function () {
+      var d = document.documentElement;
+      if (!d) return;
+      d.classList.add('tt-preparing', 'tt-no-transitions');
+      var id = 'tt-inline-boot';
+      if (!document.getElementById(id)) {
+        var s = document.createElement('style');
+        s.id = id;
+        s.textContent = "html.tt-preparing body{opacity:0!important}html.tt-no-transitions *,html.tt-no-transitions *::before,html.tt-no-transitions *::after{transition:none!important;animation:none!important}";
+        (document.head || document.documentElement).appendChild(s);
+      }
+      setTimeout(function () {
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+      }, 250);
+      setTimeout(function () {
+        d.classList.remove('tt-preparing');
+        d.classList.remove('tt-no-transitions');
+        if (document.body) document.body.style.opacity = '1';
+      }, 1200);
+    })();
+  </script>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <title>TeamTodo 로그인</title>
+  <link href="../vendor/noto-sans-kr.css" rel="stylesheet" />
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: 'Noto Sans KR', sans-serif;
+      background: linear-gradient(145deg, #fff5f8 0%, #ffe8f0 50%, #ffd6e7 100%);
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      overflow: hidden;
+      color: #222;
+    }
+    .bubbles { position: fixed; inset: 0; pointer-events: none; }
+    .bubble {
+      position: absolute;
+      border-radius: 9999px;
+      background: rgba(255, 107, 157, 0.1);
+      animation: float 6s ease-in-out infinite;
+    }
+    @keyframes float {
+      0%, 100% { transform: translateY(0) scale(1); }
+      50% { transform: translateY(-20px) scale(1.05); }
+    }
+    .container {
+      position: relative;
+      z-index: 10;
+      text-align: center;
+      padding: 44px 30px;
+      background: rgba(255, 255, 255, 0.86);
+      backdrop-filter: blur(14px);
+      border-radius: 28px;
+      box-shadow: 0 18px 48px rgba(255, 107, 157, 0.22);
+      margin: 20px;
+      max-width: 360px;
+      width: calc(100% - 40px);
+    }
+    .app-icon {
+      width: 92px;
+      height: 92px;
+      margin: 0 auto 20px;
+      border-radius: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 42px;
+      background: linear-gradient(135deg, #ff6b9d, #ffb3c6);
+      box-shadow: 0 8px 24px rgba(255, 107, 157, 0.35);
+    }
+    h1 {
+      font-size: 27px;
+      font-weight: 700;
+      margin-bottom: 8px;
+      letter-spacing: -0.4px;
+    }
+    .subtitle {
+      font-size: 14px;
+      color: #777;
+      margin-bottom: 34px;
+      line-height: 1.6;
+    }
+    .google-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 12px;
+      width: 100%;
+      padding: 15px 18px;
+      border-radius: 14px;
+      border: 2px solid #ffb3c6;
+      background: #fff;
+      color: #222;
+      font-size: 15px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: all .2s ease;
+      box-shadow: 0 4px 12px rgba(255, 107, 157, 0.14);
+    }
+    .google-btn:active { transform: scale(0.98); }
+    .google-btn:hover { border-color: #ff6b9d; background: #fff7fa; }
+    .google-icon { width: 22px; height: 22px; }
+    .features {
+      margin-top: 24px;
+      display: flex;
+      justify-content: center;
+      gap: 14px;
+      font-size: 11px;
+      color: #818181;
+    }
+    .feature {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      gap: 4px;
+      min-width: 54px;
+    }
+    .feature-icon { font-size: 20px; line-height: 1; }
+    .loading-overlay {
+      display: none;
+      position: fixed;
+      inset: 0;
+      background: rgba(255, 255, 255, 0.84);
+      z-index: 9999;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      gap: 14px;
+    }
+    .loading-overlay.show { display: flex; }
+    .spinner {
+      width: 44px;
+      height: 44px;
+      border: 4px solid #ffb3c6;
+      border-top-color: #ff6b9d;
+      border-radius: 9999px;
+      animation: spin .8s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+    .error {
+      margin-top: 12px;
+      color: #b91c1c;
+      font-size: 12px;
+      min-height: 16px;
+    }
+  </style>
+</head>
+<body>
+  <div class="bubbles">
+    <div class="bubble" style="width:120px;height:120px;top:10%;left:5%;animation-delay:0s"></div>
+    <div class="bubble" style="width:80px;height:80px;top:60%;right:8%;animation-delay:2s"></div>
+    <div class="bubble" style="width:60px;height:60px;top:80%;left:20%;animation-delay:4s"></div>
+  </div>
+
+  <div class="container">
+    <div class="app-icon">✔</div>
+    <h1>TeamTodo</h1>
+    <p class="subtitle">오늘의 할 일을 체크하고<br />포인트로 동기를 이어가세요</p>
+
+    <button class="google-btn" id="googleBtn" type="button">
+      <svg class="google-icon" viewBox="0 0 24 24" aria-hidden="true">
+        <path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92a5.07 5.07 0 0 1-2.21 3.31v2.77h3.57a10.9 10.9 0 0 0 3.28-8.09z"/>
+        <path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84A11 11 0 0 0 12 23z"/>
+        <path fill="#FBBC05" d="M5.84 14.09A6.98 6.98 0 0 1 5.49 12c0-.73.13-1.43.35-2.09V7.07H2.18A11 11 0 0 0 1 12c0 1.78.43 3.45 1.18 4.93l3.66-2.84z"/>
+        <path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15A10.9 10.9 0 0 0 12 1a11 11 0 0 0-9.82 6.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/>
+      </svg>
+      Google로 계속하기
+    </button>
+
+    <div class="features">
+      <div class="feature"><span class="feature-icon">📝</span><span>할일 관리</span></div>
+      <div class="feature"><span class="feature-icon">❤️</span><span>포인트 보상</span></div>
+      <div class="feature"><span class="feature-icon">👥</span><span>팀 협업</span></div>
+      <div class="feature"><span class="feature-icon">🎯</span><span>목표 달성</span></div>
+    </div>
+    <p id="errText" class="error"></p>
+  </div>
+
+  <div id="loadingOverlay" class="loading-overlay">
+    <div class="spinner"></div>
+    <p style="color:#ff6b9d;font-size:14px;">로그인 중...</p>
+  </div>
+
+  <script src="app.js"></script>
+  <script>
+    (function () {
+      var googleBtn = document.getElementById('googleBtn');
+      var overlay = document.getElementById('loadingOverlay');
+      var errText = document.getElementById('errText');
+
+      function setLoading(on) {
+        if (!overlay) return;
+        overlay.classList.toggle('show', !!on);
+      }
+
+      function setError(msg) {
+        if (errText) errText.textContent = msg || '';
+      }
+
+      googleBtn.addEventListener('click', function () {
+        setError('');
+        setLoading(true);
+        if (window.TeamTodo && typeof TeamTodo.login === 'function') {
+          TeamTodo.login();
+          return;
+        }
+        setLoading(false);
+        setError('로그인 기능 초기화에 실패했습니다. 앱을 다시 실행해 주세요.');
+      });
+
+      document.addEventListener('teamtodo:onLoginSuccess', function () {
+        setLoading(false);
+        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
+          TeamTodo.navigate('profile_select');
+        }
+      });
+
+      document.addEventListener('teamtodo:onLoginError', function () {
+        setLoading(false);
+        setError('로그인에 실패했습니다. 네트워크 상태를 확인 후 다시 시도해 주세요.');
+      });
+    })();
+  </script>
+</body>
+</html>
+

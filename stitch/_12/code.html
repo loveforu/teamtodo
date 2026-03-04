@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html class="light" lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<title>팀 대시보드</title>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "sans-serif"]
+                    },
+                    borderRadius: {"DEFAULT": "0.5rem", "lg": "1rem", "xl": "1.5rem", "full": "9999px"},
+                },
+            },
+        }
+    </script>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+    .scrollbar-hide::-webkit-scrollbar {
+        display: none;
+    }
+    .scrollbar-hide {
+        -ms-overflow-style: none;
+        scrollbar-width: none;
+    }
+</style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="max-w-md mx-auto bg-white dark:bg-background-dark min-h-screen shadow-xl flex flex-col relative">
+<header class="sticky top-0 z-10 bg-white/80 dark:bg-background-dark/80 backdrop-blur-md border-b border-primary/10">
+<div class="flex items-center p-4 justify-between">
+<div class="text-slate-900 dark:text-slate-100 flex size-10 shrink-0 items-center justify-center rounded-full hover:bg-primary/10 transition-colors cursor-pointer">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h1 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight flex-1 text-center">팀 대시보드</h1>
+<div class="flex w-10 items-center justify-end">
+<button class="flex size-10 items-center justify-center rounded-full hover:bg-primary/10 transition-colors text-slate-900 dark:text-slate-100">
+<span class="material-symbols-outlined">share</span>
+</button>
+</div>
+</div>
+<div class="px-4 pb-0">
+<div class="flex justify-between items-center bg-primary/5 rounded-lg p-1">
+<button class="tab-btn flex-1 py-2 text-center rounded-md bg-white dark:bg-primary text-primary dark:text-white shadow-sm font-bold text-sm transition-all" onclick="switchTab('weekly')">주간</button>
+<button class="tab-btn flex-1 py-2 text-center text-slate-500 dark:text-slate-400 font-bold text-sm transition-all hover:bg-white/50" onclick="switchTab('monthly')">월간</button>
+<button class="tab-btn flex-1 py-2 text-center text-slate-500 dark:text-slate-400 font-bold text-sm transition-all hover:bg-white/50" onclick="switchTab('yearly')">년간</button>
+</div>
+</div>
+<div class="h-4"></div>
+</header>
+<main class="flex-1 overflow-y-auto pb-24">
+<div id="dashboard-content">
+<section class="p-4 fade-in">
+<h2 class="text-slate-900 dark:text-slate-100 text-xl font-extrabold pb-4">최고 달성 멤버</h2>
+<div class="relative overflow-hidden rounded-xl bg-gradient-to-br from-primary to-primary/80 p-6 text-white shadow-lg shadow-primary/20">
+<div class="flex justify-between items-center">
+<div class="flex flex-col gap-2">
+<span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-bold bg-white/20 text-white backdrop-blur-sm w-fit"><span class="material-symbols-outlined text-xs mr-1">workspace_premium</span> 순위 #1</span>
+<p class="text-2xl font-bold" id="top-member-name">김지수</p>
+<p class="text-white/90 text-sm font-medium" id="top-member-stat">98% 목표 달성</p>
+</div>
+<div class="size-24 rounded-full border-4 border-white/30 overflow-hidden bg-white/10 shrink-0">
+<img alt="Top Member" class="w-full h-full object-cover" id="top-member-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChT_a7DB0vVXHAyZL2TNCNMeF7VqINcHTSZgaVQVS2z7roQHHaXKSwg7Sy-21WaAb-4neuRQx7SlFUqMWsfh2t-6XIffAw6Fi5uLatq6hzqCECqJKo62ZO28R1rDlHS8GCMDWgW3wQsnRrpq573emO7nKUijSVQ_BEymDztEtrePtpQUKZUVw4aO3umInskc_May5CEpEXMcsjBo6IFQ9LZbEE407LaOheccfGrkwZcUtSzZ_mc-gCAZkkjD61J0Yf5vOUiWUmbc0"/>
+</div>
+</div>
+</div>
+</section>
+<section class="p-4 pt-0">
+<div class="flex items-center justify-between pb-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold">최고의 응원가 (준 사람)</h2>
+<span class="text-primary text-xs font-bold uppercase tracking-wider">상위 3명</span>
+</div>
+<div class="space-y-3">
+<div class="flex items-center gap-4 rounded-xl bg-white dark:bg-slate-800/50 p-3 border border-slate-100 dark:border-slate-800">
+<div class="size-12 rounded-full overflow-hidden bg-primary/10">
+<img alt="Supporter 1" class="w-full h-full object-cover" id="supporter-1-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMG0_eLg_-XhViqM7uooszoNGC_rJBOuFP6HQ0qdjoOmR4LVeLollC1GsW6QQ84Kag4g8EBlkvFn44Y-lLtCPcyZJICJbfUldIQDbYwKe29Xab61h9p5mew0yol8JjZY7voOIV0vZFlXULI2ulSfJIiLZUooGedMnNBEuLw6avCS67snFFH2-SwKphNj92CE7D9PGlQoyUTzgj2lJE9ZJcEo8ipJdhzaIYCbMDmvTky1RN10gAJmn2qQhBPL3997jgLyiOad7KcVc"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-slate-900 dark:text-slate-100" id="supporter-1-name">이민호</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">커뮤니티 챔피언</p>
+</div>
+<div class="text-right">
+<p class="text-primary font-extrabold text-lg" id="supporter-1-score">142</p>
+<p class="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-bold">응원</p>
+</div>
+</div>
+<div class="flex items-center gap-4 rounded-xl bg-white dark:bg-slate-800/50 p-3 border border-slate-100 dark:border-slate-800">
+<div class="size-12 rounded-full overflow-hidden bg-primary/10">
+<img alt="Supporter 2" class="w-full h-full object-cover" id="supporter-2-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBACnJ0PJGeqmdoYXex173nu9J71ezEkKb_85hDqpm2wZumL5eYn5nk6IS0QTKUdDEKts-cCwcNVJJ9ByVRFPZOaW6mQJ45zrc4xjKt274HfQQu1X7z6y6kc9Tsjm5_Ekuu_0NGr0biezAGhXwZKkPA2A15W0dltkGqZO3V758InokXDkP3zrO0frclFydyn3uPV148EvNlcdlKnUET0MItX-WxZMBtMyt4g_yKszyTVtRu0TWU9GdN7rb_IRywA0TaTeEqHry1Q48"/>
+</div>
+<div class="flex-1">
+<p class="font-bold text-slate-900 dark:text-slate-100" id="supporter-2-name">박서연</p>
+<p class="text-slate-500 dark:text-slate-400 text-xs">팀의 활력소</p>
+</div>
+<div class="text-right">
+<p class="text-primary font-extrabold text-lg" id="supporter-2-score">118</p>
+<p class="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-bold">응원</p>
+</div>
+</div>
+</div>
+</section>
+<section class="p-4 pt-0">
+<div class="flex items-center justify-between pb-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold">최고의 인기인 (받은 사람)</h2>
+<span class="text-primary text-xs font-bold uppercase tracking-wider">상위 3명</span>
+</div>
+<div class="grid grid-cols-2 gap-3">
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
+<div class="relative mb-3">
+<div class="size-16 rounded-full overflow-hidden border-2 border-primary">
+<img alt="Popular 1" class="w-full h-full object-cover" id="popular-1-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW4sP72qNsIl7Zr1RjMRfdlCt9Hwi_93iBYEGiSwdcsQk3rijZCceUbq6ZkVfsAdDDUP0ja0DBCQ50YBZSLmPnb3QYYIcfm7d-bpxfDWjGoMWvh1giV1buyelHF5Zn2QN0l0e4RtScTYzrMtLYKSPRQa1RwIXmJlAIGdlLwA79DZWjxVTC14TNdUJ5nKcAsk4ihKHl-h_sdq4Lj07FI_RI2LWeYAgdFEH0I_b5xVhZSefa2zLYCSCXZU3MTESSuOloZPK8OxcnKNY"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary text-white size-6 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
+<span class="material-symbols-outlined text-xs">favorite</span>
+</div>
+</div>
+<p class="font-bold text-sm text-slate-900 dark:text-slate-100 line-clamp-1" id="popular-1-name">최준호</p>
+<p class="text-primary font-black text-xl mt-1" id="popular-1-score">86</p>
+<p class="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-bold">응원</p>
+</div>
+<div class="bg-white dark:bg-slate-800/50 p-4 rounded-xl border border-slate-100 dark:border-slate-800 flex flex-col items-center text-center">
+<div class="relative mb-3">
+<div class="size-16 rounded-full overflow-hidden border-2 border-primary/40">
+<img alt="Popular 2" class="w-full h-full object-cover" id="popular-2-img" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj2Sd73mmdKzoLA-IZrBSqSX8sSce2sCo_RuNv-OQEUdilqulymSL7FCjhmr7bU6YnEJjlvUnr1FY_lgkO0iK34y9BfwREvQPaxCdwpZ2tDeRKM17Ob-MixmvFBaBGWjxE5ZE5qG4XcBityIH4nv9lkPbKHQnlQpF1a_HOynRzZe40RUtEeZ7zhqREV1NCdyHZDgcsQ4nMtslYTICn9VpvOIVmPTYQCfY6leavgwqUfSiiZ5SBZ7t9Ivl0BiGsDrC8nnmPoENiOpk"/>
+</div>
+<div class="absolute -bottom-1 -right-1 bg-primary/40 text-white size-6 rounded-full flex items-center justify-center border-2 border-white dark:border-slate-800">
+<span class="material-symbols-outlined text-xs">favorite</span>
+</div>
+</div>
+<p class="font-bold text-sm text-slate-900 dark:text-slate-100 line-clamp-1" id="popular-2-name">정다은</p>
+<p class="text-primary/60 font-black text-xl mt-1" id="popular-2-score">74</p>
+<p class="text-slate-400 dark:text-slate-500 text-[10px] uppercase font-bold">응원</p>
+</div>
+</div>
+</section>
+</div>
+<section class="p-4 pt-0">
+<div class="flex items-center justify-between pb-4">
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold">팀 멤버</h2>
+</div>
+<div class="flex overflow-x-auto gap-4 pb-2 -mx-4 px-4 scrollbar-hide">
+<div class="flex flex-col items-center gap-2 min-w-[64px]">
+<div class="size-16 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700">
+<img alt="김지수" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuChT_a7DB0vVXHAyZL2TNCNMeF7VqINcHTSZgaVQVS2z7roQHHaXKSwg7Sy-21WaAb-4neuRQx7SlFUqMWsfh2t-6XIffAw6Fi5uLatq6hzqCECqJKo62ZO28R1rDlHS8GCMDWgW3wQsnRrpq573emO7nKUijSVQ_BEymDztEtrePtpQUKZUVw4aO3umInskc_May5CEpEXMcsjBo6IFQ9LZbEE407LaOheccfGrkwZcUtSzZ_mc-gCAZkkjD61J0Yf5vOUiWUmbc0"/>
+</div>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">김지수</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[64px]">
+<div class="size-16 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700">
+<img alt="이민호" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDMG0_eLg_-XhViqM7uooszoNGC_rJBOuFP6HQ0qdjoOmR4LVeLollC1GsW6QQ84Kag4g8EBlkvFn44Y-lLtCPcyZJICJbfUldIQDbYwKe29Xab61h9p5mew0yol8JjZY7voOIV0vZFlXULI2ulSfJIiLZUooGedMnNBEuLw6avCS67snFFH2-SwKphNj92CE7D9PGlQoyUTzgj2lJE9ZJcEo8ipJdhzaIYCbMDmvTky1RN10gAJmn2qQhBPL3997jgLyiOad7KcVc"/>
+</div>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">이민호</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[64px]">
+<div class="size-16 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700">
+<img alt="박서연" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuBACnJ0PJGeqmdoYXex173nu9J71ezEkKb_85hDqpm2wZumL5eYn5nk6IS0QTKUdDEKts-cCwcNVJJ9ByVRFPZOaW6mQJ45zrc4xjKt274HfQQu1X7z6y6kc9Tsjm5_Ekuu_0NGr0biezAGhXwZKkPA2A15W0dltkGqZO3V758InokXDkP3zrO0frclFydyn3uPV148EvNlcdlKnUET0MItX-WxZMBtMyt4g_yKszyTVtRu0TWU9GdN7rb_IRywA0TaTeEqHry1Q48"/>
+</div>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">박서연</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[64px]">
+<div class="size-16 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700">
+<img alt="최준호" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuAW4sP72qNsIl7Zr1RjMRfdlCt9Hwi_93iBYEGiSwdcsQk3rijZCceUbq6ZkVfsAdDDUP0ja0DBCQ50YBZSLmPnb3QYYIcfm7d-bpxfDWjGoMWvh1giV1buyelHF5Zn2QN0l0e4RtScTYzrMtLYKSPRQa1RwIXmJlAIGdlLwA79DZWjxVTC14TNdUJ5nKcAsk4ihKHl-h_sdq4Lj07FI_RI2LWeYAgdFEH0I_b5xVhZSefa2zLYCSCXZU3MTESSuOloZPK8OxcnKNY"/>
+</div>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">최준호</span>
+</div>
+<div class="flex flex-col items-center gap-2 min-w-[64px]">
+<div class="size-16 rounded-full overflow-hidden border-2 border-slate-100 dark:border-slate-700">
+<img alt="정다은" class="w-full h-full object-cover" src="https://lh3.googleusercontent.com/aida-public/AB6AXuDj2Sd73mmdKzoLA-IZrBSqSX8sSce2sCo_RuNv-OQEUdilqulymSL7FCjhmr7bU6YnEJjlvUnr1FY_lgkO0iK34y9BfwREvQPaxCdwpZ2tDeRKM17Ob-MixmvFBaBGWjxE5ZE5qG4XcBityIH4nv9lkPbKHQnlQpF1a_HOynRzZe40RUtEeZ7zhqREV1NCdyHZDgcsQ4nMtslYTICn9VpvOIVmPTYQCfY6leavgwqUfSiiZ5SBZ7t9Ivl0BiGsDrC8nnmPoENiOpk"/>
+</div>
+<span class="text-xs font-medium text-slate-700 dark:text-slate-300">정다은</span>
+</div>
+</div>
+</section>
+</main>
+<nav class="fixed bottom-0 w-full max-w-md bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 px-6 py-3 z-20">
+<div class="flex justify-between items-center">
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">check_circle</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">할일</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">calendar_month</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">캘린더</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-primary" href="#">
+<span class="material-symbols-outlined" style="font-variation-settings: 'FILL' 1">group</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">팀</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">flag</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">목표</span>
+</a>
+<a class="flex flex-col items-center gap-1 text-slate-400 dark:text-slate-500" href="#">
+<span class="material-symbols-outlined">settings</span>
+<span class="text-[10px] font-bold uppercase tracking-tight">설정</span>
+</a>
+</div>
+</nav>
+</div>
+<script>
+    // Data definition based on user request
+    const dashboardData = {
+        weekly: {
+            topMember: { name: "김지수", stat: "98% 목표 달성", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuChT_a7DB0vVXHAyZL2TNCNMeF7VqINcHTSZgaVQVS2z7roQHHaXKSwg7Sy-21WaAb-4neuRQx7SlFUqMWsfh2t-6XIffAw6Fi5uLatq6hzqCECqJKo62ZO28R1rDlHS8GCMDWgW3wQsnRrpq573emO7nKUijSVQ_BEymDztEtrePtpQUKZUVw4aO3umInskc_May5CEpEXMcsjBo6IFQ9LZbEE407LaOheccfGrkwZcUtSzZ_mc-gCAZkkjD61J0Yf5vOUiWUmbc0" },
+            supporters: [
+                { name: "이민호", score: "142", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDMG0_eLg_-XhViqM7uooszoNGC_rJBOuFP6HQ0qdjoOmR4LVeLollC1GsW6QQ84Kag4g8EBlkvFn44Y-lLtCPcyZJICJbfUldIQDbYwKe29Xab61h9p5mew0yol8JjZY7voOIV0vZFlXULI2ulSfJIiLZUooGedMnNBEuLw6avCS67snFFH2-SwKphNj92CE7D9PGlQoyUTzgj2lJE9ZJcEo8ipJdhzaIYCbMDmvTky1RN10gAJmn2qQhBPL3997jgLyiOad7KcVc" },
+                { name: "박서연", score: "118", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBACnJ0PJGeqmdoYXex173nu9J71ezEkKb_85hDqpm2wZumL5eYn5nk6IS0QTKUdDEKts-cCwcNVJJ9ByVRFPZOaW6mQJ45zrc4xjKt274HfQQu1X7z6y6kc9Tsjm5_Ekuu_0NGr0biezAGhXwZKkPA2A15W0dltkGqZO3V758InokXDkP3zrO0frclFydyn3uPV148EvNlcdlKnUET0MItX-WxZMBtMyt4g_yKszyTVtRu0TWU9GdN7rb_IRywA0TaTeEqHry1Q48" }
+            ],
+            popular: [
+                { name: "최준호", score: "86", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAW4sP72qNsIl7Zr1RjMRfdlCt9Hwi_93iBYEGiSwdcsQk3rijZCceUbq6ZkVfsAdDDUP0ja0DBCQ50YBZSLmPnb3QYYIcfm7d-bpxfDWjGoMWvh1giV1buyelHF5Zn2QN0l0e4RtScTYzrMtLYKSPRQa1RwIXmJlAIGdlLwA79DZWjxVTC14TNdUJ5nKcAsk4ihKHl-h_sdq4Lj07FI_RI2LWeYAgdFEH0I_b5xVhZSefa2zLYCSCXZU3MTESSuOloZPK8OxcnKNY" },
+                { name: "정다은", score: "74", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDj2Sd73mmdKzoLA-IZrBSqSX8sSce2sCo_RuNv-OQEUdilqulymSL7FCjhmr7bU6YnEJjlvUnr1FY_lgkO0iK34y9BfwREvQPaxCdwpZ2tDeRKM17Ob-MixmvFBaBGWjxE5ZE5qG4XcBityIH4nv9lkPbKHQnlQpF1a_HOynRzZe40RUtEeZ7zhqREV1NCdyHZDgcsQ4nMtslYTICn9VpvOIVmPTYQCfY6leavgwqUfSiiZ5SBZ7t9Ivl0BiGsDrC8nnmPoENiOpk" }
+            ]
+        },
+        monthly: {
+            topMember: { name: "이민호", stat: "95% 목표 달성", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDMG0_eLg_-XhViqM7uooszoNGC_rJBOuFP6HQ0qdjoOmR4LVeLollC1GsW6QQ84Kag4g8EBlkvFn44Y-lLtCPcyZJICJbfUldIQDbYwKe29Xab61h9p5mew0yol8JjZY7voOIV0vZFlXULI2ulSfJIiLZUooGedMnNBEuLw6avCS67snFFH2-SwKphNj92CE7D9PGlQoyUTzgj2lJE9ZJcEo8ipJdhzaIYCbMDmvTky1RN10gAJmn2qQhBPL3997jgLyiOad7KcVc" },
+            supporters: [
+                { name: "박서연", score: "320", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBACnJ0PJGeqmdoYXex173nu9J71ezEkKb_85hDqpm2wZumL5eYn5nk6IS0QTKUdDEKts-cCwcNVJJ9ByVRFPZOaW6mQJ45zrc4xjKt274HfQQu1X7z6y6kc9Tsjm5_Ekuu_0NGr0biezAGhXwZKkPA2A15W0dltkGqZO3V758InokXDkP3zrO0frclFydyn3uPV148EvNlcdlKnUET0MItX-WxZMBtMyt4g_yKszyTVtRu0TWU9GdN7rb_IRywA0TaTeEqHry1Q48" },
+                { name: "정다은", score: "290", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDj2Sd73mmdKzoLA-IZrBSqSX8sSce2sCo_RuNv-OQEUdilqulymSL7FCjhmr7bU6YnEJjlvUnr1FY_lgkO0iK34y9BfwREvQPaxCdwpZ2tDeRKM17Ob-MixmvFBaBGWjxE5ZE5qG4XcBityIH4nv9lkPbKHQnlQpF1a_HOynRzZe40RUtEeZ7zhqREV1NCdyHZDgcsQ4nMtslYTICn9VpvOIVmPTYQCfY6leavgwqUfSiiZ5SBZ7t9Ivl0BiGsDrC8nnmPoENiOpk" }
+            ],
+            popular: [
+                { name: "김지수", score: "280", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuChT_a7DB0vVXHAyZL2TNCNMeF7VqINcHTSZgaVQVS2z7roQHHaXKSwg7Sy-21WaAb-4neuRQx7SlFUqMWsfh2t-6XIffAw6Fi5uLatq6hzqCECqJKo62ZO28R1rDlHS8GCMDWgW3wQsnRrpq573emO7nKUijSVQ_BEymDztEtrePtpQUKZUVw4aO3umInskc_May5CEpEXMcsjBo6IFQ9LZbEE407LaOheccfGrkwZcUtSzZ_mc-gCAZkkjD61J0Yf5vOUiWUmbc0" },
+                { name: "최준호", score: "260", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAW4sP72qNsIl7Zr1RjMRfdlCt9Hwi_93iBYEGiSwdcsQk3rijZCceUbq6ZkVfsAdDDUP0ja0DBCQ50YBZSLmPnb3QYYIcfm7d-bpxfDWjGoMWvh1giV1buyelHF5Zn2QN0l0e4RtScTYzrMtLYKSPRQa1RwIXmJlAIGdlLwA79DZWjxVTC14TNdUJ5nKcAsk4ihKHl-h_sdq4Lj07FI_RI2LWeYAgdFEH0I_b5xVhZSefa2zLYCSCXZU3MTESSuOloZPK8OxcnKNY" }
+            ]
+        },
+        yearly: {
+            topMember: { name: "정다은", stat: "92% 목표 달성", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDj2Sd73mmdKzoLA-IZrBSqSX8sSce2sCo_RuNv-OQEUdilqulymSL7FCjhmr7bU6YnEJjlvUnr1FY_lgkO0iK34y9BfwREvQPaxCdwpZ2tDeRKM17Ob-MixmvFBaBGWjxE5ZE5qG4XcBityIH4nv9lkPbKHQnlQpF1a_HOynRzZe40RUtEeZ7zhqREV1NCdyHZDgcsQ4nMtslYTICn9VpvOIVmPTYQCfY6leavgwqUfSiiZ5SBZ7t9Ivl0BiGsDrC8nnmPoENiOpk" },
+            supporters: [
+                { name: "최준호", score: "3,500", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuAW4sP72qNsIl7Zr1RjMRfdlCt9Hwi_93iBYEGiSwdcsQk3rijZCceUbq6ZkVfsAdDDUP0ja0DBCQ50YBZSLmPnb3QYYIcfm7d-bpxfDWjGoMWvh1giV1buyelHF5Zn2QN0l0e4RtScTYzrMtLYKSPRQa1RwIXmJlAIGdlLwA79DZWjxVTC14TNdUJ5nKcAsk4ihKHl-h_sdq4Lj07FI_RI2LWeYAgdFEH0I_b5xVhZSefa2zLYCSCXZU3MTESSuOloZPK8OxcnKNY" },
+                { name: "이민호", score: "3,200", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuDMG0_eLg_-XhViqM7uooszoNGC_rJBOuFP6HQ0qdjoOmR4LVeLollC1GsW6QQ84Kag4g8EBlkvFn44Y-lLtCPcyZJICJbfUldIQDbYwKe29Xab61h9p5mew0yol8JjZY7voOIV0vZFlXULI2ulSfJIiLZUooGedMnNBEuLw6avCS67snFFH2-SwKphNj92CE7D9PGlQoyUTzgj2lJE9ZJcEo8ipJdhzaIYCbMDmvTky1RN10gAJmn2qQhBPL3997jgLyiOad7KcVc" }
+            ],
+            popular: [
+                { name: "박서연", score: "2,900", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuBACnJ0PJGeqmdoYXex173nu9J71ezEkKb_85hDqpm2wZumL5eYn5nk6IS0QTKUdDEKts-cCwcNVJJ9ByVRFPZOaW6mQJ45zrc4xjKt274HfQQu1X7z6y6kc9Tsjm5_Ekuu_0NGr0biezAGhXwZKkPA2A15W0dltkGqZO3V758InokXDkP3zrO0frclFydyn3uPV148EvNlcdlKnUET0MItX-WxZMBtMyt4g_yKszyTVtRu0TWU9GdN7rb_IRywA0TaTeEqHry1Q48" },
+                { name: "김지수", score: "2,800", img: "https://lh3.googleusercontent.com/aida-public/AB6AXuChT_a7DB0vVXHAyZL2TNCNMeF7VqINcHTSZgaVQVS2z7roQHHaXKSwg7Sy-21WaAb-4neuRQx7SlFUqMWsfh2t-6XIffAw6Fi5uLatq6hzqCECqJKo62ZO28R1rDlHS8GCMDWgW3wQsnRrpq573emO7nKUijSVQ_BEymDztEtrePtpQUKZUVw4aO3umInskc_May5CEpEXMcsjBo6IFQ9LZbEE407LaOheccfGrkwZcUtSzZ_mc-gCAZkkjD61J0Yf5vOUiWUmbc0" }
+            ]
+        }
+    };
+    function switchTab(period) {
+        const data = dashboardData[period];
+        if (!data) return;
+        // Update UI Tabs
+        const tabs = document.querySelectorAll('.tab-btn');
+        const activeClasses = ['bg-white', 'dark:bg-primary', 'text-primary', 'dark:text-white', 'shadow-sm'];
+        const inactiveClasses = ['text-slate-500', 'dark:text-slate-400', 'hover:bg-white/50'];
+        tabs.forEach((tab, index) => {
+            const tabPeriod = ['weekly', 'monthly', 'yearly'][index];
+            if (tabPeriod === period) {
+                tab.classList.remove(...inactiveClasses);
+                tab.classList.add(...activeClasses);
+            } else {
+                tab.classList.remove(...activeClasses);
+                tab.classList.add(...inactiveClasses);
+            }
+        });
+        // Update Content
+        // Top Member
+        document.getElementById('top-member-name').textContent = data.topMember.name;
+        document.getElementById('top-member-stat').textContent = data.topMember.stat;
+        document.getElementById('top-member-img').src = data.topMember.img;
+        // Supporters
+        document.getElementById('supporter-1-name').textContent = data.supporters[0].name;
+        document.getElementById('supporter-1-score').textContent = data.supporters[0].score;
+        document.getElementById('supporter-1-img').src = data.supporters[0].img;
+        document.getElementById('supporter-2-name').textContent = data.supporters[1].name;
+        document.getElementById('supporter-2-score').textContent = data.supporters[1].score;
+        document.getElementById('supporter-2-img').src = data.supporters[1].img;
+        // Popular
+        document.getElementById('popular-1-name').textContent = data.popular[0].name;
+        document.getElementById('popular-1-score').textContent = data.popular[0].score;
+        document.getElementById('popular-1-img').src = data.popular[0].img;
+        document.getElementById('popular-2-name').textContent = data.popular[1].name;
+        document.getElementById('popular-2-score').textContent = data.popular[1].score;
+        document.getElementById('popular-2-img').src = data.popular[1].img;
+    }
+</script>
+
+</body></html>

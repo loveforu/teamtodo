@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="ko"><head>
+<meta charset="utf-8"/>
+<meta content="width=device-width, initial-scale=1.0" name="viewport"/>
+<script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet"/>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap" rel="stylesheet"/>
+<script id="tailwind-config">
+        tailwind.config = {
+            darkMode: "class",
+            theme: {
+                extend: {
+                    colors: {
+                        "primary": "#eb4770",
+                        "primary-dark": "#d4365d",
+                        "background-light": "#f8f6f6",
+                        "background-dark": "#211115",
+                    },
+                    fontFamily: {
+                        "display": ["Plus Jakarta Sans", "Noto Sans KR", "sans-serif"]
+                    },
+                    borderRadius: {
+                        "DEFAULT": "0.5rem",
+                        "lg": "1rem",
+                        "xl": "1.5rem",
+                        "full": "9999px"
+                    }
+                },
+            },
+        }
+    </script>
+<style>
+        body {
+            min-height: max(884px, 100dvh);
+            overflow-y: scroll;
+        }
+        .material-symbols-outlined {
+            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+            width: 1em;
+            height: 1em;
+            display: inline-block;
+            overflow: hidden;
+            font-size: 24px;
+        }
+        .material-symbols-outlined.fill {
+            font-variation-settings: 'FILL' 1, 'wght' 400, 'GRAD' 0, 'opsz' 24;
+        }
+        .no-scrollbar::-webkit-scrollbar {
+            display: none;
+        }
+        .no-scrollbar {
+            -ms-overflow-style: none;
+            scrollbar-width: none;
+        }
+        .avatar-radio:checked + div {
+            box-shadow: 0 0 0 4px #eb4770;
+            transform: scale(0.95);
+        }
+        .avatar-radio:checked + div .check-icon {
+            opacity: 1;
+            transform: scale(1);
+        }.avatar-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 1rem;
+        }
+    </style>
+<style>
+    body {
+      min-height: max(884px, 100dvh);
+    }
+  </style>
+  </head>
+<body class="bg-background-light dark:bg-background-dark font-display text-slate-900 dark:text-slate-100 min-h-screen">
+<div class="relative flex h-full min-h-screen w-full max-w-md mx-auto flex-col bg-white dark:bg-background-dark shadow-xl overflow-hidden">
+<div class="flex items-center bg-white dark:bg-background-dark p-4 pb-2 justify-between sticky top-0 z-20 border-b border-slate-100 dark:border-slate-800">
+<div class="text-slate-900 dark:text-slate-100 flex size-12 shrink-0 items-center justify-center cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-800 rounded-full transition-colors">
+<span class="material-symbols-outlined">arrow_back</span>
+</div>
+<h2 class="text-slate-900 dark:text-slate-100 text-lg font-bold leading-tight tracking-[-0.015em] flex-1 text-center pr-12">아바타 선택</h2>
+</div>
+<div class="flex-1 flex flex-col overflow-hidden relative">
+<div class="px-5 py-4 shrink-0 bg-white dark:bg-background-dark z-10">
+<div class="flex p-1.5 gap-2 bg-slate-100 dark:bg-slate-800 rounded-2xl relative">
+<input checked="" class="peer/female hidden" id="tab-female" name="gender-tab" type="radio"/>
+<label class="flex-1 py-3 text-center rounded-xl text-sm font-bold cursor-pointer transition-all z-10 peer-checked/female:bg-white dark:peer-checked/female:bg-slate-700 peer-checked/female:text-primary peer-checked/female:shadow-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center gap-1.5" for="tab-female">
+<span class="material-symbols-outlined text-[18px]">female</span>
+                        여성
+                    </label>
+<input class="peer/male hidden" id="tab-male" name="gender-tab" type="radio"/>
+<label class="flex-1 py-3 text-center rounded-xl text-sm font-bold cursor-pointer transition-all z-10 peer-checked/male:bg-white dark:peer-checked/male:bg-slate-700 peer-checked/male:text-primary peer-checked/male:shadow-sm text-slate-500 hover:text-slate-700 dark:hover:text-slate-300 flex items-center justify-center gap-1.5" for="tab-male">
+<span class="material-symbols-outlined text-[18px]">male</span>
+                        남성
+                    </label>
+</div>
+</div>
+<div class="flex-1 overflow-y-auto no-scrollbar bg-white dark:bg-background-dark px-5 pb-32">
+<div class="avatar-grid hidden peer-checked/female:grid transition-all animate-fade-in pb-10">
+<script>
+                        const femaleSeeds = [
+                            "Jihye", "Seoyeon", "Haeun", "Minseo", "Yunseo", "Sua",
+                            "Jiu", "Jiyu", "Jiyuu", "Subin", "Chaewon", "Yerin",
+                            "Sarang", "Chaewon2", "Yerin2", "Miso", "Sarang2", "Sol",
+                            "Sarang3", "Sol2", "Boreum", "Hayun", "Hayun2", "Ena",
+                            "Yena", "Dain", "Yuna", "Yuna2", "Soyun", "Daeun",
+                            "Gaeul", "Nari" 
+                        ];
+                        const femaleNames = [
+                            "지혜", "서연", "하은", "민서", "윤서", "수아", 
+                            "지우", "지유", "채은", "수빈", "채원", "예린",
+                            "사랑", "하린", "예서", "미소", "아영", "솔",
+                            "소민", "유주", "보름", "하윤", "지안", "에나",
+                            "예나", "다인", "유나", "시아", "소윤", "다은",
+                            "가을", "나리"
+                        ];
+                        const warmBgs = ["ffe4e1", "fff0f5", "fff5ee", "fdf5e6", "faf0e6", "e6e6fa", "fff8e1", "fce4ec"];
+                        // Ensure we have 32 items
+                        const targetCountFemale = 32;
+                        const femaleItems = [];
+                        for(let i = 0; i < targetCountFemale; i++) {
+                            const seedIndex = i % femaleSeeds.length;
+                            const nameIndex = i % femaleNames.length;
+                            const bg = warmBgs[i % warmBgs.length];
+                            // More diverse traits for 32 avatars
+                            const seed = femaleSeeds[seedIndex] + (Math.floor(i / femaleSeeds.length) > 0 ? i : '');
+                            // Dicebear Avataaars API with various traits
+                            const imgUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=${bg}&top=longHair,longHairBob,longHairStraight,longHairCurvy,longHairMiaWallace,longHairNotTooLong,longHairBun,longHairCurly,bob,straight01,straight02&clothing=blazerAndShirt,shirtScoopNeck,overall,dress,shirtVNeck,graphicShirt,hoodie,collarAndSweater&eyes=happy,default,wink,hearts,surprised&mouth=smile,default,twinkle,serious&eyebrows=default,defaultNatural,raisedExcited&skinColor=f8d25c,ffdfbf,edb98a,fd9841`;
+                            const isSelected = i === 0 ? 'checked' : '';
+                            document.write(`
+                            <div class="flex flex-col items-center gap-2 mb-1">
+                                <label class="relative cursor-pointer group avatar-img-container rounded-full w-full">
+                                    <input class="avatar-radio sr-only" name="avatar-selection" type="radio" value="${imgUrl}" ${isSelected}/>
+                                    <div class="aspect-square rounded-full bg-slate-50 overflow-hidden ring-2 ring-transparent transition-all duration-200 hover:ring-primary/30 relative shadow-sm">
+                                        <img alt="${femaleNames[nameIndex]}" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-300" src="${imgUrl}" loading="lazy"/>
+                                        <div class="check-icon absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-200">
+                                            <span class="material-symbols-outlined text-white font-bold drop-shadow-md" style="font-size: 28px;">check</span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 font-medium truncate w-full text-center tracking-tight">${femaleNames[nameIndex]}</span>
+                            </div>
+                            `);
+                        }
+                    </script>
+</div>
+<div class="avatar-grid hidden peer-checked/male:grid transition-all animate-fade-in pb-10">
+<script>
+                        const maleSeeds = [
+                            "Minsu", "Seojun", "Doyun", "Junwoo", "Geonwoo", "Siwoo",
+                            "Jihun", "Jinwoo", "Hyunwoo", "Dongwoo", "Jaejun", "Taejun",
+                            "Jaejun2", "Taejun2", "Seungwoo", "Jungwoo", "Juwon", "Hajun",
+                            "Jungwoo2", "Juwon2", "Hajun2", "Eunwoo", "Yuchan", "Seongchan",
+                            "Seongchan2", "Seongchan3", "Seongchan4", "Jinwoo2", "Yongjun", "Yongjun2",
+                            "Dohyun", "Minjae"
+                        ];
+                        const maleNames = [
+                            "민수", "서준", "도윤", "준우", "건우", "시우",
+                            "지훈", "진우", "현우", "동우", "재준", "태준",
+                            "민재", "예준", "승우", "정우", "주원", "하준",
+                            "은호", "도현", "서진", "은우", "유찬", "성찬",
+                            "지호", "우진", "시윤", "선우", "용준", "재현",
+                            "도현", "민재"
+                        ];
+                        const coolBgs = ["e3f2fd", "e0f7fa", "f3e5f5", "eeeeee", "f5f5f5", "e8eaf6", "e1f5fe", "eff7f9"];
+                        // Ensure we have 32 items
+                        const targetCountMale = 32;
+                        for(let i = 0; i < targetCountMale; i++) {
+                            const seedIndex = i % maleSeeds.length;
+                            const nameIndex = i % maleNames.length;
+                            const bg = coolBgs[i % coolBgs.length];
+                            const seed = maleSeeds[seedIndex] + (Math.floor(i / maleSeeds.length) > 0 ? i : '');
+                            const imgUrl = `https://api.dicebear.com/9.x/avataaars/svg?seed=${seed}&backgroundColor=${bg}&top=shortHair,shortHairDreads01,shortHairFrizzle,shortHairShaggyMullet,shortHairShortCurly,shortHairTheCaesar,shortHairSides,shortHairCaesar&clothing=hoodie,shirtCrewNeck,blazerShirt,shirtVNeck,collarAndSweater,graphicShirt&eyes=happy,default,wink,surprised&mouth=smile,default,serious&facialHair=beardLight,none,stubble,none,none,beardMedium&eyebrows=default,defaultNatural,raisedExcited&skinColor=f8d25c,ffdfbf,edb98a`;
+                            document.write(`
+                            <div class="flex flex-col items-center gap-2 mb-1">
+                                <label class="relative cursor-pointer group avatar-img-container rounded-full w-full">
+                                    <input class="avatar-radio sr-only" name="avatar-selection" type="radio" value="${imgUrl}"/>
+                                    <div class="aspect-square rounded-full bg-slate-50 overflow-hidden ring-2 ring-transparent transition-all duration-200 hover:ring-primary/30 relative shadow-sm">
+                                        <img alt="${maleNames[nameIndex]}" class="w-full h-full object-cover transform hover:scale-110 transition-transform duration-300" src="${imgUrl}" loading="lazy"/>
+                                        <div class="check-icon absolute inset-0 flex items-center justify-center bg-black/20 opacity-0 transition-opacity duration-200">
+                                            <span class="material-symbols-outlined text-white font-bold drop-shadow-md" style="font-size: 28px;">check</span>
+                                        </div>
+                                    </div>
+                                </label>
+                                <span class="text-[11px] text-slate-600 dark:text-slate-400 font-medium truncate w-full text-center tracking-tight">${maleNames[nameIndex]}</span>
+                            </div>
+                            `);
+                        }
+                    </script>
+</div>
+</div>
+<div class="absolute bottom-[80px] left-0 right-0 p-5 pt-12 pb-6 bg-gradient-to-t from-white via-white to-transparent dark:from-background-dark dark:via-background-dark z-20">
+<button class="w-full bg-primary hover:bg-primary-dark text-white font-bold py-4 rounded-xl shadow-lg shadow-primary/30 active:scale-[0.98] transition-all flex items-center justify-center gap-2 text-base">
+<span>선택 완료</span>
+</button>
+</div>
+</div>
+<div class="fixed bottom-0 left-0 right-0 w-full max-w-md mx-auto bg-white dark:bg-background-dark border-t border-slate-100 dark:border-slate-800 z-30">
+<div class="flex items-center justify-between px-2 pt-2 pb-5 h-[80px]">
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">check_circle</span>
+<span class="text-[10px] font-medium">할일</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">calendar_month</span>
+<span class="text-[10px] font-medium">캘린더</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">group</span>
+<span class="text-[10px] font-medium">팀</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-slate-400 dark:text-slate-500 hover:text-slate-600 dark:hover:text-slate-300 transition-colors group" href="#">
+<span class="material-symbols-outlined group-hover:scale-110 transition-transform">flag</span>
+<span class="text-[10px] font-medium">목표</span>
+</a>
+<a class="flex flex-1 flex-col items-center justify-center gap-1 text-primary dark:text-primary transition-colors" href="#">
+<span class="material-symbols-outlined fill">settings</span>
+<span class="text-[10px] font-medium">설정</span>
+</a>
+</div>
+</div>
+</div>
+
+</body></html>
