@@ -107,6 +107,21 @@
             <div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold" onclick="event.stopPropagation()">탈퇴</button></div>
           </div>
         </article>
+
+        <div class="space-y-3 pt-4 border-t border-primary/5">
+          <div class="flex items-center justify-between">
+            <h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">추천 그룹</h2>
+            <button class="text-xs text-primary font-bold hover:underline" onclick="switchTab('explore')">더보기</button>
+          </div>
+          <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
+            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-orange-600"><span class="material-symbols-outlined text-3xl">directions_run</span></div>
+            <div class="flex-1"><h3 class="font-bold text-base">러닝 크루</h3><p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>8명 참여중</p><div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold">가입</button></div></div>
+          </article>
+          <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
+            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center text-blue-600"><span class="material-symbols-outlined text-3xl">menu_book</span></div>
+            <div class="flex-1"><h3 class="font-bold text-base">북클럽</h3><p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>15명 참여중</p><div class="mt-2"><button class="px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold">가입</button></div></div>
+          </article>
+        </div>
       </div>
     </section>
 
@@ -198,7 +213,12 @@
               <div class="mt-2"><button class="leave-btn px-4 py-1.5 rounded-lg bg-slate-100 text-slate-700 text-xs font-bold" data-leave-id="${esc(t.id)}">탈퇴</button></div>
             </div>
           </article>
-        `).join('')}</div>`;
+        `).join('')}${otherTeams.length > 0 ? `<div class="space-y-3 pt-4 border-t border-primary/5"><div class="flex items-center justify-between"><h2 class="text-sm font-bold uppercase tracking-wider text-slate-500">추천 그룹</h2><button class="text-xs text-primary font-bold hover:underline" id="goExploreBtn">더보기</button></div>${otherTeams.slice(0,2).map((t) => `
+          <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
+            <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-orange-200 to-amber-200 flex items-center justify-center text-orange-600"><span class="material-symbols-outlined text-3xl">group_add</span></div>
+            <div class="flex-1"><h3 class="font-bold text-base">${esc(t.name || '팀')}</h3><p class="text-sm text-slate-500 flex items-center gap-1"><span class="material-symbols-outlined text-xs">group</span>${Array.isArray(t.members) ? t.members.length : 0}명 참여중</p><div class="mt-2"><button class="join-btn px-4 py-1.5 rounded-lg bg-primary text-white text-xs font-bold" data-join-id="${esc(t.id)}">가입</button></div></div>
+          </article>
+        `).join('')}</div>` : ''}</div>`;
         exSec.innerHTML = `<h2 class="text-sm font-bold uppercase tracking-wider text-slate-500 pt-2">모든 추천 그룹</h2>${otherTeams.map((t) => `
           <article class="bg-white dark:bg-slate-800/50 rounded-xl p-4 shadow-sm border border-primary/5 flex gap-4 items-center">
             <div class="w-16 h-16 rounded-lg bg-gradient-to-br from-blue-200 to-cyan-200 flex items-center justify-center text-blue-600"><span class="material-symbols-outlined text-3xl">group_add</span></div>
@@ -212,12 +232,25 @@
             if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('team_dashboard');
           });
         });
+        const goExploreBtn = mySec.querySelector('#goExploreBtn');
+        if (goExploreBtn) {
+          goExploreBtn.addEventListener('click', () => switchTab('explore'));
+        }
         mySec.querySelectorAll('.leave-btn').forEach((btn) => {
           btn.addEventListener('click', (e) => {
             e.preventDefault(); e.stopPropagation();
             const id = btn.getAttribute('data-leave-id');
             if (window.TeamTodo && typeof TeamTodo.leaveTeam === 'function') {
               TeamTodo.leaveTeam(id, () => loadTeams());
+            }
+          });
+        });
+        mySec.querySelectorAll('.join-btn').forEach((btn) => {
+          btn.addEventListener('click', (e) => {
+            e.preventDefault();
+            const id = btn.getAttribute('data-join-id');
+            if (window.TeamTodo && typeof TeamTodo.joinTeam === 'function') {
+              TeamTodo.joinTeam(id, () => loadTeams());
             }
           });
         });
