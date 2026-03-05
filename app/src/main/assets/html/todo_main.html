@@ -484,11 +484,15 @@
             return;
           }
         } catch (_) {}
-        if (!window.TeamTodo || typeof TeamTodo.getMyProfiles !== 'function') {
+        const getProfilesApi = window.TeamTodo && (
+          (typeof TeamTodo.getMyProfiles === 'function' && TeamTodo.getMyProfiles) ||
+          (typeof TeamTodo.getProfiles === 'function' && TeamTodo.getProfiles)
+        );
+        if (!getProfilesApi) {
           if (typeof done === 'function') done();
           return;
         }
-        TeamTodo.getMyProfiles(function (rows) {
+        getProfilesApi(function (rows) {
           const list = Array.isArray(rows) ? rows : [];
           const mine = list.find((p) => p && p.isMyAccount !== false) || list[0];
           if (mine && mine.id) {
