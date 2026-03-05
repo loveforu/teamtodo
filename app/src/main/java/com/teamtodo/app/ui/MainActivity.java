@@ -88,8 +88,44 @@ public class MainActivity extends AppCompatActivity {
         pendingSharedUrl = getIntent().getStringExtra("sharedUrl");
 
         applySavedThemeColor();
-        setupWebView();
-        loadScreen(currentScreen);
+        ensureAuthSession(() -> {
+            setupWebView();
+            loadScreen(currentScreen);
+        });
+    }
+
+    private void ensureAuthSession(Runnable onReady) {
+        FirebaseUser current = mAuth.getCurrentUser();
+        if (current != null) {
+            if (onReady != null) onReady.run();
+            return;
+        }
+
+        GoogleSignInAccount last = GoogleSignIn.getLastSignedInAccount(this);
+        if (last != null && last.getIdToken() != null && !last.getIdToken().isEmpty()) {
+            AuthCredential credential = GoogleAuthProvider.getCredential(last.getIdToken(), null);
+            mAuth.signInWithCredential(credential).addOnCompleteListener(task -> {
+                if (task.isSuccessful()) {
+                    FirebaseUser user = mAuth.getCurrentUser();
+                    if (user != null) firestoreManager.createOrUpdateUser(user, null);
+                    if (onReady != null) onReady.run();
+                } else {
+                    signInAnonymouslyAndContinue(onReady);
+                }
+            });
+            return;
+        }
+
+        signInAnonymouslyAndContinue(onReady);
+    }
+
+    private void signInAnonymouslyAndContinue(Runnable onReady) {
+        mAuth.signInAnonymously().addOnCompleteListener(task -> {
+            if (!task.isSuccessful()) {
+                Log.w(TAG, "Anonymous sign-in failed", task.getException());
+            }
+            if (onReady != null) onReady.run();
+        });
     }
 
     private String normalizeHexColor(String input) {
