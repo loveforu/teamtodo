@@ -95,11 +95,7 @@
     let currentYear;
     let currentMonth;
     let selectedDay;
-    let currentTotalPoints = 2410;
-    let targetTotalPoints = 5000;
-    const taskPointValue = 50;
     const tasksStore = {};
-    const CALENDAR_PROGRESS_KEY = 'calendarWeeklyProgress';
 
     const today = new Date();
     const openedFromTodo = localStorage.getItem('calendarReturnToTodo') === '1';
@@ -109,6 +105,46 @@
 
     function formatDateKey(year, month, day) {
       return `${year}-${String(month).padStart(2, '0')}-${String(day).padStart(2, '0')}`;
+    }
+
+    function asInt(value) {
+      const n = parseInt(value, 10);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function asBool(value) {
+      return value === true || value === 1 || value === '1' || value === 'true';
+    }
+
+    function toDateAtMidnight(year, month, day) {
+      return new Date(year, month - 1, day, 0, 0, 0, 0);
+    }
+
+    function isSameDate(a, b) {
+      return a.getFullYear() === b.getFullYear() && a.getMonth() === b.getMonth() && a.getDate() === b.getDate();
+    }
+
+    function isTodaySelectedDate() {
+      return isSameDate(toDateAtMidnight(currentYear, currentMonth, selectedDay), toDateAtMidnight(today.getFullYear(), today.getMonth() + 1, today.getDate()));
+    }
+
+    function isPastSelectedDate() {
+      return toDateAtMidnight(currentYear, currentMonth, selectedDay).getTime() < toDateAtMidnight(today.getFullYear(), today.getMonth() + 1, today.getDate()).getTime();
+    }
+
+    function showPolicyHint(message) {
+      const id = 'calendarPolicyHint';
+      let el = document.getElementById(id);
+      if (!el) {
+        el = document.createElement('div');
+        el.id = id;
+        el.className = 'fixed top-6 left-1/2 -translate-x-1/2 z-[120] bg-slate-900 text-white text-xs px-3 py-2 rounded-full shadow-lg opacity-0 transition-opacity';
+        document.body.appendChild(el);
+      }
+      el.textContent = message;
+      el.classList.remove('opacity-0');
+      clearTimeout(showPolicyHint._timer);
+      showPolicyHint._timer = setTimeout(() => el.classList.add('opacity-0'), 1400);
     }
 
     function normalizeTask(t) {
@@ -267,6 +303,7 @@
       if (title) title.textContent = `${currentMonth}월 ${day}일 할일 목록`;
       loadTasksForDate(currentYear, currentMonth, selectedDay, function () {
         renderTasks();
+        loadWeeklyProgressForSelectedDate(updateProgress);
       });
 
       // todo_main에서 달력 아이콘으로 진입한 경우, 날짜 선택 즉시 되돌아간다.
@@ -286,6 +323,8 @@
       if (!container) return;
 
       const tasks = getTasksForDate(currentYear, currentMonth, selectedDay);
+      const canEditDelete = !isPastSelectedDate();
+      const canToggleComplete = isTodaySelectedDate();
       if (badge) badge.textContent = `${tasks.length}개`;
 
       if (tasks.length === 0) {
@@ -298,16 +337,16 @@
           return `
             <div class="group flex items-center justify-between p-3 bg-slate-50 dark:bg-slate-700/50 rounded-xl transition-colors border border-transparent ${opacityClass}">
               <div class="flex items-center gap-3 flex-1 cursor-default">
-                <div class="size-5 rounded-full border-2 ${checkClass} flex items-center justify-center shrink-0 transition-colors">
+                <button class="size-5 rounded-full border-2 ${checkClass} flex items-center justify-center shrink-0 transition-colors ${canToggleComplete ? '' : 'opacity-40 cursor-not-allowed'}" data-toggle-id="${task.id}" ${canToggleComplete ? '' : 'disabled'}>
                   <span class="material-symbols-outlined text-[16px] ${task.checked ? '' : 'opacity-0'}">check</span>
-                </div>
+                </button>
                 <span class="text-sm font-medium ${textClass} transition-colors">${task.title}</span>
               </div>
               <div class="flex items-center gap-1">
-                <button class="p-2 text-slate-400 hover:text-primary hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95" data-edit-id="${task.id}">
+                <button class="p-2 text-slate-400 hover:text-primary hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95 ${canEditDelete ? '' : 'opacity-40 cursor-not-allowed'}" data-edit-id="${task.id}" ${canEditDelete ? '' : 'disabled'}>
                   <span class="material-symbols-outlined text-[18px]">edit</span>
                 </button>
-                <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95" data-delete-id="${task.id}">
+                <button class="p-2 text-slate-400 hover:text-red-500 hover:bg-white dark:hover:bg-slate-600 rounded-lg transition-colors active:scale-95 ${canEditDelete ? '' : 'opacity-40 cursor-not-allowed'}" data-delete-id="${task.id}" ${canEditDelete ? '' : 'disabled'}>
                   <span class="material-symbols-outlined text-[18px]">delete</span>
                 </button>
               </div>
@@ -331,6 +370,10 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (isPastSelectedDate()) {
+            showPolicyHint('지난 날짜의 할일은 수정할 수 없습니다.');
+            return;
+          }
           const id = String(btn.dataset.editId || '');
           const task = tasks.find((t) => String(t.id) === id);
           if (!task) return;
@@ -346,7 +389,23 @@
         btn.addEventListener('click', (e) => {
           e.preventDefault();
           e.stopPropagation();
+          if (isPastSelectedDate()) {
+            showPolicyHint('지난 날짜의 할일은 삭제할 수 없습니다.');
+            return;
+          }
           deleteTask(String(btn.dataset.deleteId || ''));
+        });
+      });
+
+      container.querySelectorAll('[data-toggle-id]').forEach((btn) => {
+        btn.addEventListener('click', (e) => {
+          e.preventDefault();
+          e.stopPropagation();
+          if (!isTodaySelectedDate()) {
+            showPolicyHint('완료 체크는 오늘 날짜에서만 가능합니다.');
+            return;
+          }
+          toggleTaskComplete(String(btn.dataset.toggleId || ''));
         });
       });
     }
@@ -357,15 +416,10 @@
       const idx = list.findIndex((t) => String(t.id) === String(id));
       if (idx < 0) return;
 
-      const task = list[idx];
-      const delta = parseInt(task.points || 0, 10) || taskPointValue;
       const finish = () => {
-        targetTotalPoints = Math.max(0, targetTotalPoints - delta);
-        if (task.checked) currentTotalPoints = Math.max(0, currentTotalPoints - delta);
         list.splice(idx, 1);
-        saveProgressState();
-        updateProgress();
         renderTasks();
+        loadWeeklyProgressForSelectedDate(updateProgress);
       };
       if (window.TeamTodo && typeof TeamTodo.deleteTodo === 'function') {
         TeamTodo.deleteTodo(String(id), function () { finish(); });
@@ -374,35 +428,120 @@
       finish();
     }
 
-    function saveProgressState() {
-      localStorage.setItem(CALENDAR_PROGRESS_KEY, JSON.stringify({
-        currentTotalPoints,
-        targetTotalPoints
-      }));
+    function toggleTaskComplete(id) {
+      const key = `${currentYear}-${currentMonth}-${selectedDay}`;
+      const list = tasksStore[key] || [];
+      const idx = list.findIndex((t) => String(t.id) === String(id));
+      if (idx < 0) return;
+      const task = list[idx];
+      const next = !task.checked;
+      const finish = () => {
+        list[idx].checked = next;
+        renderTasks();
+        loadWeeklyProgressForSelectedDate(updateProgress);
+      };
+      if (window.TeamTodo && typeof TeamTodo.completeTodo === 'function') {
+        TeamTodo.completeTodo(String(id), next, function () { finish(); });
+        return;
+      }
+      finish();
     }
 
-    function restoreProgressState() {
+    function aggregatePointsFromRows(rows) {
+      const all = Array.isArray(rows) ? rows : [];
+      const childMap = new Map();
+      all.forEach((row) => {
+        const parentId = row && row.parentTodoId ? String(row.parentTodoId) : '';
+        if (!parentId) return;
+        const arr = childMap.get(parentId) || [];
+        arr.push(row);
+        childMap.set(parentId, arr);
+      });
+      let completed = 0;
+      let target = 0;
+      all.filter((row) => !(row && row.parentTodoId)).forEach((parent) => {
+        const id = String((parent && parent.id) || '');
+        const children = childMap.get(id) || [];
+        if (children.length > 0) {
+          children.forEach((child) => {
+            const p = asInt(child.points);
+            target += p;
+            if (asBool(child.isCompleted)) completed += p;
+          });
+        } else {
+          const p = asInt(parent && parent.points);
+          target += p;
+          if (asBool(parent && parent.isCompleted)) completed += p;
+        }
+      });
+      return { completed, target };
+    }
+
+    function weekStartFromSelected() {
+      const anchor = toDateAtMidnight(currentYear, currentMonth, selectedDay);
+      const day = anchor.getDay();
+      const diff = (day + 6) % 7; // monday start
+      anchor.setDate(anchor.getDate() - diff);
+      return anchor;
+    }
+
+    function collectLocalRowsForDate(profileId, dateKey) {
       try {
-        const raw = localStorage.getItem(CALENDAR_PROGRESS_KEY);
-        if (!raw) return;
-        const parsed = JSON.parse(raw);
-        if (typeof parsed.currentTotalPoints === 'number') {
-          currentTotalPoints = Math.max(0, parsed.currentTotalPoints);
-        }
-        if (typeof parsed.targetTotalPoints === 'number') {
-          targetTotalPoints = Math.max(0, parsed.targetTotalPoints);
-        }
+        const local = JSON.parse(localStorage.getItem('localSampleTodos') || '[]');
+        return local
+          .filter((t) => String(t.profileId || '') === String(profileId))
+          .filter((t) => String(t.startDate || '') === String(dateKey));
       } catch (_) {
+        return [];
       }
     }
 
-    function updateProgress() {
-      const pct = targetTotalPoints > 0 ? Math.min((currentTotalPoints / targetTotalPoints) * 100, 100) : 0;
+    function loadWeeklyProgressForSelectedDate(done) {
+      const profileId = localStorage.getItem('currentProfileId') || '';
+      if (!profileId) {
+        if (typeof done === 'function') done({ completed: 0, target: 0 });
+        return;
+      }
+      const start = weekStartFromSelected();
+      const dates = Array.from({ length: 7 }, (_, i) => {
+        const d = new Date(start);
+        d.setDate(start.getDate() + i);
+        return formatDateKey(d.getFullYear(), d.getMonth() + 1, d.getDate());
+      });
+      const sums = { completed: 0, target: 0 };
+      let pending = dates.length;
+      const consume = (rows) => {
+        const agg = aggregatePointsFromRows(rows);
+        sums.completed += agg.completed;
+        sums.target += agg.target;
+        pending -= 1;
+        if (pending === 0 && typeof done === 'function') done(sums);
+      };
+      dates.forEach((dateKey) => {
+        if (window.TeamTodo && typeof TeamTodo.getTodos === 'function') {
+          TeamTodo.getTodos(profileId, dateKey, function (rows) {
+            const arr = Array.isArray(rows) ? rows : [];
+            if (arr.length === 0) {
+              consume(collectLocalRowsForDate(profileId, dateKey));
+            } else {
+              consume(arr);
+            }
+          });
+        } else {
+          consume(collectLocalRowsForDate(profileId, dateKey));
+        }
+      });
+    }
+
+    function updateProgress(progress) {
+      const completed = progress && typeof progress.completed === 'number' ? Math.max(0, progress.completed) : 0;
+      const target = progress && typeof progress.target === 'number' ? Math.max(0, progress.target) : 0;
+      const pct = target > 0 ? Math.min((completed / target) * 100, 100) : 0;
       const bar = document.getElementById('progressBarInner');
       if (bar) bar.style.width = `${pct}%`;
       const label = document.getElementById('currentPoints');
       if (label) {
-        label.innerHTML = `+${currentTotalPoints.toLocaleString()} p <span class="text-slate-400 font-normal">/ ${targetTotalPoints.toLocaleString()} p</span>`;
+        label.innerHTML = `+${completed.toLocaleString()} p <span class="text-slate-400 font-normal">/ ${target.toLocaleString()} p</span>`;
       }
     }
 
@@ -427,13 +566,12 @@
     }
 
     document.addEventListener('DOMContentLoaded', () => {
-      restoreProgressState();
       const yearEl = document.getElementById('pickerYearDisplay');
       if (yearEl) yearEl.textContent = String(currentYear);
       renderCalendar(currentYear, currentMonth);
       loadTasksForDate(currentYear, currentMonth, selectedDay, function () {
         renderTasks();
-        updateProgress();
+        loadWeeklyProgressForSelectedDate(updateProgress);
       });
 
       const bottomNavLinks = document.querySelectorAll('#bottomNav a');
