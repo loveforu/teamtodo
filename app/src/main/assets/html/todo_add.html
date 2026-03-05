@@ -706,9 +706,54 @@
       if (daysOfWeek.length > 0) payload.daysOfWeek = daysOfWeek;
       if (editTask && editTask.id) payload.id = String(editTask.id);
 
+      function upsertLocalTodoAndNavigate(savedIdHint) {
+        try {
+          const raw = localStorage.getItem('localSampleTodos') || '[]';
+          const rows = JSON.parse(raw);
+          const list = Array.isArray(rows) ? rows : [];
+          const localId = String(savedIdHint || payload.id || ('local-' + Date.now()));
+          const next = {
+            id: localId,
+            profileId: profileId,
+            title: payload.title,
+            startDate: payload.startDate,
+            endDate: payload.endDate,
+            startTime: payload.startTime,
+            endTime: payload.endTime,
+            points: payload.points,
+            isCompleted: false,
+            parentTodoId: payload.parentTodoId || '',
+            daysOfWeek: Array.isArray(payload.daysOfWeek) ? payload.daysOfWeek : []
+          };
+          const idx = list.findIndex((t) => String((t && t.id) || '') === localId);
+          if (idx >= 0) list[idx] = Object.assign({}, list[idx], next);
+          else list.push(next);
+          localStorage.setItem('localSampleTodos', JSON.stringify(list));
+          localStorage.setItem('localSampleMode', 'true');
+          localStorage.setItem('localSamplePrimaryProfileId', profileId);
+        } catch (_) {}
+        localStorage.removeItem('todoEditMode');
+        localStorage.removeItem('todoEditTask');
+        localStorage.removeItem('todoAddPresetDate');
+        go('calendar');
+      }
+
       if (window.TeamTodo && typeof TeamTodo.saveTodo === 'function') {
+        let completed = false;
+        const timeoutId = setTimeout(function () {
+          if (completed) return;
+          completed = true;
+          upsertLocalTodoAndNavigate(payload.id || '');
+        }, 2500);
         TeamTodo.saveTodo(payload, function (res) {
+          if (completed) return;
+          completed = true;
+          clearTimeout(timeoutId);
           const savedId = (res && (res.id || res.todoId)) || payload.id || '';
+          if (!savedId) {
+            upsertLocalTodoAndNavigate('');
+            return;
+          }
           if (useTime && startTime && savedId && window.TeamTodo && typeof TeamTodo.setAlarm === 'function') {
             try {
               const ts = new Date(selectedDate + 'T' + startTime + ':00').getTime();
@@ -722,7 +767,7 @@
         });
         return;
       }
-      go('calendar');
+      upsertLocalTodoAndNavigate(payload.id || '');
     }
 
     document.addEventListener('DOMContentLoaded', function () {

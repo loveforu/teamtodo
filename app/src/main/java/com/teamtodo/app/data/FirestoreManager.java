@@ -358,12 +358,18 @@ public class FirestoreManager {
             db.collection(COL_TODOS).document(todoId)
                 .set(todoData, com.google.firebase.firestore.SetOptions.merge())
                 .addOnSuccessListener(aVoid -> callback.onResult(todoId))
-                .addOnFailureListener(e -> Log.e(TAG, "saveTodo update failed", e));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "saveTodo update failed", e);
+                    callback.onResult("");
+                });
         } else {
             todoData.put("createdAt", FieldValue.serverTimestamp());
             db.collection(COL_TODOS).add(todoData)
                 .addOnSuccessListener(docRef -> callback.onResult(docRef.getId()))
-                .addOnFailureListener(e -> Log.e(TAG, "saveTodo add failed", e));
+                .addOnFailureListener(e -> {
+                    Log.e(TAG, "saveTodo add failed", e);
+                    callback.onResult("");
+                });
         }
     }
 
