@@ -172,14 +172,19 @@
 
       function renderProfilesFromCache() {
         try {
+          const onlyMine = function (rows) {
+            return (Array.isArray(rows) ? rows : []).filter(function (p) {
+              return !p || p.isMyAccount !== false;
+            });
+          };
           const my = JSON.parse(localStorage.getItem(PROFILE_CACHE_MY) || 'null');
           if (Array.isArray(my) && my.length > 0) {
-            renderProfiles(my);
+            renderProfiles(onlyMine(my));
             return;
           }
           const localProfiles = JSON.parse(localStorage.getItem('localSampleProfiles') || 'null');
           if (Array.isArray(localProfiles) && localProfiles.length > 0) {
-            renderProfiles(localProfiles);
+            renderProfiles(onlyMine(localProfiles));
           }
         } catch (_) {}
       }
@@ -205,8 +210,10 @@
         if (typeof prevOnNative === "function") {
           try { prevOnNative(event, data); } catch (_) { }
         }
-        if (event === "onMyProfiles") {
-          const rows = Array.isArray(data) ? data : [];
+        if (event === "onMyProfiles" || event === "onProfilesForSelection" || event === "onProfiles") {
+          const rows = (Array.isArray(data) ? data : []).filter(function (p) {
+            return !p || p.isMyAccount !== false;
+          });
           if (rows.length > 0) {
             renderProfiles(rows);
           } else {

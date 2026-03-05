@@ -152,6 +152,28 @@
       badgeEl.style.display = profile.isMyAccount === false ? 'none' : 'inline-flex';
     }
 
+    function getCachedCurrentProfile() {
+      const currentId = localStorage.getItem('currentProfileId') || '';
+      const pickMine = function (rows) {
+        return (Array.isArray(rows) ? rows : []).filter(function (p) {
+          return !p || p.isMyAccount !== false;
+        });
+      };
+      try {
+        const cachedMy = pickMine(JSON.parse(localStorage.getItem('profileSelectCacheMy') || '[]'));
+        if (cachedMy.length > 0) {
+          return cachedMy.find((p) => String(p && p.id || '') === currentId) || cachedMy[0];
+        }
+      } catch (_) {}
+      try {
+        const localProfiles = pickMine(JSON.parse(localStorage.getItem('localSampleProfiles') || '[]'));
+        if (localProfiles.length > 0) {
+          return localProfiles.find((p) => String(p && p.id || '') === currentId) || localProfiles[0];
+        }
+      } catch (_) {}
+      return null;
+    }
+
     function setTheme(color, lightColor, btn, persist) {
       document.documentElement.style.setProperty('--primary-color', color);
       document.documentElement.style.setProperty('--primary-light', lightColor);
@@ -258,7 +280,8 @@
       document.getElementById('profile-select-btn').addEventListener('click', function(){ if(window.TeamTodo) TeamTodo.navigate('profile_select'); });
       document.getElementById('profile-manage-btn').addEventListener('click', function(){ if(window.TeamTodo) TeamTodo.navigate('profile_manage'); });
 
-      const seedProfile = {
+      const cachedProfile = getCachedCurrentProfile();
+      const seedProfile = cachedProfile || {
         id: localStorage.getItem('currentProfileId') || '',
         name: localStorage.getItem('currentProfileName') || '프로필',
         avatarType: localStorage.getItem('editingAvatarType') || 'female',
