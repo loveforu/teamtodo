@@ -37,17 +37,10 @@ public class SplashActivity extends AppCompatActivity {
         }
 
         new Handler(Looper.getMainLooper()).postDelayed(() -> {
-            FirebaseUser currentUser = mAuth.getCurrentUser();
             Intent next;
-            if (currentUser != null) {
-                // 로그인된 경우 → 프로필 선택 화면으로 (WebView)
-                next = new Intent(SplashActivity.this, MainActivity.class);
-                next.putExtra("screen", "profile_select");
-            } else {
-                // 미로그인 → 구글 로그인 화면으로 (WebView)
-                next = new Intent(SplashActivity.this, MainActivity.class);
-                next.putExtra("screen", "login");
-            }
+            // 테스트 편의를 위해 앱 시작 시 로그인 화면을 거치지 않고 바로 할일 화면으로 진입.
+            next = new Intent(SplashActivity.this, MainActivity.class);
+            next.putExtra("screen", "todo_main");
             if (sharedUrl != null) {
                 next.putExtra("sharedUrl", sharedUrl);
             }

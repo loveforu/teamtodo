@@ -470,6 +470,37 @@
         fetchTodosForDate(selectedDate, done);
       }
 
+      function ensureCurrentProfileReady(done) {
+        const existing = localStorage.getItem('currentProfileId') || '';
+        if (existing) {
+          if (typeof done === 'function') done();
+          return;
+        }
+        try {
+          const samplePid = localStorage.getItem('localSamplePrimaryProfileId') || '';
+          if (samplePid) {
+            localStorage.setItem('currentProfileId', samplePid);
+            if (typeof done === 'function') done();
+            return;
+          }
+        } catch (_) {}
+        if (!window.TeamTodo || typeof TeamTodo.getMyProfiles !== 'function') {
+          if (typeof done === 'function') done();
+          return;
+        }
+        TeamTodo.getMyProfiles(function (rows) {
+          const list = Array.isArray(rows) ? rows : [];
+          const mine = list.find((p) => p && p.isMyAccount !== false) || list[0];
+          if (mine && mine.id) {
+            localStorage.setItem('currentProfileId', String(mine.id));
+            localStorage.setItem('currentProfileName', String(mine.name || '프로필'));
+            localStorage.setItem('currentProfileOwnerUid', String(mine.ownerUid || ''));
+            localStorage.setItem('isViewingFriendTodo', mine.isMyAccount === false ? 'true' : 'false');
+          }
+          if (typeof done === 'function') done();
+        });
+      }
+
       function setHeaderHeartFilled(filled) {
         if (!headerHeart) return;
         headerHeart.setAttribute('fill', filled ? 'currentColor' : 'none');
@@ -920,12 +951,14 @@
       placeNoticePanel();
       window.addEventListener('resize', applyHeaderOffset);
       window.addEventListener('resize', placeNoticePanel);
-      applySelectedDate(selectedDate, function () {
-        renderTasks();
-        updateHeader();
-        refreshPointsFromApi();
+      ensureCurrentProfileReady(function () {
+        applySelectedDate(selectedDate, function () {
+          renderTasks();
+          updateHeader();
+          refreshPointsFromApi();
+        });
+        refreshQuoteFromApi();
       });
-      refreshQuoteFromApi();
     });
   </script>
 </body>

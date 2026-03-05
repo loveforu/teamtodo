@@ -633,6 +633,94 @@
         TeamTodo.navigate(screen);
       }
     }
+
+    function ensureCurrentProfileReady(done) {
+      const existing = localStorage.getItem('currentProfileId') || '';
+      if (existing) {
+        if (typeof done === 'function') done(existing);
+        return;
+      }
+      try {
+        const samplePid = localStorage.getItem('localSamplePrimaryProfileId') || '';
+        if (samplePid) {
+          localStorage.setItem('currentProfileId', samplePid);
+          if (typeof done === 'function') done(samplePid);
+          return;
+        }
+      } catch (_) {}
+      if (!window.TeamTodo || typeof TeamTodo.getMyProfiles !== 'function') {
+        if (typeof done === 'function') done('');
+        return;
+      }
+      TeamTodo.getMyProfiles(function (rows) {
+        const list = Array.isArray(rows) ? rows : [];
+        const mine = list.find((p) => p && p.isMyAccount !== false) || list[0];
+        const pid = mine && mine.id ? String(mine.id) : '';
+        if (pid) {
+          localStorage.setItem('currentProfileId', pid);
+          localStorage.setItem('currentProfileName', String(mine.name || '프로필'));
+          localStorage.setItem('currentProfileOwnerUid', String(mine.ownerUid || ''));
+        }
+        if (typeof done === 'function') done(pid);
+      });
+    }
+
+    function saveTodoWithResolvedProfile(profileId) {
+      if (!profileId) {
+        go('profile_select');
+        return;
+      }
+
+      const title = (document.getElementById('todoTitleInput')?.value || '').trim();
+      if (!title) return;
+
+      const point = parseInt(document.getElementById('pointRange')?.value || '0', 10) || 0;
+      const dayButtons = Array.from(document.querySelectorAll('#weekday-selector .day-btn'));
+      const daysOfWeek = [];
+      dayButtons.forEach((btn, idx) => {
+        if (btn.getAttribute('data-active') === 'true') daysOfWeek.push(idx);
+      });
+
+      const selectedDate = localStorage.getItem('todoAddPresetDate') || new Date().toISOString().slice(0, 10);
+      const startTime = (document.querySelector('#start-time-btn .time-display')?.textContent || '').trim();
+      const endTime = (document.querySelector('#end-time-btn .time-display')?.textContent || '').trim();
+      const useTime = !!document.getElementById('time-setting-toggle')?.checked;
+      let editTask = null;
+      try { editTask = JSON.parse(localStorage.getItem('todoEditTask') || 'null'); } catch (_) { editTask = null; }
+
+      const payload = {
+        profileId: profileId,
+        title: title,
+        startDate: selectedDate,
+        endDate: selectedDate,
+        startTime: useTime ? startTime : '',
+        endTime: useTime ? endTime : '',
+        points: point,
+        isCompleted: false,
+        parentTodoId: ''
+      };
+      if (daysOfWeek.length > 0) payload.daysOfWeek = daysOfWeek;
+      if (editTask && editTask.id) payload.id = String(editTask.id);
+
+      if (window.TeamTodo && typeof TeamTodo.saveTodo === 'function') {
+        TeamTodo.saveTodo(payload, function (res) {
+          const savedId = (res && (res.id || res.todoId)) || payload.id || '';
+          if (useTime && startTime && savedId && window.TeamTodo && typeof TeamTodo.setAlarm === 'function') {
+            try {
+              const ts = new Date(selectedDate + 'T' + startTime + ':00').getTime();
+              if (!Number.isNaN(ts)) TeamTodo.setAlarm(String(savedId), title, ts, false);
+            } catch (_) {}
+          }
+          localStorage.removeItem('todoEditMode');
+          localStorage.removeItem('todoEditTask');
+          localStorage.removeItem('todoAddPresetDate');
+          go('calendar');
+        });
+        return;
+      }
+      go('calendar');
+    }
+
     document.addEventListener('DOMContentLoaded', function () {
       try {
         const editMode = localStorage.getItem('todoEditMode') === '1';
@@ -685,60 +773,9 @@
           go('calendar');
         });
         if (saveBtn) saveBtn.addEventListener('click', function () {
-          const profileId = localStorage.getItem('currentProfileId') || '';
-          if (!profileId) {
-            go('profile_select');
-            return;
-          }
-
-          const title = (document.getElementById('todoTitleInput')?.value || '').trim();
-          if (!title) return;
-
-          const point = parseInt(document.getElementById('pointRange')?.value || '0', 10) || 0;
-          const dayButtons = Array.from(document.querySelectorAll('#weekday-selector .day-btn'));
-          const daysOfWeek = [];
-          dayButtons.forEach((btn, idx) => {
-            if (btn.getAttribute('data-active') === 'true') daysOfWeek.push(idx);
+          ensureCurrentProfileReady(function (resolvedProfileId) {
+            saveTodoWithResolvedProfile(resolvedProfileId || '');
           });
-
-          const selectedDate = localStorage.getItem('todoAddPresetDate') || new Date().toISOString().slice(0, 10);
-          const startTime = (document.querySelector('#start-time-btn .time-display')?.textContent || '').trim();
-          const endTime = (document.querySelector('#end-time-btn .time-display')?.textContent || '').trim();
-          const useTime = !!document.getElementById('time-setting-toggle')?.checked;
-          let editTask = null;
-          try { editTask = JSON.parse(localStorage.getItem('todoEditTask') || 'null'); } catch (_) { editTask = null; }
-
-          const payload = {
-            profileId: profileId,
-            title: title,
-            startDate: selectedDate,
-            endDate: selectedDate,
-            startTime: useTime ? startTime : '',
-            endTime: useTime ? endTime : '',
-            points: point,
-            isCompleted: false,
-            parentTodoId: ''
-          };
-          if (daysOfWeek.length > 0) payload.daysOfWeek = daysOfWeek;
-          if (editTask && editTask.id) payload.id = String(editTask.id);
-
-          if (window.TeamTodo && typeof TeamTodo.saveTodo === 'function') {
-            TeamTodo.saveTodo(payload, function (res) {
-              const savedId = (res && (res.id || res.todoId)) || payload.id || '';
-              if (useTime && startTime && savedId && window.TeamTodo && typeof TeamTodo.setAlarm === 'function') {
-                try {
-                  const ts = new Date(selectedDate + 'T' + startTime + ':00').getTime();
-                  if (!Number.isNaN(ts)) TeamTodo.setAlarm(String(savedId), title, ts, false);
-                } catch (_) {}
-              }
-              localStorage.removeItem('todoEditMode');
-              localStorage.removeItem('todoEditTask');
-              localStorage.removeItem('todoAddPresetDate');
-              go('calendar');
-            });
-            return;
-          }
-          go('calendar');
         });
       }
 
