@@ -88,14 +88,14 @@
               <p class="text-base font-bold">친구 응원 포인트</p>
             </div>
           </div>
-          <p id="pointsText" class="text-sm font-bold text-primary">140 / 200 p</p>
+          <p id="pointsText" class="text-sm font-bold text-primary">0 / 200 p</p>
         </div>
         <div class="relative h-3 w-full rounded-full bg-primary/20 overflow-hidden mt-3">
-          <div id="progressFill" class="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-500" style="width:70%"></div>
+          <div id="progressFill" class="absolute top-0 left-0 h-full rounded-full bg-primary transition-all duration-500" style="width:0%"></div>
         </div>
         <div class="flex justify-between items-center mt-2">
           <p id="growthText" class="text-primary text-sm font-semibold flex items-center gap-1"><span class="material-symbols-outlined text-sm">trending_up</span>친구를 응원해 주세요!</p>
-          <p id="pointsRemaining" class="text-slate-400 text-xs italic">목표까지 60p</p>
+          <p id="pointsRemaining" class="text-slate-400 text-xs italic">목표까지 200p</p>
         </div>
       </section>
 
@@ -172,8 +172,7 @@
       const tasks = [];
 
       const MAX_POINTS = 200;
-      let currentPoints = 140;
-      const POINT_STEP = 2;
+      let currentPoints = 0;
 
       const taskList = document.getElementById('taskList');
       const pointsText = document.getElementById('pointsText');
@@ -186,24 +185,153 @@
       const commentInput = document.getElementById('commentInput');
       let pendingCommentTask = null;
 
+      function asInt(value) {
+        const n = parseInt(value, 10);
+        return Number.isFinite(n) ? n : 0;
+      }
+
+      function asBool(value) {
+        return value === true || value === 1 || value === '1' || value === 'true';
+      }
+
+      function getCurrentIdentityKeys() {
+        const currentUser = window.TeamTodo && TeamTodo.state ? TeamTodo.state.currentUser : null;
+        const keys = [
+          localStorage.getItem('currentProfileOwnerUid'),
+          localStorage.getItem('currentUserUid'),
+          localStorage.getItem('currentUserEmail'),
+          currentUser && currentUser.uid,
+          currentUser && currentUser.email
+        ];
+        return keys
+          .map((k) => String(k || '').trim().toLowerCase())
+          .filter((k) => k.length > 0);
+      }
+
+      function extractRowIdentityKeys(row) {
+        const source = row || {};
+        return [
+          source.giverUid,
+          source.giverUserId,
+          source.giverEmail,
+          source.uid,
+          source.userId,
+          source.ownerUid,
+          source.ownerEmail
+        ]
+          .map((k) => String(k || '').trim().toLowerCase())
+          .filter((k) => k.length > 0);
+      }
+
+      function isLikedByCurrentUser(rows) {
+        const me = getCurrentIdentityKeys();
+        if (me.length === 0) return false;
+        const mine = new Set(me);
+        return (Array.isArray(rows) ? rows : []).some((r) => {
+          const keys = extractRowIdentityKeys(r);
+          return keys.some((k) => mine.has(k));
+        });
+      }
+
+      function computeCompletedPoints(rows) {
+        const all = Array.isArray(rows) ? rows : [];
+        const childMap = new Map();
+        all.forEach((row) => {
+          const parentId = row && row.parentTodoId ? String(row.parentTodoId) : '';
+          if (!parentId) return;
+          const arr = childMap.get(parentId) || [];
+          arr.push(row);
+          childMap.set(parentId, arr);
+        });
+        let total = 0;
+        all.filter((row) => !(row && row.parentTodoId)).forEach((parent) => {
+          const id = String((parent && parent.id) || '');
+          const children = childMap.get(id) || [];
+          if (children.length > 0) {
+            children.forEach((child) => {
+              if (asBool(child.isCompleted)) total += asInt(child.points);
+            });
+          } else if (asBool(parent && parent.isCompleted)) {
+            total += asInt(parent && parent.points);
+          }
+        });
+        return total;
+      }
+
+      function loadThumbsForTasks(done) {
+        if (!window.TeamTodo || typeof TeamTodo.getThumbsUps !== 'function' || tasks.length === 0) {
+          if (typeof done === 'function') done();
+          return;
+        }
+        let pending = tasks.length;
+        tasks.forEach((task) => {
+          TeamTodo.getThumbsUps(String(task.id), function (rows) {
+            const list = Array.isArray(rows) ? rows : [];
+            task.likes = list.length;
+            task.liked = isLikedByCurrentUser(list);
+            pending -= 1;
+            if (pending === 0 && typeof done === 'function') done();
+          });
+        });
+      }
+
+      function refreshSingleTaskThumbs(taskId, done) {
+        if (!window.TeamTodo || typeof TeamTodo.getThumbsUps !== 'function') {
+          if (typeof done === 'function') done();
+          return;
+        }
+        TeamTodo.getThumbsUps(String(taskId), function (rows) {
+          const item = tasks.find((t) => String(t.id) === String(taskId));
+          if (item) {
+            const list = Array.isArray(rows) ? rows : [];
+            item.likes = list.length;
+            item.liked = isLikedByCurrentUser(list);
+          }
+          if (typeof done === 'function') done();
+        });
+      }
+
       function loadTasks(done) {
         if (!targetProfileId || !window.TeamTodo || typeof TeamTodo.getTodos !== 'function') {
           tasks.length = 0;
+          currentPoints = 0;
           if (typeof done === 'function') done();
           return;
         }
         TeamTodo.getTodos(targetProfileId, todayKey, function (rows) {
+          const list = Array.isArray(rows) ? rows : [];
+          const childMap = new Map();
+          list.forEach((row) => {
+            const parentId = row && row.parentTodoId ? String(row.parentTodoId) : '';
+            if (!parentId) return;
+            const arr = childMap.get(parentId) || [];
+            arr.push(row);
+            childMap.set(parentId, arr);
+          });
           tasks.length = 0;
-          (Array.isArray(rows) ? rows : []).filter((x) => !x.parentTodoId).forEach((t) => {
+          list.filter((x) => !x.parentTodoId).forEach((t) => {
+            const todoId = String(t.id);
+            const children = childMap.get(todoId) || [];
+            const pointValue = children.length > 0
+              ? children.reduce((acc, child) => acc + asInt(child.points), 0)
+              : asInt(t.points);
+            const completed = children.length > 0
+              ? children.length > 0 && children.every((child) => asBool(child.isCompleted))
+              : asBool(t.isCompleted);
             tasks.push({
-              id: String(t.id),
+              id: todoId,
               title: [t.startTime ? (t.startTime + ' -') : '', String(t.title || '')].join(' ').trim(),
               sub: t.endTime ? (String(t.startTime || '') + ' ~ ' + String(t.endTime || '')).trim() : '오늘 할일',
+              points: pointValue,
+              completed: completed,
               likes: 0,
               liked: false
             });
           });
-          if (typeof done === 'function') done();
+          currentPoints = computeCompletedPoints(list);
+          loadThumbsForTasks(function () {
+            if (typeof done === 'function') done();
+          });
         });
       }
 
@@ -226,9 +354,10 @@
               <span class="material-symbols-outlined text-2xl" style="font-variation-settings:'FILL' ${t.liked ? 1 : 0}">favorite</span>
             </button>
             <div class="flex flex-col flex-1 min-w-0">
-              <p class="text-base font-semibold truncate ${t.liked ? 'text-slate-700 line-through decoration-primary/30 decoration-2' : 'text-slate-900 dark:text-white'}">${t.title}</p>
-              <p class="text-sm truncate ${t.liked ? 'text-slate-400' : 'text-slate-500'}">${t.sub}</p>
+              <p class="text-base font-semibold truncate ${t.completed ? 'text-slate-700 line-through decoration-primary/30 decoration-2' : 'text-slate-900 dark:text-white'}">${t.title}</p>
+              <p class="text-sm truncate ${t.completed ? 'text-slate-400' : 'text-slate-500'}">${t.sub}</p>
             </div>
+            <span class="inline-flex items-center rounded-full bg-primary/10 px-2 py-1 text-xs font-bold text-primary">+${Math.max(0, asInt(t.points))}p</span>
             <button class="comment-btn flex items-center justify-center text-slate-400 hover:text-blue-500 p-1">
               <span class="material-symbols-outlined text-lg">chat_bubble</span>
             </button>
@@ -253,12 +382,21 @@
             const wasLiked = item.liked;
             item.liked = !item.liked;
             item.likes = Math.max(0, item.likes + (item.liked ? 1 : -1));
-            currentPoints = Math.max(0, Math.min(MAX_POINTS, currentPoints + (item.liked ? POINT_STEP : -POINT_STEP)));
             if (window.TeamTodo) {
               if (item.liked && typeof TeamTodo.addThumbsUp === 'function') {
-                TeamTodo.addThumbsUp(String(item.id), targetProfileId, '', function () {}, targetOwnerUid);
+                TeamTodo.addThumbsUp(String(item.id), targetProfileId, '', function () {
+                  refreshSingleTaskThumbs(item.id, function () {
+                    renderTasks();
+                    updateHeader();
+                  });
+                }, targetOwnerUid);
               } else if (!item.liked && typeof TeamTodo.removeThumbsUp === 'function') {
-                TeamTodo.removeThumbsUp(String(item.id), function () {});
+                TeamTodo.removeThumbsUp(String(item.id), function () {
+                  refreshSingleTaskThumbs(item.id, function () {
+                    renderTasks();
+                    updateHeader();
+                  });
+                });
               }
             }
             if (!wasLiked && item.liked) {
@@ -323,7 +461,7 @@
       function showPlus(x, y) {
         const el = document.createElement('div');
         el.className = 'plus-float';
-        el.textContent = '+2p';
+        el.textContent = '응원 +1';
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
         document.body.appendChild(el);
@@ -366,7 +504,12 @@
       commentSend.addEventListener('click', () => {
         const txt = (commentInput.value || '').trim();
         if (pendingCommentTask && txt && window.TeamTodo && typeof TeamTodo.addThumbsUp === 'function') {
-          TeamTodo.addThumbsUp(String(pendingCommentTask.id), targetProfileId, txt, function () {}, targetOwnerUid);
+          TeamTodo.addThumbsUp(String(pendingCommentTask.id), targetProfileId, txt, function () {
+            refreshSingleTaskThumbs(pendingCommentTask.id, function () {
+              renderTasks();
+              updateHeader();
+            });
+          }, targetOwnerUid);
         }
         commentInput.value = '';
         pendingCommentTask = null;

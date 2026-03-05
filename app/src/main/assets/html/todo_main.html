@@ -518,8 +518,8 @@
         return task.children.reduce((acc, child) => acc + child.points, 0);
       }
 
-      function updateHeader() {
-        currentPoints = sumPoints();
+      function updateHeader(forcedPoints) {
+        currentPoints = typeof forcedPoints === 'number' ? Math.max(0, forcedPoints) : sumPoints();
         const pct = Math.min(100, (currentPoints / MAX_POINTS) * 100);
 
         pointsText.textContent = `${currentPoints} / ${MAX_POINTS} p`;
@@ -551,14 +551,14 @@
 
       function refreshPointsFromApi() {
         if (isLocalSampleMode()) return;
+        // Date-specific todo aggregation is the default; only backfill from API when today's list is empty.
+        if (selectedDate !== TODAY_KEY) return;
+        if (Array.isArray(tasks) && tasks.length > 0) return;
         const profileId = localStorage.getItem('currentProfileId') || '';
         if (!profileId || !window.TeamTodo || typeof TeamTodo.getPoints !== 'function') return;
         TeamTodo.getPoints(profileId, function (d) {
           if (d && typeof d.points === 'number') {
-            currentPoints = Math.max(0, d.points);
-            const pct = Math.min(100, (currentPoints / MAX_POINTS) * 100);
-            pointsText.textContent = `${currentPoints} / ${MAX_POINTS} p`;
-            progressFill.style.width = `${pct}%`;
+            updateHeader(d.points);
           }
         });
       }

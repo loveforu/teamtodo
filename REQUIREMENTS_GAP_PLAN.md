@@ -35,6 +35,9 @@
 | 샘플 기본 프로필 키 | `localSamplePrimaryProfileId` 도입 및 사용 |
 | 팀 목록 초기 렌더 | 원격 이미지 의존 제거 + 로컬 선렌더 적용 |
 | 단위 테스트(TDD) | `FirestoreManagerTest` 추가 및 통과 |
+| 친구 할일 포인트 정합성 | `friend_todo`에서 하드코딩(140/+2p) 제거, 완료 TODO 기준 실집계 적용 |
+| 친구 할일 응원 상태 동기화 | `getThumbsUps` 기반 좋아요 수/내 응원 여부 로드 및 토글 후 재동기화 |
+| 메인 포인트 덮어쓰기 방지 | `todo_main`에서 날짜별 TODO 집계를 우선하고, 오늘+빈목록에서만 `getPoints` 백필 적용 |
 
 ## 남은 작업 순서
 1. `todo_main`/`friend_todo` 오늘의 포인트 계산 및 하트 상태 원본 동작까지 일치.
