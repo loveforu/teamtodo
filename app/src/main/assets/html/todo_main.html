@@ -557,8 +557,12 @@
         const profileId = localStorage.getItem('currentProfileId') || '';
         if (!profileId || !window.TeamTodo || typeof TeamTodo.getPoints !== 'function') return;
         TeamTodo.getPoints(profileId, function (d) {
+          // getPoints may be cumulative; only accept sane daily-range values.
           if (d && typeof d.points === 'number') {
-            updateHeader(d.points);
+            const safeDailyPoints = Math.max(0, Math.floor(d.points));
+            if (safeDailyPoints <= MAX_POINTS) {
+              updateHeader(safeDailyPoints);
+            }
           }
         });
       }
