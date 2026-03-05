@@ -173,6 +173,7 @@
 
       const MAX_POINTS = 200;
       let currentPoints = 0;
+      let baseCompletedPoints = 0;
 
       const taskList = document.getElementById('taskList');
       const pointsText = document.getElementById('pointsText');
@@ -295,6 +296,7 @@
         if (!targetProfileId || !window.TeamTodo || typeof TeamTodo.getTodos !== 'function') {
           tasks.length = 0;
           currentPoints = 0;
+          baseCompletedPoints = 0;
           if (typeof done === 'function') done();
           return;
         }
@@ -328,7 +330,8 @@
               liked: false
             });
           });
-          currentPoints = computeCompletedPoints(list);
+          baseCompletedPoints = computeCompletedPoints(list);
+          currentPoints = baseCompletedPoints;
           loadThumbsForTasks(function () {
             if (typeof done === 'function') done();
           });
@@ -341,6 +344,8 @@
       }
 
       function updateHeader() {
+        const cheerPoints = tasks.reduce((acc, t) => acc + (t && t.liked ? Math.max(0, asInt(t.points)) : 0), 0);
+        currentPoints = Math.max(0, baseCompletedPoints + cheerPoints);
         pointsText.textContent = `${currentPoints} / ${MAX_POINTS} p`;
         progressFill.style.width = `${Math.min(100, (currentPoints / MAX_POINTS) * 100)}%`;
         pointsRemaining.textContent = `목표까지 ${Math.max(0, MAX_POINTS - currentPoints)}p`;
@@ -402,7 +407,7 @@
             if (!wasLiked && item.liked) {
               const rect = likeBtn.getBoundingClientRect();
               animateHeart(rect.left + rect.width / 2, rect.top + rect.height / 2);
-              showPlus(rect.left + rect.width / 2 + 10, rect.top + rect.height / 2 - 20);
+              showPlus(rect.left + rect.width / 2 + 10, rect.top + rect.height / 2 - 20, Math.max(0, asInt(item.points)));
             }
             renderTasks();
             updateHeader();
@@ -458,10 +463,10 @@
         requestAnimationFrame(step);
       }
 
-      function showPlus(x, y) {
+      function showPlus(x, y, points) {
         const el = document.createElement('div');
         el.className = 'plus-float';
-        el.textContent = '응원 +1';
+        el.textContent = `응원 +${Math.max(1, asInt(points))}p`;
         el.style.left = `${x}px`;
         el.style.top = `${y}px`;
         document.body.appendChild(el);
@@ -504,8 +509,14 @@
       commentSend.addEventListener('click', () => {
         const txt = (commentInput.value || '').trim();
         if (pendingCommentTask && txt && window.TeamTodo && typeof TeamTodo.addThumbsUp === 'function') {
-          TeamTodo.addThumbsUp(String(pendingCommentTask.id), targetProfileId, txt, function () {
-            refreshSingleTaskThumbs(pendingCommentTask.id, function () {
+          const taskId = String(pendingCommentTask.id);
+          const item = tasks.find((t) => String(t.id) === taskId);
+          if (item && !item.liked) {
+            item.liked = true;
+            item.likes = Math.max(0, asInt(item.likes) + 1);
+          }
+          TeamTodo.addThumbsUp(taskId, targetProfileId, txt, function () {
+            refreshSingleTaskThumbs(taskId, function () {
               renderTasks();
               updateHeader();
             });

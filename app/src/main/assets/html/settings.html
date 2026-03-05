@@ -304,25 +304,54 @@
       allThemeButtons.forEach((btn) => btn.addEventListener('click', function(){ setTheme(btn.dataset.color, btn.dataset.light, btn, true); }));
 
       const msgEl = document.getElementById('data-manage-msg');
-      document.getElementById('seed-sample-btn').addEventListener('click', function () {
-        if (msgEl) msgEl.textContent = '샘플 데이터를 생성 중입니다...';
-        buildLocalSample();
-        if (window.TeamTodo && typeof TeamTodo.call === 'function') {
-          TeamTodo.call('seedSampleData', {});
-        } else if (window.TeamTodo && typeof TeamTodo.seedSampleData === 'function') {
-          TeamTodo.seedSampleData();
-        }
-        if (window.TeamTodo && typeof TeamTodo.navigate === 'function') {
-          setTimeout(function () { TeamTodo.navigate('todo_main'); }, 120);
-        }
-      });
-      document.getElementById('reset-data-btn').addEventListener('click', function () {
+      const seedBtn = document.getElementById('seed-sample-btn');
+      let seedingInProgress = false;
+      let seedFallbackTimer = null;
+
+      function clearLocalSampleFlags() {
         localStorage.removeItem('localSampleMode');
         localStorage.removeItem('localSampleProfiles');
         localStorage.removeItem('localSampleTodos');
         localStorage.removeItem('localSampleGoals');
         localStorage.removeItem('localSampleTeams');
         localStorage.removeItem('localSamplePrimaryProfileId');
+      }
+
+      function finishSeeding() {
+        seedingInProgress = false;
+        if (seedFallbackTimer) {
+          clearTimeout(seedFallbackTimer);
+          seedFallbackTimer = null;
+        }
+        if (seedBtn) seedBtn.disabled = false;
+      }
+
+      document.getElementById('seed-sample-btn').addEventListener('click', function () {
+        if (seedingInProgress) return;
+        seedingInProgress = true;
+        if (seedBtn) seedBtn.disabled = true;
+        if (msgEl) msgEl.textContent = '샘플 데이터를 생성 중입니다...';
+        if (window.TeamTodo && typeof TeamTodo.call === 'function') {
+          TeamTodo.call('seedSampleData', {});
+        } else if (window.TeamTodo && typeof TeamTodo.seedSampleData === 'function') {
+          TeamTodo.seedSampleData();
+        } else {
+          buildLocalSample();
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('todo_main');
+          if (msgEl) msgEl.textContent = '오프라인 샘플 데이터를 생성했습니다.';
+          finishSeeding();
+          return;
+        }
+        seedFallbackTimer = setTimeout(function () {
+          if (!seedingInProgress) return;
+          buildLocalSample();
+          if (msgEl) msgEl.textContent = '원격 생성 응답이 없어 로컬 샘플로 전환했습니다.';
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('todo_main');
+          finishSeeding();
+        }, 6000);
+      });
+      document.getElementById('reset-data-btn').addEventListener('click', function () {
+        clearLocalSampleFlags();
         if (window.TeamTodo && typeof TeamTodo.resetMyData === 'function') TeamTodo.resetMyData();
         if (msgEl) msgEl.textContent = '데이터 초기화 완료.';
       });
@@ -331,14 +360,30 @@
       window.onNativeEvent = function (event, data) {
         if (typeof prevOnNativeEvent === 'function') { try { prevOnNativeEvent(event, data); } catch (_) {} }
         if (event === 'onSampleSeeded') {
+          clearLocalSampleFlags();
+          if (window.TeamTodo && typeof TeamTodo.call === 'function') TeamTodo.call('getProfilesForSelection', {});
           if (msgEl) msgEl.textContent = '샘플 데이터 생성 완료.';
+          if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('todo_main');
+          finishSeeding();
         }
         if (event === 'onError') {
-          if (msgEl) msgEl.textContent = '샘플 데이터 생성 중 오류가 발생했습니다.';
+          const err = String((data && data.error) || '');
+          if (seedingInProgress && err === 'seedSampleDataFailed') {
+            buildLocalSample();
+            if (msgEl) msgEl.textContent = '원격 생성 실패로 로컬 샘플을 생성했습니다.';
+            if (window.TeamTodo && typeof TeamTodo.navigate === 'function') TeamTodo.navigate('todo_main');
+            finishSeeding();
+          } else if (msgEl) {
+            msgEl.textContent = '오류가 발생했습니다.';
+          }
         }
         if ((event === 'onMyProfiles' || event === 'onProfiles' || event === 'onProfilesForSelection') && Array.isArray(data) && data.length) {
           const currentId = localStorage.getItem('currentProfileId') || '';
           const profile = data.find((p)=>String(p.id||'')===currentId) || data[0];
+          if (profile && profile.id) {
+            localStorage.setItem('currentProfileId', String(profile.id));
+            localStorage.setItem('currentProfileName', String(profile.name || '프로필'));
+          }
           renderProfile(profile);
         }
         if (event === 'onCurrentUser' && data && data.email) {
