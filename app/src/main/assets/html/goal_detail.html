@@ -133,27 +133,27 @@
 <div class="text-center space-y-2">
 <div class="inline-flex items-center gap-1.5 px-3 py-1 rounded-full bg-primary/10 text-primary text-xs font-bold mb-1">
 <span class="material-symbols-outlined text-sm">savings</span>
-<span>재무 관리</span>
+<span id="goalCategory">재무 관리</span>
 </div>
 <h1 id="goalTitle" class="text-2xl font-bold text-slate-900 dark:text-white">100만원 저축하기</h1>
-<p class="text-slate-500 dark:text-slate-400 text-sm">2023.10.01 - 2023.12.31 (3개월)</p>
+<p id="goalPeriod" class="text-slate-500 dark:text-slate-400 text-sm">2023.10.01 - 2023.12.31 (3개월)</p>
 </div>
 <div class="bg-white dark:bg-slate-800 rounded-3xl p-6 shadow-sm border border-slate-100 dark:border-slate-700">
 <div class="flex justify-between items-end mb-2">
 <div>
 <p class="text-slate-500 text-xs font-medium mb-1">현재 달성률</p>
 <div class="flex items-baseline gap-1">
-<span class="text-4xl font-bold text-primary">60</span>
+<span id="goalProgressPercent" class="text-4xl font-bold text-primary">60</span>
 <span class="text-lg font-bold text-slate-400">%</span>
 </div>
 </div>
 <div class="text-right">
 <p class="text-slate-500 text-xs font-medium mb-1">진행 단계</p>
-<p class="text-lg font-bold text-slate-800 dark:text-white"><span class="text-primary">6</span> <span class="text-slate-300">/</span> 10</p>
+<p class="text-lg font-bold text-slate-800 dark:text-white"><span id="goalProgressStep" class="text-primary">6</span> <span class="text-slate-300">/</span> <span id="goalProgressTotal">10</span></p>
 </div>
 </div>
 <div class="w-full bg-slate-100 dark:bg-slate-700 rounded-full h-3 overflow-hidden">
-<div class="bg-primary h-full rounded-full w-[60%] shadow-[0_0_10px_rgba(235,71,112,0.4)]"></div>
+<div id="goalProgressBar" class="bg-primary h-full rounded-full w-[60%] shadow-[0_0_10px_rgba(235,71,112,0.4)]"></div>
 </div>
 <p class="text-center text-xs text-slate-400 mt-3">조금만 더 힘내세요! 목표가 눈앞에 있어요 ✨</p>
 </div>
@@ -286,6 +286,60 @@
         if (titleEl) titleEl.textContent = selectedTitle;
       }
       const selectedGoalId = localStorage.getItem('selectedGoalId') || '';
+      const goalDoneKey = 'goalDone:' + (selectedGoalId || selectedTitle || 'default');
+
+      function asInt(value, fallback) {
+        const n = parseInt(value, 10);
+        if (Number.isFinite(n)) return n;
+        return Number.isFinite(fallback) ? fallback : 0;
+      }
+
+      function applyGoalData(goal) {
+        if (!goal) return;
+        const titleEl = document.getElementById('goalTitle');
+        const categoryEl = document.getElementById('goalCategory');
+        const periodEl = document.getElementById('goalPeriod');
+        const percentEl = document.getElementById('goalProgressPercent');
+        const stepEl = document.getElementById('goalProgressStep');
+        const totalEl = document.getElementById('goalProgressTotal');
+        const barEl = document.getElementById('goalProgressBar');
+
+        const title = String(goal.title || '').trim();
+        const category = String(goal.category || '').trim();
+        const periodRaw = String(goal.period || '').trim();
+        const startDate = String(goal.startDate || '').trim();
+        const endDate = String(goal.endDate || '').trim();
+        const doneCount = asInt(goal.doneCount, asInt(goal.currentStep, 6));
+        const totalCount = Math.max(1, asInt(goal.totalCount, asInt(goal.totalStep, 10)));
+        const inferred = Math.round((doneCount / totalCount) * 100);
+        const percent = Math.max(0, Math.min(100, asInt(goal.progressPercent, asInt(goal.progress, inferred))));
+        const periodText = periodRaw || (startDate && endDate ? `${startDate} - ${endDate}` : '');
+
+        if (title && titleEl) titleEl.textContent = title;
+        if (category && categoryEl) categoryEl.textContent = category;
+        if (periodText && periodEl) periodEl.textContent = periodText;
+        if (percentEl) percentEl.textContent = String(percent);
+        if (stepEl) stepEl.textContent = String(doneCount);
+        if (totalEl) totalEl.textContent = String(totalCount);
+        if (barEl) barEl.style.width = `${percent}%`;
+      }
+
+      (function hydrateGoalDetail() {
+        const profileId = localStorage.getItem('currentProfileId') || '';
+        if (!profileId || !window.TeamTodo || typeof TeamTodo.getGoals !== 'function') return;
+        TeamTodo.getGoals(profileId, function (rows) {
+          const list = Array.isArray(rows) ? rows : [];
+          if (list.length === 0) return;
+          let target = null;
+          if (selectedGoalId) {
+            target = list.find(function (g) { return String(g && g.id) === String(selectedGoalId); }) || null;
+          }
+          if (!target && selectedTitle) {
+            target = list.find(function (g) { return String(g && g.title || '').trim() === String(selectedTitle).trim(); }) || null;
+          }
+          if (target) applyGoalData(target);
+        });
+      })();
 
       const backBtn = document.getElementById('goalDetailBackBtn');
       if (backBtn) backBtn.addEventListener('click', function () { go('goal_list'); });
@@ -317,7 +371,7 @@
 
       const completeBtn = document.getElementById('goalCompleteBtn');
       if (completeBtn) {
-        let isDone = localStorage.getItem('goalDone:' + selectedGoalId) === '1';
+        let isDone = localStorage.getItem(goalDoneKey) === '1';
         const setDoneUi = function (done) {
           isDone = done;
           completeBtn.innerHTML = done
@@ -330,7 +384,7 @@
         setDoneUi(isDone);
         completeBtn.addEventListener('click', function () {
           const next = !isDone;
-          localStorage.setItem('goalDone:' + selectedGoalId, next ? '1' : '0');
+          localStorage.setItem(goalDoneKey, next ? '1' : '0');
           setDoneUi(next);
         });
       }

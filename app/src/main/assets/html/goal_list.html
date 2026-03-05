@@ -376,6 +376,7 @@
             const selectedId = card.getAttribute('data-goal-id') || '';
             if (selectedTitle) localStorage.setItem('selectedGoalTitle', selectedTitle);
             if (selectedId) localStorage.setItem('selectedGoalId', selectedId);
+            else localStorage.removeItem('selectedGoalId');
             go('goal_detail');
           });
         });
@@ -430,6 +431,7 @@
           const titleEl = card.querySelector('h3');
           const selectedTitle = titleEl ? (titleEl.textContent || '').trim() : '';
           if (selectedTitle) localStorage.setItem('selectedGoalTitle', selectedTitle);
+          localStorage.removeItem('selectedGoalId');
           go('goal_detail');
         });
       });
